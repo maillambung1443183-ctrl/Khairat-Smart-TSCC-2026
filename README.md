@@ -1,0 +1,1 @@
+# Khairat-Smart-TSCC-2026
