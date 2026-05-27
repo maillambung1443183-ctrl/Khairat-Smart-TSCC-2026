@@ -4,16 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistem Khairat Smart - Al-Falah</title>
-    <!-- Tailwind CSS CDN for Premium Corporate UI -->
+    
+    <!-- Pustaka CSS & Icon (Tailwind & FontAwesome) -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Premium Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- Library PapaParse Untuk Baca CSV Guna HP Admin -->
+    
+    <!-- Pustaka Pembaca CSV (PapaParse) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
+    <!-- PUSTAKA FIREBASE VERSI KHAS KALIS SEKATAN (COMPAT MODE) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
         .tab-content, .auth-screen { display: none; }
@@ -22,239 +29,288 @@
 </head>
 <body class="h-full flex flex-col overflow-hidden text-slate-800">
 
-    <!-- ======================================================== -->
-    <!-- 1. GERBANG MASUK (AUTH SYSTEM SCREEN)                    -->
-    <!-- ======================================================== -->
+    <!-- GERBANG MASUK SYSTEM (LOGIN) -->
     <div id="auth-wrapper" class="fixed inset-0 bg-gradient-to-br from-emerald-950 via-slate-900 to-slate-950 flex items-center justify-center p-4 z-50 overflow-y-auto">
-        <div class="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-100 transform transition-all duration-300">
-            
-            <!-- Header Brand Auth -->
-            <div class="bg-gradient-to-r from-emerald-600 to-teal-600 p-8 text-center text-white relative">
-                <div class="absolute -right-6 -top-6 w-24 h-24 bg-white/10 rounded-full blur-xl"></div>
+        <div class="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-100">
+            <div class="bg-gradient-to-r from-emerald-600 to-teal-600 p-8 text-center text-white">
                 <div class="w-16 h-16 bg-white/10 backdrop-blur-md text-white rounded-2xl flex items-center justify-center text-2xl mx-auto shadow-lg mb-4">
                     <i class="fa-solid fa-hand-holding-heart"></i>
                 </div>
                 <h1 class="text-2xl font-extrabold tracking-tight">Khairat<span class="text-emerald-200">Smart</span></h1>
-                <p class="text-xs text-emerald-100/80 font-medium mt-1">Sistem Surau Al-Falah</p>
+                <p class="text-xs text-emerald-100/80 font-medium mt-1">Sistem Kebajikan Kariah Masjid Al-Falah</p>
             </div>
 
             <div class="p-6 sm:p-8">
-                <!-- BOX ALERT UTAMA -->
+                <!-- KOTAK NOTIFIKASI RANGKAIAN -->
                 <div id="authAlert" class="hidden mb-4 p-3.5 rounded-xl text-xs font-semibold text-center"></div>
 
-                <!-- SCREEN 1: LOGIN (LOG IN PERTAMA KALI / CARIAN REKOD) -->
                 <div id="screen-login" class="auth-screen active space-y-5">
                     <div class="text-center mb-2">
-                        <h3 class="text-lg font-bold text-slate-900">Log Masuk Sistem</h3>
-                        <p class="text-xs text-slate-400">Gunakan No. Ahli daripada rekod Drive kariah anda.</p>
+                        <h3 class="text-lg font-bold text-slate-900">Log Masuk</h3>
+                        <p class="text-xs text-slate-400">Sila masukkan ID Pengguna atau ID Admin.</p>
                     </div>
                     <form id="loginForm" class="space-y-4">
                         <div>
-                            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Nombor Ahli Khairat</label>
+                            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">ID Pengguna / No. Ahli</label>
                             <div class="relative">
                                 <i class="fa-solid fa-id-card absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                                <input type="text" id="login-no-ahli" required class="w-full pl-11 pr-4 py-3 text-sm rounded-xl border border-slate-200 focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/5 transition" placeholder="cth: KAF001 atau ADMIN-ALFALAH">
+                                <input type="text" id="login-no-ahli" required class="w-full pl-11 pr-4 py-3 text-sm rounded-xl border border-slate-200 focus:outline-none focus:border-emerald-500" placeholder="cth: KAF001 atau ADMIN-ALFALAH">
                             </div>
                         </div>
                         <div>
-                            <div class="flex justify-between mb-1.5">
-                                <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Kata Laluan</label>
-                                <button type="button" onclick="showAuthScreen('screen-forgot')" class="text-[11px] text-emerald-600 font-bold hover:underline">Lupa Kata Laluan?</button>
-                            </div>
+                            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Kata Laluan</label>
                             <div class="relative">
                                 <i class="fa-solid fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                                <input type="password" id="login-password" required class="w-full pl-11 pr-4 py-3 text-sm rounded-xl border border-slate-200 focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/5 transition" placeholder="••••••••">
+                                <input type="password" id="login-password" required class="w-full pl-11 pr-4 py-3 text-sm rounded-xl border border-slate-200 focus:outline-none focus:border-emerald-500" placeholder="••••••••">
                             </div>
                         </div>
                         <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm py-3.5 rounded-xl shadow-lg transition flex items-center justify-center gap-2">
-                            Masuk Ke Dashboard <i class="fa-solid fa-arrow-right text-xs"></i>
+                            Masuk Ke Sistem <i class="fa-solid fa-arrow-right text-xs"></i>
                         </button>
                     </form>
-                    <div class="text-center pt-2">
-                        <p class="text-xs text-slate-500">Belum berdaftar sebagai ahli kariah? <button onclick="showAuthScreen('screen-register')" class="text-emerald-600 font-bold hover:underline">Daftar Sini</button></p>
-                    </div>
                 </div>
-
-                <!-- SCREEN 2: REGISTER (DAFTAR AHLI BARU) -->
-                <div id="screen-register" class="auth-screen space-y-5">
-                    <div class="text-center mb-2">
-                        <h3 class="text-lg font-bold text-slate-900">Permohonan Ahli Baru</h3>
-                        <p class="text-xs text-slate-400">Daftar jika nama anda belum ada dalam simpanan Drive.</p>
-                    </div>
-                    <form id="registerForm" class="space-y-4">
-                        <div>
-                            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Nama Penuh (Ikut IC)</label>
-                            <input type="text" id="reg-nama" required class="w-full px-4 py-3 text-sm rounded-xl border border-slate-200 focus:outline-none focus:border-emerald-500" placeholder="Ahmad bin Ali">
-                        </div>
-                        <div>
-                            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Nombor Kad Pengenalan</label>
-                            <input type="text" id="reg-ic" required class="w-full px-4 py-3 text-sm rounded-xl border border-slate-200 focus:outline-none focus:border-emerald-500" placeholder="900101015543">
-                        </div>
-                        <div>
-                            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Cipta Kata Laluan Baru</label>
-                            <input type="password" id="reg-password" required class="w-full px-4 py-3 text-sm rounded-xl border border-slate-200 focus:outline-none focus:border-emerald-500" placeholder="Minimum 6 aksara">
-                        </div>
-                        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm py-3.5 rounded-xl shadow-lg transition">
-                            Hantar Borang Keahlian
-                        </button>
-                    </form>
-                    <div class="text-center pt-2">
-                        <p class="text-xs text-slate-500">Sudah ada No. Ahli? <button onclick="showAuthScreen('screen-login')" class="text-emerald-600 font-bold hover:underline">Log Masuk</button></p>
-                    </div>
-                </div>
-
-                <!-- SCREEN 3: FORGOT PASSWORD (LUPA KATA LALUAN) -->
-                <div id="screen-forgot" class="auth-screen space-y-5">
-                    <div class="text-center mb-2">
-                        <h3 class="text-lg font-bold text-slate-900">Set Semula Kata Laluan</h3>
-                        <p class="text-xs text-slate-400">Masukkan No. Ahli untuk pengesahan semula akaun digital.</p>
-                    </div>
-                    <form id="forgotForm" class="space-y-4">
-                        <div>
-                            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Masukkan No. Ahli Anda</label>
-                            <input type="text" id="forgot-no-ahli" required class="w-full px-4 py-3 text-sm rounded-xl border border-slate-200 focus:outline-none focus:border-emerald-500" placeholder="cth: KAF001">
-                        </div>
-                        <button type="submit" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm py-3.5 rounded-xl shadow-lg transition">
-                            Mohon Pautan Set Semula via WhatsApp
-                        </button>
-                    </form>
-                    <div class="text-center pt-2">
-                        <button onclick="showAuthScreen('screen-login')" class="text-xs text-slate-500 font-bold hover:text-slate-700"><i class="fa-solid fa-arrow-left-long mr-1"></i> Kembali ke Log Masuk</button>
-                    </div>
-                </div>
-
             </div>
         </div>
     </div>
 
-
-    <!-- ======================================================== -->
-    <!-- 2. SISTEM UTAMA (APABILA BERJAYA LOG IN)                  -->
-    <!-- ======================================================== -->
-    <!-- TOP HEADER BAR -->
+    <!-- HEADER UTAMA SISTEM -->
     <header class="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between shadow-sm flex-shrink-0 z-10">
         <div class="flex items-center space-x-3">
-            <div class="bg-emerald-500 text-slate-950 p-2 rounded-xl shadow-md shadow-emerald-500/10">
+            <div class="bg-emerald-500 text-slate-950 p-2 rounded-xl shadow-md">
                 <i class="fa-solid fa-hand-holding-heart text-lg"></i>
             </div>
             <div>
                 <h1 class="text-base font-bold tracking-tight text-slate-900">Khairat<span class="text-emerald-600">Smart</span></h1>
-                <p class="text-[10px] text-slate-400 font-medium -mt-1">Masjid Al-Falah</p>
+                <p id="user-role-tag" class="text-[10px] text-slate-400 font-bold -mt-1 uppercase tracking-wider">Ahli Kariah</p>
             </div>
         </div>
         <div class="flex items-center space-x-4">
-            <h2 id="page-title" class="hidden sm:block text-sm font-bold text-slate-700 bg-slate-100 px-3 py-1.5 rounded-lg">Dashboard Utama</h2>
-            <div class="text-right text-xs">
-                <button onclick="logoutSystem()" class="text-xs font-bold text-red-600 hover:text-red-700 border border-red-200 px-3 py-1.5 rounded-xl hover:bg-red-50 transition flex items-center gap-1">
-                    <i class="fa-solid fa-right-from-bracket"></i> Keluar
-                </button>
-            </div>
+            <button onclick="logoutSystem()" class="text-xs font-bold text-red-600 border border-red-200 px-3 py-1.5 rounded-xl hover:bg-red-50 transition">
+                <i class="fa-solid fa-right-from-bracket"></i> Keluar
+            </button>
         </div>
     </header>
 
-    <!-- APPLICATION DYNAMIC SCREENS WRAPPER -->
+    <!-- SEKSYEN KANDUNGAN -->
     <div class="flex-1 p-4 sm:p-6 overflow-y-auto pb-28">
-
-        <!-- ================= TAB 1: DASHBOARD ================= -->
-        <section id="dashboard-tab" class="tab-content active space-y-6">
-            <!-- Stat Cards Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
-                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
-                    <div>
-                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Jumlah Tabungan Khairat</span>
-                        <span id="stat-dana" class="text-2xl font-black text-slate-900 mt-1 block">RM 0.00</span>
-                        <span class="text-[11px] text-emerald-600 font-medium mt-1 inline-flex items-center gap-1"><i class="fa-solid fa-arrow-trend-up"></i> Dikemaskini Live</span>
-                    </div>
-                    <div class="w-12 h-12 bg-emerald-50 text-emerald-600 flex items-center justify-center rounded-xl text-xl shadow-inner"><i class="fa-solid fa-vault"></i></div>
-                </div>
-                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
-                    <div>
-                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Jumlah Ahli Berdaftar</span>
-                        <span id="stat-ahli" class="text-2xl font-black text-slate-900 mt-1 block">0 Orang</span>
-                        <span class="text-[11px] text-slate-500 font-medium mt-1 block">Yuran Tahunan Aktif</span>
-                    </div>
-                    <div class="w-12 h-12 bg-blue-50 text-blue-600 flex items-center justify-center rounded-xl text-xl shadow-inner"><i class="fa-solid fa-users"></i></div>
-                </div>
-                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
-                    <div>
-                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Kes Tuntutan Selesai</span>
-                        <span id="stat-tuntutan" class="text-2xl font-black text-slate-900 mt-1 block">0 Kes</span>
-                        <span class="text-[11px] text-rose-500 font-medium mt-1 inline-flex items-center gap-1"><i class="fa-solid fa-heart-crack"></i> Kebajikan Diuruskan</span>
-                    </div>
-                    <div class="w-12 h-12 bg-rose-50 text-rose-600 flex items-center justify-center rounded-xl text-xl shadow-inner"><i class="fa-solid fa-handshake-angle"></i></div>
+        
+        <!-- PAPARAN DATA PERIBADI (AHLI BIASA) -->
+        <section id="ahli-peribadi-tab" class="tab-content active space-y-4">
+            <div class="bg-gradient-to-r from-slate-900 to-emerald-950 text-white p-6 rounded-3xl shadow-xl space-y-4">
+                <span class="text-[10px] bg-emerald-500/20 text-emerald-300 font-black px-2.5 py-1 rounded-full uppercase tracking-widest"><i class="fa-solid fa-user-shield"></i> Profil Ahli Disahkan</span>
+                <div>
+                    <h2 id="ahli-nama-papar" class="text-xl font-black tracking-tight">MEMUAT NAMA...</h2>
+                    <p id="ahli-id-papar" class="text-xs text-slate-400 font-bold mt-1">ID AHLI: ---</p>
                 </div>
             </div>
-
-            <!-- Analytics Widget Split -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div class="lg:col-span-2 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                    <h3 class="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2"><i class="fa-solid fa-chart-line text-emerald-500"></i> Agihan & Kapasiti Dana Komuniti</h3>
-                    <div class="space-y-4 pt-2">
-                        <div>
-                            <div class="flex justify-between text-xs font-medium mb-1.5"><span class="text-slate-500">Dana Pengebumian & Kafan</span><span class="font-bold text-slate-900">70%</span></div>
-                            <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden"><div class="h-full bg-emerald-500 rounded-full" style="width: 70%"></div></div>
-                        </div>
-                        <div>
-                            <div class="flex justify-between text-xs font-medium mb-1.5"><span class="text-slate-500">Tabung Kebajikan Waris & Anak Yatim</span><span class="font-bold text-slate-900">20%</span></div>
-                            <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden"><div class="h-full bg-blue-500 rounded-full" style="width: 20%"></div></div>
-                        </div>
-                        <div>
-                            <div class="flex justify-between text-xs font-medium mb-1.5"><span class="text-slate-500">Dana Badal Haji & Pengurusan</span><span class="font-bold text-slate-900">10%</span></div>
-                            <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden"><div class="h-full bg-amber-500 rounded-full" style="width: 10%"></div></div>
-                        </div>
-                    </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Status Khairat</span>
+                    <span id="ahli-status-papar" class="text-base font-black text-slate-900 mt-2 block">---</span>
                 </div>
-                <div class="bg-slate-900 p-6 rounded-2xl text-white flex flex-col justify-between shadow-lg">
-                    <div>
-                        <span class="text-emerald-400 font-bold uppercase tracking-wider text-[10px]">Akses Pantas Pintar</span>
-                        <h4 class="text-lg font-bold mt-1 mb-2">Urusan Kebajikan Kecemasan</h4>
-                        <p class="text-xs text-slate-400 leading-relaxed">Gunakan fungsi borang tuntutan kilat jika berlaku kematian ahli kariah untuk pelepasan dana segera.</p>
-                    </div>
-                    <button onclick="switchTab('tuntutan-tab')" class="w-full bg-white text-slate-950 font-bold text-xs py-3 rounded-xl transition hover:bg-emerald-400 flex items-center justify-center gap-2 mt-4">
-                        Mohon Tuntutan <i class="fa-solid fa-arrow-right text-[10px]"></i>
-                    </button>
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Sumbangan Anda</span>
+                    <span id="ahli-bayaran-papar" class="text-base font-black text-emerald-600 mt-2 block">RM 0.00</span>
                 </div>
             </div>
         </section>
 
-        <!-- ================= TAB 2: REGISTER FORM ================= -->
-        <section id="daftar-tab" class="tab-content max-w-2xl mx-auto">
-            <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
-                <div class="bg-slate-900 p-5 text-white flex items-center space-x-3">
-                    <div class="w-9 h-9 bg-emerald-500/20 text-emerald-400 rounded-lg flex items-center justify-center"><i class="fa-solid fa-user-shield"></i></div>
+        <!-- PAPARAN DASHBOARD (ADMIN SAHAJA) -->
+        <section id="admin-dashboard-tab" class="tab-content space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
                     <div>
-                        <h3 class="font-bold text-sm">Kemasukan Data Ahli Khairat</h3>
-                        <p class="text-[11px] text-slate-400">Pendaftaran caruman baru ahli Masjid Al-Falah.</p>
+                        <span class="text-[10px] font-bold text-slate-400 uppercase">Total Dana Terkumpul</span>
+                        <span id="stat-dana" class="text-2xl font-black text-slate-900 mt-1 block">RM 0.00</span>
                     </div>
+                    <div class="w-12 h-12 bg-emerald-50 text-emerald-600 flex items-center justify-center rounded-xl text-xl"><i class="fa-solid fa-vault"></i></div>
                 </div>
-                <form id="appRegistrationForm" class="p-5 sm:p-6 space-y-4">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Nama Penuh Ahli</label>
-                            <input type="text" id="app-nama" required class="w-full px-4 py-2.5 text-sm rounded-xl border border-slate-200 focus:outline-none focus:border-emerald-500" placeholder="Ahmad Bin Mohamad">
-                        </div>
-                        <div>
-                            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">No. Kad Pengenalan</label>
-                            <input type="text" id="app-ic" required class="w-full px-4 py-2.5 text-sm rounded-xl border border-slate-200 focus:outline-none focus:border-emerald-500" placeholder="851020145431">
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">No. Telefon (WhatsApp)</label>
-                            <input type="tel" id="app-phone" required class="w-full px-4 py-2.5 text-sm rounded-xl border border-slate-200 focus:outline-none focus:border-emerald-500" placeholder="0123456789">
-                        </div>
-                        <div>
-                            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Pakej & Caruman</label>
-                            <select id="app-pakej" required class="w-full px-4 py-2.5 text-sm rounded-xl border border-slate-200 bg-white focus:outline-none focus:border-emerald-500">
-                                <option value="50">Pakej Individu (RM 50/Thn)</option>
-                                <option value="150" selected>Pakej Keluarga Pintar (RM 150/Thn)</option>
-                                <option value="120">Pakej Warga Emas Plus (RM 120/Thn)</option>
-                            </select>
-                        </div>
-                    </div>
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
                     <div>
-                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Alamat Rumah Lengkap</label>
-                        <textarea id="app-alamat" rows="2" required class="w-full px-4 py-2.5 text-sm rounded-xl border border-slate-200 focus:outline-none focus:border-emerald-500" placeholder="Alamat penuh rumah kediaman..."></textarea>
+                        <span class="text-[10px] font-bold text-slate-400 uppercase">Jumlah Ahli Digital</span>
+                        <span id="stat-ahli" class="text-2xl font-black text-slate-900 mt-1 block">0 Orang</span>
                     </div>
-                    
-               
+                    <div class="w-12 h-12 bg-blue-50 text-blue-600 flex items-center justify-center rounded-xl text-xl"><i class="fa-solid fa-users"></i></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PAPARAN SENARAI PENUH KAWALAN (ADMIN SAHAJA) -->
+        <section id="admin-senarai-tab" class="tab-content space-y-4">
+            <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                <input type="text" id="searchBar" onkeyup="filterTable()" class="w-full max-w-xs px-4 py-2 text-xs rounded-lg border focus:outline-none focus:border-emerald-500" placeholder="Cari nama atau ID ahli...">
+                <span class="text-[10px] font-bold text-red-600"><i class="fa-solid fa-lock"></i> Kawalan Admin</span>
+            </div>
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-900 text-white text-[10px] font-bold uppercase tracking-wider">
+                            <th class="px-5 py-3">ID / Nama Ahli</th>
+                            <th class="px-5 py-3">Status</th>
+                            <th class="px-5 py-3">Yuran</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ahliTableBody" class="divide-y divide-slate-100 text-xs font-medium text-slate-700"></tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <!-- MENU DI BAHAGIAN BAWAH -->
+    <div id="bottom-nav-bar" class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 shadow-2xl z-40 px-2 hidden">
+        <div id="nav-container" class="max-w-md mx-auto flex justify-around items-center h-16"></div>
+    </div>
+
+    <script>
+        // MAKLUMAT CONFIGURATION FIREBASE CLOUD DATA
+        var firebaseConfig = {
+          apiKey: "AIzaSyAD_xdF9IDyWoFoPFuQZv7TcOM71m-7zbA",
+          authDomain: "khairat-smart-al-falah-tscc.firebaseapp.com",
+          projectId: "khairat-smart-al-falah-tscc",
+          storageBucket: "khairat-smart-al-falah-tscc.firebasestorage.app",
+          messagingSenderId: "90984659311",
+          appId: "1:90984659311:web:f82d82b83b59609c6b509a"
+        };
+
+        // Mulakan Pengaktifan Firebase Menggunakan Kaedah Kalis Sekatan (Compat)
+        firebase.initializeApp(firebaseConfig);
+        var db = firebase.firestore();
+
+        // KAWALAN LOG MASUK UTAMA
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            var noAhliInput = document.getElementById('login-no-ahli').value.trim().toUpperCase();
+            var passwordInput = document.getElementById('login-password').value;
+            var alertBox = document.getElementById('authAlert');
+
+            alertBox.className = "mb-4 p-3.5 rounded-xl text-xs font-semibold text-center bg-blue-50 text-blue-800 block";
+            alertBox.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Menyemak pangkalan data...`;
+
+            // STRUKTUR KEMASUKAN FAIL BAGI ADMIN MASJID AL-FALAH
+            if (noAhliInput === "ADMIN-ALFALAH" && passwordInput === "masjid123") {
+                alertBox.className = "mb-4 p-4 rounded-xl text-xs font-semibold bg-amber-50 text-amber-900 border border-amber-200 block text-left space-y-2";
+                alertBox.innerHTML = `
+                    <p class="font-bold text-sm text-amber-950"><i class="fa-solid fa-user-gear"></i> Sistem Pengurus (Admin) Aktif</p>
+                    <p class="text-slate-600 text-[11px]">Sila pilih fail <strong>DATA AKTIF-TAK AHLI .csv</strong> telefon anda:</p>
+                    <input type="file" id="failCsvAdmin" accept=".csv" class="w-full text-xs block bg-white p-2 border rounded-lg">
+                    <button id="btnSync" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-lg font-bold text-xs mt-2 transition">Mula Sync Data ke Cloud</button>
+                `;
+                
+                document.getElementById('failCsvAdmin').addEventListener('change', function() {
+                    document.getElementById('btnSync').onclick = function() { window.prosesUploadCSV_DariHP(document.getElementById('failCsvAdmin').files[0]); };
+                });
+
+                document.getElementById('user-role-tag').innerText = "Sistem Pengurus (Admin)";
+                binaMenuNavigasi("admin");
+                switchTab('admin-dashboard-tab');
+                bacaDataSeluruhKariah_Admin();
+                
+                setTimeout(function() {
+                    document.getElementById('auth-wrapper').classList.add('hidden');
+                    document.getElementById('bottom-nav-bar').classList.remove('hidden');
+                }, 800);
+                return;
+            }
+
+            // PROSES SEMAKAN DATA AHLI BIASA (PRIVASI SEKATAN DATA)
+            db.collection("senarai_ahli_drive").doc(noAhliInput).get().then(function(ahliSnap) {
+                if (ahliSnap.exists) {
+                    var dataAhli = ahliSnap.data();
+                    if (passwordInput === dataAhli.PASSWORD) {
+                        alertBox.className = "mb-4 p-3.5 rounded-xl text-xs font-semibold text-center bg-emerald-50 text-emerald-800 block";
+                        alertBox.innerHTML = `Log Masuk Berjaya!`;
+                        
+                        document.getElementById('user-role-tag').innerText = "Akaun Ahli Kariah";
+                        document.getElementById('ahli-nama-papar').innerText = dataAhli.NAMA;
+                        document.getElementById('ahli-id-papar').innerText = `NO AHLI: ` + noAhliInput;
+                        document.getElementById('ahli-status-papar').innerHTML = `<span class="bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full text-xs font-bold">` + dataAhli.STATUS + `</span>`;
+                        document.getElementById('ahli-bayaran-papar').innerText = `RM ` + parseFloat(dataAhli.BAYARAN || 0).toFixed(2);
+
+                        binaMenuNavigasi("ahli");
+                        switchTab('ahli-peribadi-tab');
+
+                        setTimeout(function() {
+                            document.getElementById('auth-wrapper').classList.add('hidden');
+                            document.getElementById('bottom-nav-bar').classList.remove('hidden');
+                        }, 800);
+                    } else {
+                        alertBox.className = "mb-4 p-3.5 rounded-xl text-xs font-semibold text-center bg-red-50 text-red-800 block";
+                        alertBox.innerText = "Kata laluan salah.";
+                    }
+                } else {
+                    alertBox.className = "mb-4 p-3.5 rounded-xl text-xs font-semibold text-center bg-amber-50 text-amber-800 block";
+                    alertBox.innerText = `ID tidak dijumpai. Hubungi ADMIN untuk upload CSV dahulu.`;
+                }
+            }).catch(function(error) {
+                alertBox.className = "mb-4 p-3.5 rounded-xl text-xs font-semibold text-center bg-red-50 text-red-800 block";
+                alertBox.innerText = "Ralat Rangkaian: Sila pastikan sambungan internet telefon anda aktif.";
+            });
+        });
+
+        function binaMenuNavigasi(peranan) {
+            var navContainer = document.getElementById('nav-container');
+            if(peranan === "admin") {
+                navContainer.innerHTML = `
+                    <button onclick="switchTab('admin-dashboard-tab')" id="link-admin-dashboard-tab" class="tab-link flex flex-col items-center justify-center w-16 text-emerald-600">
+                        <i class="fa-solid fa-chart-pie text-lg"></i><span class="text-[10px] font-bold mt-1">Dashboard</span>
+                    </button>
+                    <button onclick="switchTab('admin-senarai-tab')" id="link-admin-senarai-tab" class="tab-link flex flex-col items-center justify-center w-16 text-slate-400">
+                        <i class="fa-solid fa-users text-lg"></i><span class="text-[10px] font-semibold mt-1">Urus Ahli</span>
+                    </button>
+                `;
+            } else {
+                navContainer.innerHTML = `
+                    <button onclick="switchTab('ahli-peribadi-tab')" id="link-ahli-peribadi-tab" class="tab-link flex flex-col items-center justify-center w-24 text-emerald-600">
+                        <i class="fa-solid fa-user-check text-lg"></i><span class="text-[10px] font-bold mt-1">Rekod Saya</span>
+                    </button>
+                `;
+            }
+        }
+
+        function bacaDataSeluruhKariah_Admin() {
+            var tableBody = document.getElementById('ahliTableBody');
+            db.collection("senarai_ahli_drive").onSnapshot(function(snapshot) {
+                var html = ""; var count = 0; var totalKutipan = 0;
+                snapshot.forEach(function(doc) {
+                    var data = doc.data(); count++; totalKutipan += parseFloat(data.BAYARAN || 0);
+                    html += `
+                    <tr class="border-b border-slate-100">
+                        <td class="px-5 py-3"><div class="font-bold text-slate-900">` + doc.id + `</div><div class="text-[10px] text-slate-400">` + data.NAMA + `</div></td>
+                        <td class="px-5 py-3"><span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded text-[10px] font-bold">` + data.STATUS + `</span></td>
+                        <td class="px-5 py-3 text-slate-900 font-bold">RM ` + parseFloat(data.BAYARAN).toFixed(2) + `</td>
+                    </tr>`;
+                });
+                tableBody.innerHTML = html;
+                document.getElementById('stat-dana').innerText = `RM ` + totalKutipan.toLocaleString('ms-MY', {minimumFractionDigits: 2});
+                document.getElementById('stat-ahli').innerText = count + ` Orang`;
+            });
+        }
+
+        window.prosesUploadCSV_DariHP = function(failCSV) {
+            var alertBox = document.getElementById('authAlert');
+            if(!failCSV) { alertBox.innerText = "Sila pilih fail CSV dahulu!"; return; }
+            
+            alertBox.innerHTML = `Memproses & memuat naik data... Sila tunggu.`;
+            Papa.parse(failCSV, {
+                header: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    var dataData = results.data;
+                    var batch = db.batch();
+                    var count = 0;
+
+                    dataData.forEach(function(baris) {
+                        var cleanedBaris = {};
+                        Object.keys(baris).forEach(function(key) { cleanedBaris[key.trim().toUpperCase()] = baris[key]; });
+
+                        var noAhli = cleanedBaris["MEMBER ID"];
+                        var namaAhli = cleanedBaris["NAMA"];
+                        var statusAhli = cleanedBaris["STATUS"] || "AKTIF";
+                        var bayaranAhli = cleanedBaris["BAYARAN"] || "50";
+
+                        if (noAhli && namaAhli) {
+                            var docRef = db.collection("senarai_ahli_drive").doc(noAhli.trim().toUpperCase());
+                            batch.set(docRef, {
+                                NAMA: namaAhli.trim().toUpperCase(),
+                                STATUS: statusAhli.trim().toUpperCase(),
+                                BAYARAN
