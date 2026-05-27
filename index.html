@@ -2,15 +2,20 @@
 <html lang="ms">
 <head>
     <meta charset="UTF-8">
-    <title>Sistem Khairat Al-Falah</title>
+    <title>Sistem Kariah Al-Falah</title>
+    <style>
+        body { font-family: sans-serif; display: flex; justify-content: center; padding-top: 50px; background: #f0f2f5; }
+        .box { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 300px; }
+        input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+    </style>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAD_xdF9IDyWoFoPFuQZv7TcOM71m-7zbA",
             authDomain: "khairat-smart-al-falah-tscc.firebaseapp.com",
-            databaseURL: "https://khairat-smart-al-falah-tscc-default-rtdb.firebaseio.com",
             projectId: "khairat-smart-al-falah-tscc",
             storageBucket: "khairat-smart-al-falah-tscc.firebasestorage.app",
             messagingSenderId: "90984659311",
@@ -19,41 +24,52 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
 
-        // Data 110 Ahli
-        const senaraiAhli = [
-            {id: "KAF001", nama: "BAHARUDIN BIN BUDIN"}, {id: "KAF002", nama: "KARIM BIN RAMLAN"},
-            // ... (Tampal baki 108 nama anda di sini) ...
-            {id: "KAF110", nama: "MOHD ZAKIMI BIN KUDUS"}
-        ];
+        window.toggleForm = (mode) => {
+            document.getElementById("login-box").style.display = mode === 'login' ? 'block' : 'none';
+            document.getElementById("register-box").style.display = mode === 'register' ? 'block' : 'none';
+        };
 
         window.login = () => {
-            const email = document.getElementById("email").value;
-            const pass = document.getElementById("password").value;
-            signInWithEmailAndPassword(auth, email, pass)
-            .then(() => alert("Berjaya Log Masuk!"))
-            .catch(err => alert("Gagal: " + err.message));
+            signInWithEmailAndPassword(auth, document.getElementById("l-email").value, document.getElementById("l-pass").value)
+            .catch(err => alert("Log Masuk Gagal: " + err.message));
+        };
+
+        window.register = () => {
+            createUserWithEmailAndPassword(auth, document.getElementById("r-email").value, document.getElementById("r-pass").value)
+            .then(() => alert("Pendaftaran Berjaya! Sila log masuk."))
+            .catch(err => alert("Daftar Gagal: " + err.message));
         };
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                document.getElementById("login-page").style.display = "none";
+                document.getElementById("auth-pages").style.display = "none";
                 document.getElementById("dashboard").style.display = "block";
             }
         });
     </script>
 </head>
 <body>
-    <div id="login-page">
-        <h2>Log Masuk Kariah</h2>
-        <input type="email" id="email" placeholder="Email"><br>
-        <input type="password" id="password" placeholder="Password"><br>
-        <button onclick="login()">Masuk</button>
+    <div id="auth-pages">
+        <div id="login-box" class="box">
+            <h2>Log Masuk</h2>
+            <input type="email" id="l-email" placeholder="Email">
+            <input type="password" id="l-pass" placeholder="Password">
+            <button onclick="login()">Log Masuk</button>
+            <p><a href="#" onclick="toggleForm('register')">Daftar Baru?</a></p>
+        </div>
+
+        <div id="register-box" class="box" style="display:none;">
+            <h2>Daftar Baru</h2>
+            <input type="email" id="r-email" placeholder="Email">
+            <input type="password" id="r-pass" placeholder="Password">
+            <button onclick="register()">Daftar Sekarang</button>
+            <p><a href="#" onclick="toggleForm('login')">Sudah ada akaun? Log Masuk</a></p>
+        </div>
     </div>
 
-    <div id="dashboard" style="display:none;">
-        <h1>Senarai Ahli</h1>
-        <input type="text" id="cari" placeholder="Cari nama..." onkeyup="tapis()">
-        <div id="data"></div>
-    </div>
+    <div id="dashboard" style="display:none; text-align:center;">
+        <h1>Dashboard Kariah</h1>
+        <p>Selamat datang! Anda telah berjaya masuk ke sistem.</p>
+        </div>
 </body>
 </html>
