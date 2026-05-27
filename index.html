@@ -2,91 +2,58 @@
 <html lang="ms">
 <head>
     <meta charset="UTF-8">
-    <title>Sistem Carian Ahli Kariah</title>
-    <style>
-        body { font-family: sans-serif; padding: 20px; background: #f4f4f4; }
-        input { width: 100%; padding: 15px; margin-bottom: 20px; font-size: 16px; border: 1px solid #ccc; border-radius: 8px; }
-        .ahli-item { background: white; padding: 15px; margin-bottom: 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .nama { font-weight: bold; color: #333; }
-        .id { color: #666; font-size: 0.9em; }
-    </style>
-</head>
-<body>
+    <title>Sistem Khairat Al-Falah</title>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
-    <h1>Carian Ahli Kariah</h1>
-    <input type="text" id="cari" placeholder="Taip nama atau ID ahli..." onkeyup="tapisAhli()">
-    <div id="data"></div>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAD_xdF9IDyWoFoPFuQZv7TcOM71m-7zbA",
+            authDomain: "khairat-smart-al-falah-tscc.firebaseapp.com",
+            databaseURL: "https://khairat-smart-al-falah-tscc-default-rtdb.firebaseio.com",
+            projectId: "khairat-smart-al-falah-tscc",
+            storageBucket: "khairat-smart-al-falah-tscc.firebasestorage.app",
+            messagingSenderId: "90984659311",
+            appId: "1:90984659311:web:c66603de479fcaa66b509a"
+        };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
 
-    <script>
-        const ahli = [
+        // Data 110 Ahli
+        const senaraiAhli = [
             {id: "KAF001", nama: "BAHARUDIN BIN BUDIN"}, {id: "KAF002", nama: "KARIM BIN RAMLAN"},
-            {id: "KAF003", nama: "ISMAIL BIN JAAMAT"}, {id: "KAF004", nama: "AWG MOHD FAUZI BIN ABU SAMAH"},
-            {id: "KAF005", nama: "MD AMIN BIN MD JOHAN"}, {id: "KAF006", nama: "AMIRUDDIN BIN OTHMAN"},
-            {id: "KAF007", nama: "UMAR BIN KASIM"}, {id: "KAF008", nama: "SURAYAH BINTI UNAN"},
-            {id: "KAF009", nama: "ROSLI BIN MID"}, {id: "KAF010", nama: "ROSLINDA BINTI MID"},
-            {id: "KAF011", nama: "ABD JALIL BIN MANSOR"}, {id: "KAF012", nama: "ZAINUREN BIN HUSSIN"},
-            {id: "KAF013", nama: "KAMARULZAMAN HUSSIN"}, {id: "KAF014", nama: "JAAFAR BIN HITAM"},
-            {id: "KAF015", nama: "MUSTAFA BIN MANAP"}, {id: "KAF016", nama: "NOOR AZWAN BIN AMAT RAMLI"},
-            {id: "KAF017", nama: "MOHD AZMAN BIN BUANG"}, {id: "KAF018", nama: "NURZIYATI BINTI MD ALI"},
-            {id: "KAF019", nama: "AMRAN BIN AHMAD"}, {id: "KAF020", nama: "MOHD SHUKRI BIN ISMAIL"},
-            {id: "KAF021", nama: "MOHD NOORASHIDIN SOLEHUDIN"}, {id: "KAF022", nama: "MOHD AZIZAN BIN MANAF"},
-            {id: "KAF023", nama: "MUHAMMAD BIN MOHD AMIN"}, {id: "KAF024", nama: "RAHIM BIN TUMADI"},
-            {id: "KAF025", nama: "MARIAH BINTI BAHAROM"}, {id: "KAF026", nama: "MUSA BIN WAHAB"},
-            {id: "KAF027", nama: "ABDUL RASHID BIN TAHIR"}, {id: "KAF028", nama: "NURUL AMIRAH BINTI ZAILANI"},
-            {id: "KAF029", nama: "KHALID BIN ABAS"}, {id: "KAF030", nama: "NAZRI BIN ABU BAKAR"},
-            {id: "KAF031", nama: "ZULSAFREE BIN ASMAT"}, {id: "KAF032", nama: "ZAMMARI BIN YUSOFF"},
-            {id: "KAF033", nama: "MOHD YANI BIN SELAMAT"}, {id: "KAF034", nama: "SAPARI BIN ABDUL MUDI"},
-            {id: "KAF035", nama: "JABRI BIN IBRAHIM"}, {id: "KAF036", nama: "ZAKARIA BIN MIHAD"},
-            {id: "KAF037", nama: "KAMARUL BAHRIN BIN SALLEH"}, {id: "KAF038", nama: "AHMAD ROSLI BIN AMAT ZAINAL"},
-            {id: "KAF039", nama: "YUSNI BIN YAKUP"}, {id: "KAF040", nama: "FATIMAH BINTI NADARHAN"},
-            {id: "KAF041", nama: "NAZARI BIN YAHYA"}, {id: "KAF042", nama: "ABDUL KHALID BIN ABD WAHAB"},
-            {id: "KAF043", nama: "ALI BIN HASSAN"}, {id: "KAF044", nama: "MANSOR BIN MOHAMED"},
-            {id: "KAF045", nama: "ISMAIL BIN ISHAK"}, {id: "KAF046", nama: "NORMAN BIN ZAINAL"},
-            {id: "KAF047", nama: "MOHD YUSOP BIN ATAN"}, {id: "KAF048", nama: "MOHD ZAID BIN ABDULLAH"},
-            {id: "KAF049", nama: "SHAH RIZAL BIN YUSOF"}, {id: "KAF050", nama: "AMIR HAMZAH BIN MD DAUD"},
-            {id: "KAF051", nama: "ISAK BIN MUHAMAD"}, {id: "KAF052", nama: "SYUHADA BIN JAAFAR"},
-            {id: "KAF053", nama: "FAUZIAH BINTI MOHAMED"}, {id: "KAF054", nama: "ISMAIL BIN OMAR"},
-            {id: "KAF055", nama: "ABDUL ALIM BIN MANSOR"}, {id: "KAF056", nama: "SYED AZANAL BIN SYED MUSTAFA"},
-            {id: "KAF057", nama: "MOHD SHAMIL BIN RAFINYI"}, {id: "KAF058", nama: "YUNOS BIN SULAIMAN"},
-            {id: "KAF059", nama: "NORAZIZAH BINTI SABTU"}, {id: "KAF060", nama: "ROSLI BIN HAMAD"},
-            {id: "KAF061", nama: "FADZIL BIN SULAIMAN"}, {id: "KAF062", nama: "MOHAMAD HAFIZ BIN HUSSEIN"},
-            {id: "KAF063", nama: "NORIZAN BIN SAION"}, {id: "KAF064", nama: "MOHD NOR NAIMI BIN AHMAD"},
-            {id: "KAF065", nama: "MOHD AZMI BIN JAAFAR"}, {id: "KAF066", nama: "MUHAMMAD NORALIFF BIN HUSAIN"},
-            {id: "KAF067", nama: "ABD JALIL BIN HASSAN"}, {id: "KAF068", nama: "ABDUL RAHMAN BIN HUSSAIN"},
-            {id: "KAF069", nama: "SURAYAH BINTI MOHD DERIS"}, {id: "KAF070", nama: "SHAIFUL BIN ARIFFIN"},
-            {id: "KAF071", nama: "MUHAMMAD RAZAN BIN ZAINAL"}, {id: "KAF072", nama: "MOHD NOR HAFIZ BIN KATMUN"},
-            {id: "KAF073", nama: "MASITAH BINTI HAMZAH"}, {id: "KAF074", nama: "BARJAKI BIN KAMIT"},
-            {id: "KAF075", nama: "MOHAMAD SUFRI BIN SELAMAT"}, {id: "KAF076", nama: "NOOR AZLAN BIN AZIZ"},
-            {id: "KAF077", nama: "MOHD SHAH BIN SALLEH"}, {id: "KAF078", nama: "AZMIZAR BIN MOHD DAUD"},
-            {id: "KAF079", nama: "MOHD SHUKHOR BIN HITAM"}, {id: "KAF080", nama: "FAIZAL BIN YUSOFF"},
-            {id: "KAF081", nama: "MD DRIS BIN MAT"}, {id: "KAF082", nama: "ROS GAHANI BIN JAAFAR"},
-            {id: "KAF083", nama: "MERIANI BINTI ABU BAKAR"}, {id: "KAF084", nama: "ROSNAH BINTI TOMPANG"},
-            {id: "KAF085", nama: "MUHAMMAD FARIDUDDIN GHAZALI"}, {id: "KAF086", nama: "SOZANA BINTI HJ BAHARUM"},
-            {id: "KAF087", nama: "MOHD ZAN BIN MOHD NOR"}, {id: "KAF088", nama: "ROSNITA BINTI ABU"},
-            {id: "KAF089", nama: "MUHAMMAD FIRDAUS BIN YAHYA"}, {id: "KAF090", nama: "MASTURA BINTI MOKHTAR"},
-            {id: "KAF091", nama: "ZAKI BIN ABDULLAH"}, {id: "KAF092", nama: "MOHD SAMENGAN BIN SAFARI"},
-            {id: "KAF093", nama: "HAIRUL ASRAF BIN JAMAT"}, {id: "KAF094", nama: "AZMI BIN AYIP"},
-            {id: "KAF095", nama: "IZRIN FAZRIN BIN MAHMUD"}, {id: "KAF096", nama: "ABDUL RASHID BIN MANAF"},
-            {id: "KAF097", nama: "IDRIS BIN KHALID"}, {id: "KAF098", nama: "AIDI REDZA BIN ABD RAHMAN"},
-            {id: "KAF099", nama: "MOHD SHADELLAZLAH B MOHD SIDEK"}, {id: "KAF100", nama: "TUKIRAN BIN TUKIMAN"},
-            {id: "KAF101", nama: "FADILLAH WATI BINTI MOHD IDRUS"}, {id: "KAF102", nama: "NORLIAYATI BINTI DERAHMAN"},
-            {id: "KAF103", nama: "MOHAMMAD SHARIF BIN ABD MAJID"}, {id: "KAF104", nama: "AMRAN BIN MAON"},
-            {id: "KAF105", nama: "MUHAMMAD AZFAR BIN ZAID"}, {id: "KAF106", nama: "MOHD DAUD BIN YAAKOB"},
-            {id: "KAF107", nama: "MINHAD BIN MANAP"}, {id: "KAF108", nama: "HISHAMUDDIN BIN SAHAK"},
-            {id: "KAF109", nama: "HAIRUDINSHAM BIN ATAN"}, {id: "KAF110", nama: "MOHD ZAKIMI BIN KUDUS"}
+            // ... (Tampal baki 108 nama anda di sini) ...
+            {id: "KAF110", nama: "MOHD ZAKIMI BIN KUDUS"}
         ];
 
-        function tapisAhli() {
-            let input = document.getElementById("cari").value.toUpperCase();
-            let container = document.getElementById("data");
-            container.innerHTML = "";
-            ahli.forEach(a => {
-                if (a.nama.includes(input) || a.id.includes(input)) {
-                    container.innerHTML += `<div class="ahli-item"><div class="id">${a.id}</div><div class="nama">${a.nama}</div></div>`;
-                }
-            });
-        }
-        tapisAhli();
+        window.login = () => {
+            const email = document.getElementById("email").value;
+            const pass = document.getElementById("password").value;
+            signInWithEmailAndPassword(auth, email, pass)
+            .then(() => alert("Berjaya Log Masuk!"))
+            .catch(err => alert("Gagal: " + err.message));
+        };
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                document.getElementById("login-page").style.display = "none";
+                document.getElementById("dashboard").style.display = "block";
+            }
+        });
     </script>
+</head>
+<body>
+    <div id="login-page">
+        <h2>Log Masuk Kariah</h2>
+        <input type="email" id="email" placeholder="Email"><br>
+        <input type="password" id="password" placeholder="Password"><br>
+        <button onclick="login()">Masuk</button>
+    </div>
+
+    <div id="dashboard" style="display:none;">
+        <h1>Senarai Ahli</h1>
+        <input type="text" id="cari" placeholder="Cari nama..." onkeyup="tapis()">
+        <div id="data"></div>
+    </div>
 </body>
 </html>
