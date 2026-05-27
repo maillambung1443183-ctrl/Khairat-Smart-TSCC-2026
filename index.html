@@ -1,316 +1,81 @@
 <!DOCTYPE html>
-<html lang="ms" class="h-full bg-slate-50">
+<html lang="ms">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Khairat Smart - Al-Falah</title>
-    
-    <!-- Pustaka CSS & Icon (Tailwind & FontAwesome) -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
-    <!-- Pustaka Pembaca CSV (PapaParse) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-
-    <!-- PUSTAKA FIREBASE VERSI KHAS KALIS SEKATAN (COMPAT MODE) -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-
+    <title>Senarai Penuh Ahli Kariah</title>
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
-        .tab-content, .auth-screen { display: none; }
-        .tab-content.active, .auth-screen.active { display: block; }
+        body { font-family: sans-serif; padding: 20px; line-height: 1.6; }
+        .ahli-item { border-bottom: 1px solid #eee; padding: 5px 0; }
     </style>
 </head>
-<body class="h-full flex flex-col overflow-hidden text-slate-800">
-
-    <!-- GERBANG MASUK SYSTEM (LOGIN) -->
-    <div id="auth-wrapper" class="fixed inset-0 bg-gradient-to-br from-emerald-950 via-slate-900 to-slate-950 flex items-center justify-center p-4 z-50 overflow-y-auto">
-        <div class="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-100">
-            <div class="bg-gradient-to-r from-emerald-600 to-teal-600 p-8 text-center text-white">
-                <div class="w-16 h-16 bg-white/10 backdrop-blur-md text-white rounded-2xl flex items-center justify-center text-2xl mx-auto shadow-lg mb-4">
-                    <i class="fa-solid fa-hand-holding-heart"></i>
-                </div>
-                <h1 class="text-2xl font-extrabold tracking-tight">Khairat<span class="text-emerald-200">Smart</span></h1>
-                <p class="text-xs text-emerald-100/80 font-medium mt-1">Sistem Kebajikan Kariah Masjid Al-Falah</p>
-            </div>
-
-            <div class="p-6 sm:p-8">
-                <!-- KOTAK NOTIFIKASI RANGKAIAN -->
-                <div id="authAlert" class="hidden mb-4 p-3.5 rounded-xl text-xs font-semibold text-center"></div>
-
-                <div id="screen-login" class="auth-screen active space-y-5">
-                    <div class="text-center mb-2">
-                        <h3 class="text-lg font-bold text-slate-900">Log Masuk</h3>
-                        <p class="text-xs text-slate-400">Sila masukkan ID Pengguna atau ID Admin.</p>
-                    </div>
-                    <form id="loginForm" class="space-y-4">
-                        <div>
-                            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">ID Pengguna / No. Ahli</label>
-                            <div class="relative">
-                                <i class="fa-solid fa-id-card absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                                <input type="text" id="login-no-ahli" required class="w-full pl-11 pr-4 py-3 text-sm rounded-xl border border-slate-200 focus:outline-none focus:border-emerald-500" placeholder="cth: KAF001 atau ADMIN-ALFALAH">
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Kata Laluan</label>
-                            <div class="relative">
-                                <i class="fa-solid fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                                <input type="password" id="login-password" required class="w-full pl-11 pr-4 py-3 text-sm rounded-xl border border-slate-200 focus:outline-none focus:border-emerald-500" placeholder="••••••••">
-                            </div>
-                        </div>
-                        <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm py-3.5 rounded-xl shadow-lg transition flex items-center justify-center gap-2">
-                            Masuk Ke Sistem <i class="fa-solid fa-arrow-right text-xs"></i>
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- HEADER UTAMA SISTEM -->
-    <header class="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between shadow-sm flex-shrink-0 z-10">
-        <div class="flex items-center space-x-3">
-            <div class="bg-emerald-500 text-slate-950 p-2 rounded-xl shadow-md">
-                <i class="fa-solid fa-hand-holding-heart text-lg"></i>
-            </div>
-            <div>
-                <h1 class="text-base font-bold tracking-tight text-slate-900">Khairat<span class="text-emerald-600">Smart</span></h1>
-                <p id="user-role-tag" class="text-[10px] text-slate-400 font-bold -mt-1 uppercase tracking-wider">Ahli Kariah</p>
-            </div>
-        </div>
-        <div class="flex items-center space-x-4">
-            <button onclick="logoutSystem()" class="text-xs font-bold text-red-600 border border-red-200 px-3 py-1.5 rounded-xl hover:bg-red-50 transition">
-                <i class="fa-solid fa-right-from-bracket"></i> Keluar
-            </button>
-        </div>
-    </header>
-
-    <!-- SEKSYEN KANDUNGAN -->
-    <div class="flex-1 p-4 sm:p-6 overflow-y-auto pb-28">
-        
-        <!-- PAPARAN DATA PERIBADI (AHLI BIASA) -->
-        <section id="ahli-peribadi-tab" class="tab-content active space-y-4">
-            <div class="bg-gradient-to-r from-slate-900 to-emerald-950 text-white p-6 rounded-3xl shadow-xl space-y-4">
-                <span class="text-[10px] bg-emerald-500/20 text-emerald-300 font-black px-2.5 py-1 rounded-full uppercase tracking-widest"><i class="fa-solid fa-user-shield"></i> Profil Ahli Disahkan</span>
-                <div>
-                    <h2 id="ahli-nama-papar" class="text-xl font-black tracking-tight">MEMUAT NAMA...</h2>
-                    <p id="ahli-id-papar" class="text-xs text-slate-400 font-bold mt-1">ID AHLI: ---</p>
-                </div>
-            </div>
-            <div class="grid grid-cols-2 gap-4">
-                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Status Khairat</span>
-                    <span id="ahli-status-papar" class="text-base font-black text-slate-900 mt-2 block">---</span>
-                </div>
-                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Sumbangan Anda</span>
-                    <span id="ahli-bayaran-papar" class="text-base font-black text-emerald-600 mt-2 block">RM 0.00</span>
-                </div>
-            </div>
-        </section>
-
-        <!-- PAPARAN DASHBOARD (ADMIN SAHAJA) -->
-        <section id="admin-dashboard-tab" class="tab-content space-y-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
-                    <div>
-                        <span class="text-[10px] font-bold text-slate-400 uppercase">Total Dana Terkumpul</span>
-                        <span id="stat-dana" class="text-2xl font-black text-slate-900 mt-1 block">RM 0.00</span>
-                    </div>
-                    <div class="w-12 h-12 bg-emerald-50 text-emerald-600 flex items-center justify-center rounded-xl text-xl"><i class="fa-solid fa-vault"></i></div>
-                </div>
-                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
-                    <div>
-                        <span class="text-[10px] font-bold text-slate-400 uppercase">Jumlah Ahli Digital</span>
-                        <span id="stat-ahli" class="text-2xl font-black text-slate-900 mt-1 block">0 Orang</span>
-                    </div>
-                    <div class="w-12 h-12 bg-blue-50 text-blue-600 flex items-center justify-center rounded-xl text-xl"><i class="fa-solid fa-users"></i></div>
-                </div>
-            </div>
-        </section>
-
-        <!-- PAPARAN SENARAI PENUH KAWALAN (ADMIN SAHAJA) -->
-        <section id="admin-senarai-tab" class="tab-content space-y-4">
-            <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
-                <input type="text" id="searchBar" onkeyup="filterTable()" class="w-full max-w-xs px-4 py-2 text-xs rounded-lg border focus:outline-none focus:border-emerald-500" placeholder="Cari nama atau ID ahli...">
-                <span class="text-[10px] font-bold text-red-600"><i class="fa-solid fa-lock"></i> Kawalan Admin</span>
-            </div>
-            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="bg-slate-900 text-white text-[10px] font-bold uppercase tracking-wider">
-                            <th class="px-5 py-3">ID / Nama Ahli</th>
-                            <th class="px-5 py-3">Status</th>
-                            <th class="px-5 py-3">Yuran</th>
-                        </tr>
-                    </thead>
-                    <tbody id="ahliTableBody" class="divide-y divide-slate-100 text-xs font-medium text-slate-700"></tbody>
-                </table>
-            </div>
-        </section>
-    </div>
-
-    <!-- MENU DI BAHAGIAN BAWAH -->
-    <div id="bottom-nav-bar" class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 shadow-2xl z-40 px-2 hidden">
-        <div id="nav-container" class="max-w-md mx-auto flex justify-around items-center h-16"></div>
-    </div>
+<body>
+    <h1>Senarai Penuh Ahli Kariah</h1>
+    <div id="data"></div>
 
     <script>
-        // MAKLUMAT CONFIGURATION FIREBASE CLOUD DATA
-        var firebaseConfig = {
-          apiKey: "AIzaSyAD_xdF9IDyWoFoPFuQZv7TcOM71m-7zbA",
-          authDomain: "khairat-smart-al-falah-tscc.firebaseapp.com",
-          projectId: "khairat-smart-al-falah-tscc",
-          storageBucket: "khairat-smart-al-falah-tscc.firebasestorage.app",
-          messagingSenderId: "90984659311",
-          appId: "1:90984659311:web:f82d82b83b59609c6b509a"
-        };
+        const ahli = [
+            {id: "KAF001", nama: "BAHARUDIN BIN BUDIN"}, {id: "KAF002", nama: "KARIM BIN RAMLAN"},
+            {id: "KAF003", nama: "ISMAIL BIN JAAMAT"}, {id: "KAF004", nama: "AWG MOHD FAUZI BIN ABU SAMAH"},
+            {id: "KAF005", nama: "MD AMIN BIN MD JOHAN"}, {id: "KAF006", nama: "AMIRUDDIN BIN OTHMAN"},
+            {id: "KAF007", nama: "UMAR BIN KASIM"}, {id: "KAF008", nama: "SURAYAH BINTI UNAN"},
+            {id: "KAF009", nama: "ROSLI BIN MID"}, {id: "KAF010", nama: "ROSLINDA BINTI MID"},
+            {id: "KAF011", nama: "ABD JALIL BIN MANSOR"}, {id: "KAF012", nama: "ZAINUREN BIN HUSSIN"},
+            {id: "KAF013", nama: "KAMARULZAMAN HUSSIN"}, {id: "KAF014", nama: "JAAFAR BIN HITAM"},
+            {id: "KAF015", nama: "MUSTAFA BIN MANAP"}, {id: "KAF016", nama: "NOOR AZWAN BIN AMAT RAMLI"},
+            {id: "KAF017", nama: "MOHD AZMAN BIN BUANG"}, {id: "KAF018", nama: "NURZIYATI BINTI MD ALI"},
+            {id: "KAF019", nama: "AMRAN BIN AHMAD"}, {id: "KAF020", nama: "MOHD SHUKRI BIN ISMAIL"},
+            {id: "KAF021", nama: "MOHD NOORASHIDIN SOLEHUDIN"}, {id: "KAF022", nama: "MOHD AZIZAN BIN MANAF"},
+            {id: "KAF023", nama: "MUHAMMAD BIN MOHD AMIN"}, {id: "KAF024", nama: "RAHIM BIN TUMADI"},
+            {id: "KAF025", nama: "MARIAH BINTI BAHAROM"}, {id: "KAF026", nama: "MUSA BIN WAHAB"},
+            {id: "KAF027", nama: "ABDUL RASHID BIN TAHIR"}, {id: "KAF028", nama: "NURUL AMIRAH BINTI ZAILANI"},
+            {id: "KAF029", nama: "KHALID BIN ABAS"}, {id: "KAF030", nama: "NAZRI BIN ABU BAKAR"},
+            {id: "KAF031", nama: "ZULSAFREE BIN ASMAT"}, {id: "KAF032", nama: "ZAMMARI BIN YUSOFF"},
+            {id: "KAF033", nama: "MOHD YANI BIN SELAMAT"}, {id: "KAF034", nama: "SAPARI BIN ABDUL MUDI"},
+            {id: "KAF035", nama: "JABRI BIN IBRAHIM"}, {id: "KAF036", nama: "ZAKARIA BIN MIHAD"},
+            {id: "KAF037", nama: "KAMARUL BAHRIN BIN SALLEH"}, {id: "KAF038", nama: "AHMAD ROSLI BIN AMAT ZAINAL"},
+            {id: "KAF039", nama: "YUSNI BIN YAKUP"}, {id: "KAF040", nama: "FATIMAH BINTI NADARHAN"},
+            {id: "KAF041", nama: "NAZARI BIN YAHYA"}, {id: "KAF042", nama: "ABDUL KHALID BIN ABD WAHAB"},
+            {id: "KAF043", nama: "ALI BIN HASSAN"}, {id: "KAF044", nama: "MANSOR BIN MOHAMED"},
+            {id: "KAF045", nama: "ISMAIL BIN ISHAK"}, {id: "KAF046", nama: "NORMAN BIN ZAINAL"},
+            {id: "KAF047", nama: "MOHD YUSOP BIN ATAN"}, {id: "KAF048", nama: "MOHD ZAID BIN ABDULLAH"},
+            {id: "KAF049", nama: "SHAH RIZAL BIN YUSOF"}, {id: "KAF050", nama: "AMIR HAMZAH BIN MD DAUD"},
+            {id: "KAF051", nama: "ISAK BIN MUHAMAD"}, {id: "KAF052", nama: "SYUHADA BIN JAAFAR"},
+            {id: "KAF053", nama: "FAUZIAH BINTI MOHAMED"}, {id: "KAF054", nama: "ISMAIL BIN OMAR"},
+            {id: "KAF055", nama: "ABDUL ALIM BIN MANSOR"}, {id: "KAF056", nama: "SYED AZANAL BIN SYED MUSTAFA"},
+            {id: "KAF057", nama: "MOHD SHAMIL BIN RAFINYI"}, {id: "KAF058", nama: "YUNOS BIN SULAIMAN"},
+            {id: "KAF059", nama: "NORAZIZAH BINTI SABTU"}, {id: "KAF060", nama: "ROSLI BIN HAMAD"},
+            {id: "KAF061", nama: "FADZIL BIN SULAIMAN"}, {id: "KAF062", nama: "MOHAMAD HAFIZ BIN HUSSEIN"},
+            {id: "KAF063", nama: "NORIZAN BIN SAION"}, {id: "KAF064", nama: "MOHD NOR NAIMI BIN AHMAD"},
+            {id: "KAF065", nama: "MOHD AZMI BIN JAAFAR"}, {id: "KAF066", nama: "MUHAMMAD NORALIFF BIN HUSAIN"},
+            {id: "KAF067", nama: "ABD JALIL BIN HASSAN"}, {id: "KAF068", nama: "ABDUL RAHMAN BIN HUSSAIN"},
+            {id: "KAF069", nama: "SURAYAH BINTI MOHD DERIS"}, {id: "KAF070", nama: "SHAIFUL BIN ARIFFIN"},
+            {id: "KAF071", nama: "MUHAMMAD RAZAN BIN ZAINAL"}, {id: "KAF072", nama: "MOHD NOR HAFIZ BIN KATMUN"},
+            {id: "KAF073", nama: "MASITAH BINTI HAMZAH"}, {id: "KAF074", nama: "BARJAKI BIN KAMIT"},
+            {id: "KAF075", nama: "MOHAMAD SUFRI BIN SELAMAT"}, {id: "KAF076", nama: "NOOR AZLAN BIN AZIZ"},
+            {id: "KAF077", nama: "MOHD SHAH BIN SALLEH"}, {id: "KAF078", nama: "AZMIZAR BIN MOHD DAUD"},
+            {id: "KAF079", nama: "MOHD SHUKHOR BIN HITAM"}, {id: "KAF080", nama: "FAIZAL BIN YUSOFF"},
+            {id: "KAF081", nama: "MD DRIS BIN MAT"}, {id: "KAF082", nama: "ROS GAHANI BIN JAAFAR"},
+            {id: "KAF083", nama: "MERIANI BINTI ABU BAKAR"}, {id: "KAF084", nama: "ROSNAH BINTI TOMPANG"},
+            {id: "KAF085", nama: "MUHAMMAD FARIDUDDIN GHAZALI"}, {id: "KAF086", nama: "SOZANA BINTI HJ BAHARUM"},
+            {id: "KAF087", nama: "MOHD ZAN BIN MOHD NOR"}, {id: "KAF088", nama: "ROSNITA BINTI ABU"},
+            {id: "KAF089", nama: "MUHAMMAD FIRDAUS BIN YAHYA"}, {id: "KAF090", nama: "MASTURA BINTI MOKHTAR"},
+            {id: "KAF091", nama: "ZAKI BIN ABDULLAH"}, {id: "KAF092", nama: "MOHD SAMENGAN BIN SAFARI"},
+            {id: "KAF093", nama: "HAIRUL ASRAF BIN JAMAT"}, {id: "KAF094", nama: "AZMI BIN AYIP"},
+            {id: "KAF095", nama: "IZRIN FAZRIN BIN MAHMUD"}, {id: "KAF096", nama: "ABDUL RASHID BIN MANAF"},
+            {id: "KAF097", nama: "IDRIS BIN KHALID"}, {id: "KAF098", nama: "AIDI REDZA BIN ABD RAHMAN"},
+            {id: "KAF099", nama: "MOHD SHADELLAZLAH B MOHD SIDEK"}, {id: "KAF100", nama: "TUKIRAN BIN TUKIMAN"},
+            {id: "KAF101", nama: "FADILLAH WATI BINTI MOHD IDRUS"}, {id: "KAF102", nama: "NORLIAYATI BINTI DERAHMAN"},
+            {id: "KAF103", nama: "MOHAMMAD SHARIF BIN ABD MAJID"}, {id: "KAF104", nama: "AMRAN BIN MAON"},
+            {id: "KAF105", nama: "MUHAMMAD AZFAR BIN ZAID"}, {id: "KAF106", nama: "MOHD DAUD BIN YAAKOB"},
+            {id: "KAF107", nama: "MINHAD BIN MANAP"}, {id: "KAF108", nama: "HISHAMUDDIN BIN SAHAK"},
+            {id: "KAF109", nama: "HAIRUDINSHAM BIN ATAN"}, {id: "KAF110", nama: "MOHD ZAKIMI BIN KUDUS"}
+        ];
 
-        // Mulakan Pengaktifan Firebase Menggunakan Kaedah Kalis Sekatan (Compat)
-        firebase.initializeApp(firebaseConfig);
-        var db = firebase.firestore();
-
-        // KAWALAN LOG MASUK UTAMA
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            var noAhliInput = document.getElementById('login-no-ahli').value.trim().toUpperCase();
-            var passwordInput = document.getElementById('login-password').value;
-            var alertBox = document.getElementById('authAlert');
-
-            alertBox.className = "mb-4 p-3.5 rounded-xl text-xs font-semibold text-center bg-blue-50 text-blue-800 block";
-            alertBox.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Menyemak pangkalan data...`;
-
-            // STRUKTUR KEMASUKAN FAIL BAGI ADMIN MASJID AL-FALAH
-            if (noAhliInput === "ADMIN-ALFALAH" && passwordInput === "masjid123") {
-                alertBox.className = "mb-4 p-4 rounded-xl text-xs font-semibold bg-amber-50 text-amber-900 border border-amber-200 block text-left space-y-2";
-                alertBox.innerHTML = `
-                    <p class="font-bold text-sm text-amber-950"><i class="fa-solid fa-user-gear"></i> Sistem Pengurus (Admin) Aktif</p>
-                    <p class="text-slate-600 text-[11px]">Sila pilih fail <strong>DATA AKTIF-TAK AHLI .csv</strong> telefon anda:</p>
-                    <input type="file" id="failCsvAdmin" accept=".csv" class="w-full text-xs block bg-white p-2 border rounded-lg">
-                    <button id="btnSync" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-lg font-bold text-xs mt-2 transition">Mula Sync Data ke Cloud</button>
-                `;
-                
-                document.getElementById('failCsvAdmin').addEventListener('change', function() {
-                    document.getElementById('btnSync').onclick = function() { window.prosesUploadCSV_DariHP(document.getElementById('failCsvAdmin').files[0]); };
-                });
-
-                document.getElementById('user-role-tag').innerText = "Sistem Pengurus (Admin)";
-                binaMenuNavigasi("admin");
-                switchTab('admin-dashboard-tab');
-                bacaDataSeluruhKariah_Admin();
-                
-                setTimeout(function() {
-                    document.getElementById('auth-wrapper').classList.add('hidden');
-                    document.getElementById('bottom-nav-bar').classList.remove('hidden');
-                }, 800);
-                return;
-            }
-
-            // PROSES SEMAKAN DATA AHLI BIASA (PRIVASI SEKATAN DATA)
-            db.collection("senarai_ahli_drive").doc(noAhliInput).get().then(function(ahliSnap) {
-                if (ahliSnap.exists) {
-                    var dataAhli = ahliSnap.data();
-                    if (passwordInput === dataAhli.PASSWORD) {
-                        alertBox.className = "mb-4 p-3.5 rounded-xl text-xs font-semibold text-center bg-emerald-50 text-emerald-800 block";
-                        alertBox.innerHTML = `Log Masuk Berjaya!`;
-                        
-                        document.getElementById('user-role-tag').innerText = "Akaun Ahli Kariah";
-                        document.getElementById('ahli-nama-papar').innerText = dataAhli.NAMA;
-                        document.getElementById('ahli-id-papar').innerText = `NO AHLI: ` + noAhliInput;
-                        document.getElementById('ahli-status-papar').innerHTML = `<span class="bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full text-xs font-bold">` + dataAhli.STATUS + `</span>`;
-                        document.getElementById('ahli-bayaran-papar').innerText = `RM ` + parseFloat(dataAhli.BAYARAN || 0).toFixed(2);
-
-                        binaMenuNavigasi("ahli");
-                        switchTab('ahli-peribadi-tab');
-
-                        setTimeout(function() {
-                            document.getElementById('auth-wrapper').classList.add('hidden');
-                            document.getElementById('bottom-nav-bar').classList.remove('hidden');
-                        }, 800);
-                    } else {
-                        alertBox.className = "mb-4 p-3.5 rounded-xl text-xs font-semibold text-center bg-red-50 text-red-800 block";
-                        alertBox.innerText = "Kata laluan salah.";
-                    }
-                } else {
-                    alertBox.className = "mb-4 p-3.5 rounded-xl text-xs font-semibold text-center bg-amber-50 text-amber-800 block";
-                    alertBox.innerText = `ID tidak dijumpai. Hubungi ADMIN untuk upload CSV dahulu.`;
-                }
-            }).catch(function(error) {
-                alertBox.className = "mb-4 p-3.5 rounded-xl text-xs font-semibold text-center bg-red-50 text-red-800 block";
-                alertBox.innerText = "Ralat Rangkaian: Sila pastikan sambungan internet telefon anda aktif.";
-            });
+        const container = document.getElementById("data");
+        ahli.forEach(a => {
+            container.innerHTML += `<div class="ahli-item">${a.id}: ${a.nama}</div>`;
         });
+    </script>
+</body>
+</html>
 
-        function binaMenuNavigasi(peranan) {
-            var navContainer = document.getElementById('nav-container');
-            if(peranan === "admin") {
-                navContainer.innerHTML = `
-                    <button onclick="switchTab('admin-dashboard-tab')" id="link-admin-dashboard-tab" class="tab-link flex flex-col items-center justify-center w-16 text-emerald-600">
-                        <i class="fa-solid fa-chart-pie text-lg"></i><span class="text-[10px] font-bold mt-1">Dashboard</span>
-                    </button>
-                    <button onclick="switchTab('admin-senarai-tab')" id="link-admin-senarai-tab" class="tab-link flex flex-col items-center justify-center w-16 text-slate-400">
-                        <i class="fa-solid fa-users text-lg"></i><span class="text-[10px] font-semibold mt-1">Urus Ahli</span>
-                    </button>
-                `;
-            } else {
-                navContainer.innerHTML = `
-                    <button onclick="switchTab('ahli-peribadi-tab')" id="link-ahli-peribadi-tab" class="tab-link flex flex-col items-center justify-center w-24 text-emerald-600">
-                        <i class="fa-solid fa-user-check text-lg"></i><span class="text-[10px] font-bold mt-1">Rekod Saya</span>
-                    </button>
-                `;
-            }
-        }
-
-        function bacaDataSeluruhKariah_Admin() {
-            var tableBody = document.getElementById('ahliTableBody');
-            db.collection("senarai_ahli_drive").onSnapshot(function(snapshot) {
-                var html = ""; var count = 0; var totalKutipan = 0;
-                snapshot.forEach(function(doc) {
-                    var data = doc.data(); count++; totalKutipan += parseFloat(data.BAYARAN || 0);
-                    html += `
-                    <tr class="border-b border-slate-100">
-                        <td class="px-5 py-3"><div class="font-bold text-slate-900">` + doc.id + `</div><div class="text-[10px] text-slate-400">` + data.NAMA + `</div></td>
-                        <td class="px-5 py-3"><span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded text-[10px] font-bold">` + data.STATUS + `</span></td>
-                        <td class="px-5 py-3 text-slate-900 font-bold">RM ` + parseFloat(data.BAYARAN).toFixed(2) + `</td>
-                    </tr>`;
-                });
-                tableBody.innerHTML = html;
-                document.getElementById('stat-dana').innerText = `RM ` + totalKutipan.toLocaleString('ms-MY', {minimumFractionDigits: 2});
-                document.getElementById('stat-ahli').innerText = count + ` Orang`;
-            });
-        }
-
-        window.prosesUploadCSV_DariHP = function(failCSV) {
-            var alertBox = document.getElementById('authAlert');
-            if(!failCSV) { alertBox.innerText = "Sila pilih fail CSV dahulu!"; return; }
-            
-            alertBox.innerHTML = `Memproses & memuat naik data... Sila tunggu.`;
-            Papa.parse(failCSV, {
-                header: true,
-                skipEmptyLines: true,
-                complete: function(results) {
-                    var dataData = results.data;
-                    var batch = db.batch();
-                    var count = 0;
-
-                    dataData.forEach(function(baris) {
-                        var cleanedBaris = {};
-                        Object.keys(baris).forEach(function(key) { cleanedBaris[key.trim().toUpperCase()] = baris[key]; });
-
-                        var noAhli = cleanedBaris["MEMBER ID"];
-                        var namaAhli = cleanedBaris["NAMA"];
-                        var statusAhli = cleanedBaris["STATUS"] || "AKTIF";
-                        var bayaranAhli = cleanedBaris["BAYARAN"] || "50";
-
-                        if (noAhli && namaAhli) {
-                            var docRef = db.collection("senarai_ahli_drive").doc(noAhli.trim().toUpperCase());
-                            batch.set(docRef, {
-                                NAMA: namaAhli.trim().toUpperCase(),
-                                STATUS: statusAhli.trim().toUpperCase(),
-                                BAYARAN
