@@ -2,14 +2,19 @@
 <html lang="ms">
 <head>
     <meta charset="UTF-8">
-    <title>Senarai Penuh Ahli Kariah</title>
+    <title>Sistem Carian Ahli Kariah</title>
     <style>
-        body { font-family: sans-serif; padding: 20px; line-height: 1.6; }
-        .ahli-item { border-bottom: 1px solid #eee; padding: 5px 0; }
+        body { font-family: sans-serif; padding: 20px; background: #f4f4f4; }
+        input { width: 100%; padding: 15px; margin-bottom: 20px; font-size: 16px; border: 1px solid #ccc; border-radius: 8px; }
+        .ahli-item { background: white; padding: 15px; margin-bottom: 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .nama { font-weight: bold; color: #333; }
+        .id { color: #666; font-size: 0.9em; }
     </style>
 </head>
 <body>
-    <h1>Senarai Penuh Ahli Kariah</h1>
+
+    <h1>Carian Ahli Kariah</h1>
+    <input type="text" id="cari" placeholder="Taip nama atau ID ahli..." onkeyup="tapisAhli()">
     <div id="data"></div>
 
     <script>
@@ -71,11 +76,17 @@
             {id: "KAF109", nama: "HAIRUDINSHAM BIN ATAN"}, {id: "KAF110", nama: "MOHD ZAKIMI BIN KUDUS"}
         ];
 
-        const container = document.getElementById("data");
-        ahli.forEach(a => {
-            container.innerHTML += `<div class="ahli-item">${a.id}: ${a.nama}</div>`;
-        });
+        function tapisAhli() {
+            let input = document.getElementById("cari").value.toUpperCase();
+            let container = document.getElementById("data");
+            container.innerHTML = "";
+            ahli.forEach(a => {
+                if (a.nama.includes(input) || a.id.includes(input)) {
+                    container.innerHTML += `<div class="ahli-item"><div class="id">${a.id}</div><div class="nama">${a.nama}</div></div>`;
+                }
+            });
+        }
+        tapisAhli();
     </script>
 </body>
 </html>
-
