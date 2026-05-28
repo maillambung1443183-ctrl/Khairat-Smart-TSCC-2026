@@ -9,55 +9,54 @@
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
     
     <style>
-        body { font-family: sans-serif; padding: 15px; }
-        input { width: 90%; padding: 10px; margin-bottom: 10px; }
-        button { padding: 10px 20px; }
+        body { font-family: Arial, sans-serif; padding: 20px; background-color: #f4f7f6; }
+        .page { display: none; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .active { display: block; }
+        nav { margin-bottom: 20px; }
+        button { padding: 10px; cursor: pointer; border: none; border-radius: 5px; background: #27ae60; color: white; }
+        input { width: 90%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 5px; }
+        h2 { color: #2c3e50; }
     </style>
 </head>
 <body>
 
-    <div id="page1">
-        <h2>Info Manfaat Khairat (RM1,000)</h2>
-        <p>Bantuan khairat kematian yang diberikan adalah seperti berikut:</p>
-        <ul>
-            <li><strong>RM 750:</strong> Pengurusan Jenazah</li>
-            <li><strong>RM 250:</strong> Bantuan Tunai</li>
-        </ul>
+    <nav>
+        <button onclick="showPage('info')">Info & AJK</button>
+        <button onclick="showPage('auth')">Akaun</button>
+        <button onclick="showPage('daftar')">Daftar</button>
+    </nav>
+
+    <div id="info" class="page active">
+        <h2>Manfaat Khairat (RM1,000)</h2>
+        <p>RM 750: Pengurusan Jenazah<br>RM 250: Bantuan Tunai</p>
+        <h2>Senarai AJK</h2>
+        <p>1. Pengerusi: En Awang (0133333333)<br>2. Setiausaha: En Ismail (0177000242)<br>3. Bendahari: En Mohd Zan (0111111111)</p>
     </div>
 
-    <hr>
-
-    <div id="page2">
-        <h2>Senarai AJK Khairat</h2>
-        <ol>
-            <li>Pengerusi: <strong>En Awang Mohd Fauzi</strong> - 0133333333</li>
-            <li>Setiausaha: <strong>En Ismail Bin Ishak</strong> - 0177000242</li>
-            <li>Bendahari: <strong>En Mohd Zan</strong> - 0111111111</li>
-        </ol>
-        <p><em>Sebarang pertanyaan boleh berhubung dengan pihak AJK di atas.</em></p>
+    <div id="auth" class="page">
+        <h2>Log Masuk</h2>
+        <input type="email" id="loginEmail" placeholder="Emel"><br>
+        <input type="password" id="loginPass" placeholder="Kata Laluan"><br>
+        <button onclick="loginUser()">Log Masuk</button>
+        <h2>Lupa Kata Laluan</h2>
+        <input type="email" id="emailLupa" placeholder="Emel anda"><br>
+        <button onclick="lupaKataLaluan()">Reset</button>
     </div>
 
-    <hr>
-
-    <h2>Log Masuk</h2>
-    <input type="email" id="loginEmail" placeholder="Emel"><br>
-    <input type="password" id="loginPass" placeholder="Kata Laluan"><br>
-    <button onclick="loginUser()">Log Masuk</button>
-
-    <hr>
-
-    <h2>Pendaftaran ID Ahli</h2>
-    <input type="text" id="inputID" placeholder="ID (Contoh: KAF001)"><br>
-    <input type="email" id="inputEmail" placeholder="Emel"><br>
-    <button onclick="registerData()">Daftar Data</button>
-
-    <hr>
-
-    <h2>Lupa Kata Laluan?</h2>
-    <input type="email" id="emailLupa" placeholder="Masukkan emel anda"><br>
-    <button onclick="lupaKataLaluan()">Reset Kata Laluan</button>
+    <div id="daftar" class="page">
+        <h2>Pendaftaran ID Ahli</h2>
+        <input type="text" id="inputID" placeholder="ID (Contoh: KAF001)"><br>
+        <input type="email" id="inputEmail" placeholder="Emel"><br>
+        <button onclick="registerData()">Daftar Sekarang</button>
+    </div>
 
     <script>
+        // Fungsi tukar page
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+        }
+
         const firebaseConfig = {
             apiKey: "AIzaSyAD_xdF9IDyWoFoPFuQZv7TcOM71m-7zbA",
             authDomain: "khairat-smart-al-falah-tscc.firebaseapp.com",
