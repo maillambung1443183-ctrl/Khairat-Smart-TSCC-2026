@@ -9,83 +9,87 @@
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
     
     <style>
-        body { font-family: Arial, sans-serif; padding: 20px; background-color: #f4f7f6; }
-        .page { display: none; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); margin-top: 10px; }
+        body { font-family: 'Segoe UI', sans-serif; background: #eef2f3; padding: 20px; }
+        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .page { display: none; }
         .active { display: block; }
-        .hidden { display: none; } /* Untuk sorok kandungan */
-        button { padding: 10px; cursor: pointer; border: none; border-radius: 5px; background: #27ae60; color: white; margin-bottom: 5px; }
-        input { width: 90%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 5px; }
+        .btn { background: #3498db; color: white; padding: 12px; border: none; border-radius: 8px; width: 100%; font-weight: bold; }
+        h2 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
+        input, textarea { width: 95%; padding: 10px; margin: 8px 0; border: 1px solid #ccc; border-radius: 5px; }
     </style>
 </head>
 <body>
 
-    <div id="loginPage" class="page active">
-        <h2>Log Masuk Sistem</h2>
-        <input type="email" id="loginEmail" placeholder="Emel"><br>
-        <input type="password" id="loginPass" placeholder="Kata Laluan"><br>
-        <button onclick="loginUser()">Log Masuk</button>
-        <p><a href="#" onclick="showReset()">Lupa kata laluan?</a></p>
+    <!-- Login Page -->
+    <div id="loginPage" class="card active">
+        <h2>🔒 Log Masuk</h2>
+        <input type="email" id="loginEmail" placeholder="Emel">
+        <input type="password" id="loginPass" placeholder="Kata Laluan">
+        <button class="btn" onclick="loginUser()">MASUK</button>
     </div>
 
-    <div id="mainContent" class="hidden">
-        <nav>
-            <button onclick="showPage('info')">Info & AJK</button>
+    <!-- Main Content -->
+    <div id="mainContent" class="page">
+        <nav style="margin-bottom: 20px;">
+            <button onclick="showPage('info')">Info</button>
+            <button onclick="showPage('profil')">Profil Ahli</button>
             <button onclick="showPage('daftar')">Daftar</button>
-            <button onclick="location.reload()">Log Keluar</button>
         </nav>
 
-        <div id="info" class="page active">
-            <h2>Manfaat Khairat (RM1,000)</h2>
-            <p>RM 750: Pengurusan Jenazah<br>RM 250: Bantuan Tunai</p>
-            <h2>Senarai AJK</h2>
-            <p>1. Pengerusi: En Awang (0133333333)<br>2. Setiausaha: En Ismail (0177000242)<br>3. Bendahari: En Mohd Zan (0111111111)</p>
+        <div id="info" class="page active card">
+            <h2>✨ Manfaat Khairat</h2>
+            <p><strong>RM 750:</strong> Pengurusan Jenazah</p>
+            <p><strong>RM 250:</strong> Bantuan Tunai</p>
+            <p><strong>Bank:</strong> 9988000930222 (Surau Al Falah TSCC)</p>
+            <h3>👥 Barisan AJK</h3>
+            <p>Pengerusi: En Awang (0133333333)<br>Setiausaha: En Ismail (0177000242)<br>Bendahari: En Mohd Zan (0111111111)</p>
         </div>
 
-        <div id="daftar" class="page">
-            <h2>Pendaftaran ID Ahli</h2>
-            <input type="text" id="inputID" placeholder="ID (Contoh: KAF001)"><br>
-            <input type="email" id="inputEmail" placeholder="Emel"><br>
-            <button onclick="registerData()">Daftar Sekarang</button>
+        <div id="profil" class="page card">
+            <h2>👤 Kemaskini Profil</h2>
+            <input type="text" id="pAlamat" placeholder="Alamat Penuh">
+            <input type="text" id="pTel" placeholder="No Telefon">
+            <input type="text" id="pTanggungan" placeholder="Tanggungan (5 orang)">
+            <input type="text" id="pWaris" placeholder="Waris Utama">
+            <button class="btn" style="background:#27ae60" onclick="updateProfil()">Simpan Kemaskini</button>
+        </div>
+
+        <div id="daftar" class="page card">
+            <h2>📝 Pendaftaran Baru</h2>
+            <input type="text" id="dNama" placeholder="Nama Penuh">
+            <input type="text" id="dAlamat" placeholder="Alamat">
+            <input type="text" id="dTel" placeholder="No Telefon">
+            <input type="email" id="dEmail" placeholder="Email">
+            <input type="text" id="dWaris" placeholder="Waris Utama">
+            <input type="text" id="dTanggungan" placeholder="Tanggungan (5 orang)">
+            <button class="btn" style="background:#e67e22" onclick="registerData()">Daftar Sekarang</button>
         </div>
     </div>
 
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyAD_xdF9IDyWoFoPFuQZv7TcOM71m-7zbA",
-            authDomain: "khairat-smart-al-falah-tscc.firebaseapp.com",
-            databaseURL: "https://khairat-smart-al-falah-tscc-default-rtdb.firebaseio.com",
-            projectId: "khairat-smart-al-falah-tscc",
-            storageBucket: "khairat-smart-al-falah-tscc.firebasestorage.app",
-            messagingSenderId: "90984659311",
-            appId: "1:90984659311:web:f82d82b83b59609c6b509a",
-            measurementId: "G-YZSE1KBQHD"
-        };
+        const firebaseConfig = { /* (Gunakan config anda di sini) */ };
         firebase.initializeApp(firebaseConfig);
 
-        function loginUser() {
-            let email = document.getElementById("loginEmail").value;
-            let pass = document.getElementById("loginPass").value;
-            firebase.auth().signInWithEmailAndPassword(email, pass)
-            .then(() => {
-                document.getElementById('loginPage').classList.remove('active');
-                document.getElementById('mainContent').classList.remove('hidden');
-                document.getElementById('mainContent').classList.add('active');
-            })
-            .catch((error) => { alert("Ralat: " + error.message); });
-        }
-
-        function showPage(pageId) {
+        function loginUser() { /* (Fungsi login sedia ada) */ }
+        function showPage(id) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById(pageId).classList.add('active');
+            document.getElementById(id).classList.add('active');
+        }
+        
+        function registerData() {
+            let data = {
+                nama: document.getElementById('dNama').value,
+                alamat: document.getElementById('dAlamat').value,
+                tel: document.getElementById('dTel').value,
+                email: document.getElementById('dEmail').value,
+                waris: document.getElementById('dWaris').value,
+                tanggungan: document.getElementById('dTanggungan').value
+            };
+            firebase.database().ref('ahli/' + data.nama).set(data)
+            .then(() => alert("Berjaya Daftar! Sila buat bayaran ke akaun 9988000930222"));
         }
 
-        function registerData() {
-            let idAhli = document.getElementById("inputID").value.trim();
-            let emailUser = document.getElementById("inputEmail").value.trim();
-            firebase.database().ref('ahli/' + idAhli).update({ email: emailUser })
-            .then(() => { alert("Data berjaya disimpan!"); })
-            .catch((error) => { alert("Ralat: " + error.message); });
-        }
+        function updateProfil() { /* Fungsi .update() ke Firebase */ }
     </script>
 </body>
 </html>
