@@ -10,53 +10,46 @@
     
     <style>
         body { font-family: Arial, sans-serif; padding: 20px; background-color: #f4f7f6; }
-        .page { display: none; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .page { display: none; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); margin-top: 10px; }
         .active { display: block; }
-        nav { margin-bottom: 20px; }
-        button { padding: 10px; cursor: pointer; border: none; border-radius: 5px; background: #27ae60; color: white; }
+        .hidden { display: none; } /* Untuk sorok kandungan */
+        button { padding: 10px; cursor: pointer; border: none; border-radius: 5px; background: #27ae60; color: white; margin-bottom: 5px; }
         input { width: 90%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 5px; }
-        h2 { color: #2c3e50; }
     </style>
 </head>
 <body>
 
-    <nav>
-        <button onclick="showPage('info')">Info & AJK</button>
-        <button onclick="showPage('auth')">Akaun</button>
-        <button onclick="showPage('daftar')">Daftar</button>
-    </nav>
-
-    <div id="info" class="page active">
-        <h2>Manfaat Khairat (RM1,000)</h2>
-        <p>RM 750: Pengurusan Jenazah<br>RM 250: Bantuan Tunai</p>
-        <h2>Senarai AJK</h2>
-        <p>1. Pengerusi: En Awang (0133333333)<br>2. Setiausaha: En Ismail (0177000242)<br>3. Bendahari: En Mohd Zan (0111111111)</p>
-    </div>
-
-    <div id="auth" class="page">
-        <h2>Log Masuk</h2>
+    <div id="loginPage" class="page active">
+        <h2>Log Masuk Sistem</h2>
         <input type="email" id="loginEmail" placeholder="Emel"><br>
         <input type="password" id="loginPass" placeholder="Kata Laluan"><br>
         <button onclick="loginUser()">Log Masuk</button>
-        <h2>Lupa Kata Laluan</h2>
-        <input type="email" id="emailLupa" placeholder="Emel anda"><br>
-        <button onclick="lupaKataLaluan()">Reset</button>
+        <p><a href="#" onclick="showReset()">Lupa kata laluan?</a></p>
     </div>
 
-    <div id="daftar" class="page">
-        <h2>Pendaftaran ID Ahli</h2>
-        <input type="text" id="inputID" placeholder="ID (Contoh: KAF001)"><br>
-        <input type="email" id="inputEmail" placeholder="Emel"><br>
-        <button onclick="registerData()">Daftar Sekarang</button>
+    <div id="mainContent" class="hidden">
+        <nav>
+            <button onclick="showPage('info')">Info & AJK</button>
+            <button onclick="showPage('daftar')">Daftar</button>
+            <button onclick="location.reload()">Log Keluar</button>
+        </nav>
+
+        <div id="info" class="page active">
+            <h2>Manfaat Khairat (RM1,000)</h2>
+            <p>RM 750: Pengurusan Jenazah<br>RM 250: Bantuan Tunai</p>
+            <h2>Senarai AJK</h2>
+            <p>1. Pengerusi: En Awang (0133333333)<br>2. Setiausaha: En Ismail (0177000242)<br>3. Bendahari: En Mohd Zan (0111111111)</p>
+        </div>
+
+        <div id="daftar" class="page">
+            <h2>Pendaftaran ID Ahli</h2>
+            <input type="text" id="inputID" placeholder="ID (Contoh: KAF001)"><br>
+            <input type="email" id="inputEmail" placeholder="Emel"><br>
+            <button onclick="registerData()">Daftar Sekarang</button>
+        </div>
     </div>
 
     <script>
-        // Fungsi tukar page
-        function showPage(pageId) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById(pageId).classList.add('active');
-        }
-
         const firebaseConfig = {
             apiKey: "AIzaSyAD_xdF9IDyWoFoPFuQZv7TcOM71m-7zbA",
             authDomain: "khairat-smart-al-falah-tscc.firebaseapp.com",
@@ -73,8 +66,17 @@
             let email = document.getElementById("loginEmail").value;
             let pass = document.getElementById("loginPass").value;
             firebase.auth().signInWithEmailAndPassword(email, pass)
-            .then(() => { alert("Log masuk berjaya!"); })
+            .then(() => {
+                document.getElementById('loginPage').classList.remove('active');
+                document.getElementById('mainContent').classList.remove('hidden');
+                document.getElementById('mainContent').classList.add('active');
+            })
             .catch((error) => { alert("Ralat: " + error.message); });
+        }
+
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
         }
 
         function registerData() {
@@ -82,13 +84,6 @@
             let emailUser = document.getElementById("inputEmail").value.trim();
             firebase.database().ref('ahli/' + idAhli).update({ email: emailUser })
             .then(() => { alert("Data berjaya disimpan!"); })
-            .catch((error) => { alert("Ralat: " + error.message); });
-        }
-
-        function lupaKataLaluan() {
-            let email = document.getElementById("emailLupa").value.trim();
-            firebase.auth().sendPasswordResetEmail(email)
-            .then(() => { alert("Pautan reset telah dihantar ke emel anda."); })
             .catch((error) => { alert("Ralat: " + error.message); });
         }
     </script>
