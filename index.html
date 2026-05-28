@@ -1,106 +1,31 @@
-<!DOCTYPE html>
-<html lang="ms">
-<head>
-    <meta charset="UTF-8">
-    <title>Sistem Khairat Al-Falah 2026</title>
-    <style>
-        body { font-family: sans-serif; padding: 20px; background: #f4f4f9; }
-        .box { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); max-width: 400px; margin: auto; }
-        input { width: 100%; padding: 10px; margin: 8px 0; box-sizing: border-box; }
-        button { width: 100%; padding: 10px; background: #28a745; color: white; border: none; cursor: pointer; }
-        .data-row { background: white; padding: 10px; margin: 5px 0; border-radius: 4px; border: 1px solid #ddd; }
-    </style>
-</head>
-<body>
+// Fungsi ini dipanggil apabila butang "Daftar Emel ke ID" ditekan
+function registerEmail(userEmail) {
+    // 1. Ambil ID yang ditaip oleh pengguna di ruangan input HTML
+    // Pastikan ID input anda dalam HTML adalah "inputID"
+    let idAhli = document.getElementById("inputID").value.trim();
 
-    <!-- Bahagian Auth -->
-    <div id="auth-pages" class="box">
-        <h2 id="form-title">Log Masuk</h2>
-        <input type="email" id="email" placeholder="Email">
-        <input type="password" id="password" placeholder="Password">
-        <button id="btn-action" onclick="handleAuth()">Log Masuk</button>
-        <p style="text-align:center; cursor:pointer; color:blue;" onclick="toggleMode()" id="toggle-text">Daftar Baru?</p>
-    </div>
+    // 2. Validasi: Pastikan ID tidak kosong
+    if (!idAhli) {
+        alert("Sila masukkan ID ahli (contoh: KAF001)!");
+        return;
+    }
 
-    <!-- Bahagian Dashboard -->
-    <div id="dashboard" style="display:none; max-width: 600px; margin: auto;">
-        <h1>Dashboard Kariah</h1>
-        <div id="data-container"></div>
-        <hr>
-        <h3>Daftar Emel Anda (Jika belum)</h3>
-        <input type="text" id="member-id" placeholder="Masukkan ID (contoh: KAF001)">
-        <button onclick="registerEmail()">Daftar Emel ke ID</button>
-        <br><br>
-        <button onclick="location.reload()" style="background:red;">Log Keluar</button>
-    </div>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
-        import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyAD_xdF9IDyWoFoPFuQZv7TcOM71m-7zbA",
-            authDomain: "khairat-smart-al-falah-tscc.firebaseapp.com",
-            databaseURL: "https://khairat-smart-al-falah-tscc-default-rtdb.firebaseio.com",
-            projectId: "khairat-smart-al-falah-tscc",
-            storageBucket: "khairat-smart-al-falah-tscc.firebasestorage.app",
-            messagingSenderId: "90984659311",
-            appId: "1:90984659311:web:c66603de479fcaa66b509a",
-            measurementId: "G-9LYT85X94V"
-        };
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getDatabase(app);
-        const ADMIN_EMAIL = "maillambung1443@yahoo.com"; // Gantikan dengan emel anda
-
-        let isLogin = true;
-        window.toggleMode = () => {
-            isLogin = !isLogin;
-            document.getElementById("form-title").innerText = isLogin ? "Log Masuk" : "Daftar Baru";
-            document.getElementById("btn-action").innerText = isLogin ? "Log Masuk" : "Daftar";
-            document.getElementById("toggle-text").innerText = isLogin ? "Daftar Baru?" : "Sudah ada akaun? Log Masuk";
-        };
-
-        window.handleAuth = () => {
-            const email = document.getElementById("email").value;
-            const pass = document.getElementById("password").value;
-            if(isLogin) signInWithEmailAndPassword(auth, email, pass).catch(e => alert(e.message));
-            else createUserWithEmailAndPassword(auth, email, pass).catch(e => alert(e.message));
-        };
-
-        window.registerEmail = async () => {
-            const id = document.getElementById("member-id").value;
-            const user = auth.currentUser;
-            await update(ref(db, 'ahli/' + id), { email: user.email });
-            alert("Emel berjaya didaftarkan!");
-            location.reload();
-        };
-
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                document.getElementById("auth-pages").style.display = "none";
-                document.getElementById("dashboard").style.display = "block";
-                const snapshot = await get(ref(db, 'ahli'));
-                const data = snapshot.val();
-                const container = document.getElementById("data-container");
-
-                if (user.email === ADMIN_EMAIL) {
-                    for (let id in data) {
-                        container.innerHTML += `<div class="data-row">${id}: ${data[id].nama} (Emel: ${data[id].email || 'Tiada'})</div>`;
-                    }
-                } else {
-                    let jumpa = false;
-                    for (let id in data) {
-                        if (data[id].email === user.email) {
-                            container.innerHTML = `<div class="data-row">Profil Anda: ${data[id].nama}</div>`;
-                            jumpa = true;
-                        }
-                    }
-                    if (!jumpa) container.innerHTML = "Emel anda belum dipadankan dengan ID ahli.";
-                }
-            }
-        });
-    </script>
-</body>
-</html>
+    // 3. Simpan data ke Firebase
+    // Kita simpan emel di dalam folder ID ahli (contoh: ahli/KAF045/email)
+    // Firebase akan mencipta struktur ahli -> KAF045 -> email secara automatik
+    firebase.database().ref('ahli/' + idAhli).update({
+        email: userEmail
+    })
+    .then(() => {
+        // Beritahu pengguna pendaftaran berjaya
+        alert("Emel berjaya didaftarkan!");
+        
+        // Segarkan halaman supaya nama ahli terus muncul di dashboard
+        location.reload();
+    })
+    .catch((error) => {
+        // Tangkap sebarang ralat (contoh: masalah sambungan internet)
+        console.error("Ralat Firebase: ", error);
+        alert("Pendaftaran gagal. Sila semak ID anda.");
+    });
+}
