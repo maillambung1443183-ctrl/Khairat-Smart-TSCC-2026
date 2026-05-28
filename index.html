@@ -19,33 +19,33 @@
 </head>
 <body>
 
-    <!-- 1. Skrin Log Masuk -->
+    <!-- Skrin Log Masuk -->
     <div id="loginSection" class="card">
         <h2>🔑 Log Masuk</h2>
         <input type="email" id="lEmail" placeholder="Emel">
         <input type="password" id="lPass" placeholder="Kata Laluan">
         <button class="btn" onclick="loginUser()">MASUK</button>
-        <p style="text-align:center; cursor:pointer;" onclick="alert('Sila hubungi Setiausaha: En Ismail Bin Ishak (0177000242)')">Lupa Kata Laluan?</p>
     </div>
 
-    <!-- 2. Dashboard Selepas Login -->
+    <!-- Dashboard & Butiran Ahli -->
     <div id="mainSection" class="card hidden">
         <h2>Dashboard Ahli</h2>
-        <div style="background:#f9f9f9; padding:10px; border-radius:8px;">
-            <p>✅ <b>Manfaat:</b> RM750 (Jenazah) + RM250 (Tunai)</p>
-            <p>🏦 <b>Bayaran:</b> 9988000930222 (Surau Al Falah TSCC)</p>
+        
+        <!-- Bahagian Paparan Data -->
+        <div id="displayData" style="background:#f0f7ff; padding:15px; border-radius:10px; font-size:14px;">
+            <p><b>Nama:</b> <span id="dNama">Memuatkan...</span></p>
+            <p><b>Alamat:</b> <span id="dAlamat">-</span></p>
+            <p><b>No Tel:</b> <span id="dTel">-</span></p>
+            <p><b>Waris:</b> <span id="dWaris">-</span></p>
+            <p><b>Tanggungan:</b> <span id="dTanggungan">-</span></p>
         </div>
+
         <hr>
-        <h3>Profil & Kemaskini</h3>
-        <input type="text" id="uAlamat" placeholder="Alamat Penuh">
-        <input type="text" id="uTel" placeholder="No Telefon">
-        <input type="text" id="uWaris" placeholder="Waris Utama">
-        <p><b>Tanggungan (5 orang):</b></p>
-        <input type="text" class="tang" placeholder="Tanggungan 1">
-        <input type="text" class="tang" placeholder="Tanggungan 2">
-        <input type="text" class="tang" placeholder="Tanggungan 3">
-        <input type="text" class="tang" placeholder="Tanggungan 4">
-        <input type="text" class="tang" placeholder="Tanggungan 5">
+        <h3>Kemaskini Data</h3>
+        <input type="text" id="uAlamat" placeholder="Alamat Baru">
+        <input type="text" id="uTel" placeholder="No Tel Baru">
+        <input type="text" id="uWaris" placeholder="Waris Baru">
+        <input type="text" id="uTanggungan" placeholder="Tanggungan (cth: Ali, Abu, Siti)">
         <button class="btn" onclick="updateProfil()">SIMPAN KEMASKINI</button>
         <button class="btn" style="background:#e74c3c" onclick="location.reload()">LOG KELUAR</button>
     </div>
@@ -67,26 +67,38 @@
             let email = document.getElementById('lEmail').value;
             let pass = document.getElementById('lPass').value;
             firebase.auth().signInWithEmailAndPassword(email, pass)
-            .then(() => {
+            .then((userCredential) => {
                 document.getElementById('loginSection').classList.add('hidden');
                 document.getElementById('mainSection').classList.remove('hidden');
+                loadData(userCredential.user.uid);
             })
             .catch(e => alert("Ralat: " + e.message));
         }
 
+        function loadData(uid) {
+            firebase.database().ref('ahli/' + uid).once('value').then((snapshot) => {
+                let data = snapshot.val();
+                if(data) {
+                    document.getElementById('dNama').innerText = data.nama || "Tiada Nama";
+                    document.getElementById('dAlamat').innerText = data.alamat || "-";
+                    document.getElementById('dTel').innerText = data.tel || "-";
+                    document.getElementById('dWaris').innerText = data.waris || "-";
+                    document.getElementById('dTanggungan').innerText = data.tanggungan || "-";
+                }
+            });
+        }
+
         function updateProfil() {
             let user = firebase.auth().currentUser;
-            let tList = [];
-            document.querySelectorAll('.tang').forEach(i => tList.push(i.value));
-            
-            if(user) {
-                firebase.database().ref('ahli/' + user.uid).update({
-                    alamat: document.getElementById('uAlamat').value,
-                    tel: document.getElementById('uTel').value,
-                    waris: document.getElementById('uWaris').value,
-                    tanggungan: tList
-                }).then(() => alert("Profil berjaya dikemaskini!"));
-            }
+            firebase.database().ref('ahli/' + user.uid).update({
+                alamat: document.getElementById('uAlamat').value,
+                tel: document.getElementById('uTel').value,
+                waris: document.getElementById('uWaris').value,
+                tanggungan: document.getElementById('uTanggungan').value
+            }).then(() => {
+                alert("Data dikemaskini!");
+                loadData(user.uid); // Muat semula paparan
+            });
         }
     </script>
 </body>
