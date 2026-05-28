@@ -13,37 +13,44 @@
         .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 20px; max-width: 400px; margin: auto; }
         .page { display: none; }
         .active { display: block; }
-        .btn { background: #27ae60; color: white; padding: 12px; border: none; border-radius: 8px; width: 100%; font-weight: bold; margin-top: 10px; }
+        .btn { background: #27ae60; color: white; padding: 12px; border: none; border-radius: 8px; width: 100%; font-weight: bold; margin-top: 10px; cursor: pointer; }
         input { width: 92%; padding: 10px; margin: 5px 0; border: 1px solid #ddd; border-radius: 5px; }
         h2 { color: #2c3e50; text-align: center; }
     </style>
 </head>
 <body>
 
-    <!-- Skrin Log Masuk -->
     <div id="loginPage" class="card active">
         <h2>🔑 Log Masuk</h2>
         <input type="email" id="loginEmail" placeholder="Emel">
         <input type="password" id="loginPass" placeholder="Kata Laluan">
         <button class="btn" onclick="loginUser()">MASUK</button>
+        <p style="text-align:center; margin-top:10px;">
+            <a href="#" onclick="showPage('lupaPage')">Lupa Kata Laluan?</a>
+        </p>
     </div>
 
-    <!-- Kandungan Utama (Selepas Login) -->
+    <div id="lupaPage" class="card page">
+        <h2>🔄 Reset Kata Laluan</h2>
+        <input type="email" id="emailLupa" placeholder="Masukkan emel anda">
+        <button class="btn" style="background:#e74c3c" onclick="lupaKataLaluan()">Hantar Pautan</button>
+        <p style="text-align:center; margin-top:10px;">
+            <a href="#" onclick="showPage('loginPage')">Kembali ke Log Masuk</a>
+        </p>
+    </div>
+
     <div id="mainContent" class="page">
-        
-        <!-- Info & Manfaat -->
         <div id="info" class="card active">
             <h2 style="color:#27ae60;">Selamat Datang!</h2>
-            <p>Khidmat bakti kami adalah keutamaan anda. Manfaat khairat RM1,000 disediakan bagi meringankan beban waris:</p>
+            <p>Khidmat bakti kami adalah keutamaan. Manfaat khairat RM1,000:</p>
             <div style="background:#e8f8f5; padding:10px; border-radius:8px;">
                 <p>✅ <b>RM750:</b> Pengurusan Jenazah</p>
                 <p>✅ <b>RM250:</b> Bantuan Tunai</p>
             </div>
-            <p>Sila buat bayaran ke: <b>9988000930222 (Surau Al Falah TSCC)</b></p>
+            <p>Bayaran: <b>9988000930222 (Surau Al Falah TSCC)</b></p>
             <button class="btn" onclick="showPage('ajk')">Lihat AJK</button>
         </div>
 
-        <!-- AJK Page -->
         <div id="ajk" class="card page">
             <h2>👥 Barisan AJK</h2>
             <p>Pengerusi: En Awang (0133333333)</p>
@@ -52,12 +59,12 @@
             <button class="btn" onclick="showPage('daftar')">Seterusnya: Daftar</button>
         </div>
 
-        <!-- Daftar Page -->
         <div id="daftar" class="card page">
             <h2>📝 Pendaftaran Ahli</h2>
             <input type="text" id="dNama" placeholder="Nama Penuh">
             <input type="text" id="dAlamat" placeholder="Alamat">
             <input type="text" id="dTel" placeholder="No Telefon">
+            <input type="text" id="dWaris" placeholder="Nama Waris Utama">
             <hr>
             <p><b>5 Nama Tanggungan:</b></p>
             <input type="text" class="tang" placeholder="Tanggungan 1">
@@ -65,13 +72,22 @@
             <input type="text" class="tang" placeholder="Tanggungan 3">
             <input type="text" class="tang" placeholder="Tanggungan 4">
             <input type="text" class="tang" placeholder="Tanggungan 5">
-            <input type="text" id="dWaris" placeholder="Nama Waris Utama">
             <button class="btn" onclick="registerData()">HANTAR PENDAFTARAN</button>
+            <button class="btn" style="background:#7f8c8d" onclick="location.reload()">Log Keluar</button>
         </div>
     </div>
 
     <script>
-        const firebaseConfig = { /* (Kekalkan config anda) */ };
+        const firebaseConfig = {
+            apiKey: "AIzaSyAD_xdF9IDyWoFoPFuQZv7TcOM71m-7zbA",
+            authDomain: "khairat-smart-al-falah-tscc.firebaseapp.com",
+            databaseURL: "https://khairat-smart-al-falah-tscc-default-rtdb.firebaseio.com",
+            projectId: "khairat-smart-al-falah-tscc",
+            storageBucket: "khairat-smart-al-falah-tscc.firebasestorage.app",
+            messagingSenderId: "90984659311",
+            appId: "1:90984659311:web:c66603de479fcaa66b509a",
+            measurementId: "G-9LYT85X94V"
+        };
         firebase.initializeApp(firebaseConfig);
 
         function showPage(id) {
@@ -87,6 +103,13 @@
                 document.getElementById('loginPage').classList.remove('active');
                 document.getElementById('mainContent').classList.add('active');
             })
+            .catch(e => alert("Ralat: " + e.message));
+        }
+
+        function lupaKataLaluan() {
+            let email = document.getElementById('emailLupa').value;
+            firebase.auth().sendPasswordResetEmail(email)
+            .then(() => alert("Pautan reset telah dihantar ke emel anda."))
             .catch(e => alert("Ralat: " + e.message));
         }
 
