@@ -10,42 +10,49 @@
     
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #eef2f3; padding: 20px; }
-        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; max-width: 400px; margin: auto; }
-        .btn { background: #27ae60; color: white; padding: 12px; border: none; border-radius: 8px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        input { width: 90%; padding: 10px; margin: 8px 0; border: 1px solid #ccc; border-radius: 5px; }
+        .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 20px; max-width: 450px; margin: auto; }
+        .btn { background: #27ae60; color: white; padding: 15px; border: none; border-radius: 8px; width: 100%; font-weight: bold; font-size: 16px; cursor: pointer; margin-top: 10px; }
+        input { width: 92%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; border-radius: 5px; font-size: 16px; }
+        .data-text { font-size: 18px; line-height: 1.6; color: #333; }
         .hidden { display: none; }
         h2 { text-align: center; color: #2c3e50; }
     </style>
 </head>
 <body>
 
-    <!-- Skrin Log Masuk -->
+    <!-- 1. Log Masuk -->
     <div id="loginSection" class="card">
         <h2>🔑 Log Masuk</h2>
         <input type="email" id="lEmail" placeholder="Emel">
         <input type="password" id="lPass" placeholder="Kata Laluan">
         <button class="btn" onclick="loginUser()">MASUK</button>
+        <p style="text-align:center; margin-top:15px; cursor:pointer; color:blue;" onclick="showLupa()">Lupa Kata Laluan?</p>
     </div>
 
-    <!-- Dashboard & Butiran Ahli -->
+    <!-- 2. Lupa Kata Laluan -->
+    <div id="lupaSection" class="card hidden">
+        <h2>🔄 Reset Kata Laluan</h2>
+        <input type="email" id="emailLupa" placeholder="Masukkan emel anda">
+        <button class="btn" style="background:#e67e22" onclick="lupaPassword()">Hantar Pautan Reset</button>
+        <p style="text-align:center; margin-top:15px; cursor:pointer;" onclick="location.reload()">Kembali</p>
+    </div>
+
+    <!-- 3. Dashboard -->
     <div id="mainSection" class="card hidden">
-        <h2>Dashboard Ahli</h2>
-        
-        <!-- Bahagian Paparan Data -->
-        <div id="displayData" style="background:#f0f7ff; padding:15px; border-radius:10px; font-size:14px;">
-            <p><b>Nama:</b> <span id="dNama">Memuatkan...</span></p>
+        <h2>👤 Butiran Peserta</h2>
+        <div id="displayData" class="data-text">
+            <p><b>Nama:</b> <span id="dNama">Loading...</span></p>
             <p><b>Alamat:</b> <span id="dAlamat">-</span></p>
             <p><b>No Tel:</b> <span id="dTel">-</span></p>
             <p><b>Waris:</b> <span id="dWaris">-</span></p>
             <p><b>Tanggungan:</b> <span id="dTanggungan">-</span></p>
         </div>
-
         <hr>
-        <h3>Kemaskini Data</h3>
+        <h3>Kemaskini Profil</h3>
         <input type="text" id="uAlamat" placeholder="Alamat Baru">
         <input type="text" id="uTel" placeholder="No Tel Baru">
         <input type="text" id="uWaris" placeholder="Waris Baru">
-        <input type="text" id="uTanggungan" placeholder="Tanggungan (cth: Ali, Abu, Siti)">
+        <input type="text" id="uTanggungan" placeholder="Tanggungan (5 orang)">
         <button class="btn" onclick="updateProfil()">SIMPAN KEMASKINI</button>
         <button class="btn" style="background:#e74c3c" onclick="location.reload()">LOG KELUAR</button>
     </div>
@@ -63,42 +70,50 @@
         };
         firebase.initializeApp(firebaseConfig);
 
+        function showLupa() {
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('lupaSection').classList.remove('hidden');
+        }
+
+        function lupaPassword() {
+            let email = document.getElementById('emailLupa').value;
+            firebase.auth().sendPasswordResetEmail(email)
+            .then(() => alert("Pautan reset telah dihantar ke emel anda."))
+            .catch(e => alert("Ralat: " + e.message));
+        }
+
         function loginUser() {
             let email = document.getElementById('lEmail').value;
             let pass = document.getElementById('lPass').value;
             firebase.auth().signInWithEmailAndPassword(email, pass)
-            .then((userCredential) => {
+            .then((u) => {
                 document.getElementById('loginSection').classList.add('hidden');
                 document.getElementById('mainSection').classList.remove('hidden');
-                loadData(userCredential.user.uid);
-            })
-            .catch(e => alert("Ralat: " + e.message));
+                loadData(u.user.uid);
+            }).catch(e => alert("Ralat: " + e.message));
         }
 
         function loadData(uid) {
-            firebase.database().ref('ahli/' + uid).once('value').then((snapshot) => {
-                let data = snapshot.val();
-                if(data) {
-                    document.getElementById('dNama').innerText = data.nama || "Tiada Nama";
-                    document.getElementById('dAlamat').innerText = data.alamat || "-";
-                    document.getElementById('dTel').innerText = data.tel || "-";
-                    document.getElementById('dWaris').innerText = data.waris || "-";
-                    document.getElementById('dTanggungan').innerText = data.tanggungan || "-";
+            firebase.database().ref('ahli/' + uid).once('value').then((s) => {
+                let d = s.val();
+                if(d) {
+                    document.getElementById('dNama').innerText = d.nama || "Ahli";
+                    document.getElementById('dAlamat').innerText = d.alamat || "-";
+                    document.getElementById('dTel').innerText = d.tel || "-";
+                    document.getElementById('dWaris').innerText = d.waris || "-";
+                    document.getElementById('dTanggungan').innerText = d.tanggungan || "-";
                 }
             });
         }
 
         function updateProfil() {
-            let user = firebase.auth().currentUser;
-            firebase.database().ref('ahli/' + user.uid).update({
+            let u = firebase.auth().currentUser;
+            firebase.database().ref('ahli/' + u.uid).update({
                 alamat: document.getElementById('uAlamat').value,
                 tel: document.getElementById('uTel').value,
                 waris: document.getElementById('uWaris').value,
                 tanggungan: document.getElementById('uTanggungan').value
-            }).then(() => {
-                alert("Data dikemaskini!");
-                loadData(user.uid); // Muat semula paparan
-            });
+            }).then(() => { alert("Berjaya dikemaskini!"); loadData(u.uid); });
         }
     </script>
 </body>
