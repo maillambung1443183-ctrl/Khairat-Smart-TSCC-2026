@@ -18,13 +18,22 @@
     </button>
 
     <script>
-        // Konfigurasi Firebase (Gunakan konfigurasi anda sendiri)
+        // 1. Konfigurasi Firebase anda
         const firebaseConfig = {
-            // apiKey, authDomain, databaseURL, dll...
+            apiKey: "AIzaSyAD_xdF9IDyWoFoPFuQZv7TcOM71m-7zbA",
+            authDomain: "khairat-smart-al-falah-tscc.firebaseapp.com",
+            databaseURL: "https://khairat-smart-al-falah-tscc-default-rtdb.firebaseio.com",
+            projectId: "khairat-smart-al-falah-tscc",
+            storageBucket: "khairat-smart-al-falah-tscc.firebasestorage.app",
+            messagingSenderId: "90984659311",
+            appId: "1:90984659311:web:f82d82b83b59609c6b509a",
+            measurementId: "G-YZSE1KBQHD"
         };
+
+        // 2. Inisialisasi Firebase
         firebase.initializeApp(firebaseConfig);
 
-        // Fungsi Register yang anda minta
+        // 3. Fungsi Pendaftaran
         function registerEmail(userEmail) {
             let idAhli = document.getElementById("inputID").value.trim();
 
@@ -33,6 +42,7 @@
                 return;
             }
 
+            // Menyimpan emel di bawah ID Ahli (contoh: ahli/KAF001/email)
             firebase.database().ref('ahli/' + idAhli).update({
                 email: userEmail
             })
@@ -42,7 +52,7 @@
             })
             .catch((error) => {
                 console.error("Ralat Firebase: ", error);
-                alert("Pendaftaran gagal. Sila semak ID anda.");
+                alert("Pendaftaran gagal: " + error.message);
             });
         }
     </script>
