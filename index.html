@@ -3,22 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <title>Sistem Khairat Smart TSCC</title>
+    <!-- Firebase SDK v9 Compatibility -->
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
 </head>
 <body>
 
-    <h2>Daftar Emel Ahli</h2>
+    <h2>Pendaftaran Emel Ahli</h2>
     
-    <label>Masukkan ID Ahli:</label>
+    <!-- Ruangan Input ID -->
+    <label>Masukkan ID Ahli:</label><br>
     <input type="text" id="inputID" placeholder="Contoh: KAF001">
+    <br><br>
+
+    <!-- Ruangan Input Emel (Pengguna taip sendiri) -->
+    <label>Masukkan Emel Anda:</label><br>
+    <input type="email" id="inputEmail" placeholder="contoh@email.com">
+    <br><br>
     
-    <button onclick="registerEmail('maillambung1443@yahoo.com')">
-        Daftar Emel ke ID
-    </button>
+    <!-- Butang Pendaftaran -->
+    <button onclick="registerData()">Daftar Sekarang</button>
 
     <script>
-        // 1. Konfigurasi Firebase anda
+        // 1. Konfigurasi Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyAD_xdF9IDyWoFoPFuQZv7TcOM71m-7zbA",
             authDomain: "khairat-smart-al-falah-tscc.firebaseapp.com",
@@ -33,22 +40,25 @@
         // 2. Inisialisasi Firebase
         firebase.initializeApp(firebaseConfig);
 
-        // 3. Fungsi Pendaftaran
-        function registerEmail(userEmail) {
+        // 3. Fungsi Pendaftaran yang mengambil input daripada pengguna
+        function registerData() {
+            // Mengambil nilai dari kotak input HTML
             let idAhli = document.getElementById("inputID").value.trim();
+            let emailUser = document.getElementById("inputEmail").value.trim();
 
-            if (!idAhli) {
-                alert("Sila masukkan ID ahli (contoh: KAF001)!");
+            // Validasi: Pastikan tiada kotak yang kosong
+            if (!idAhli || !emailUser) {
+                alert("Sila isi kedua-dua ID dan Emel!");
                 return;
             }
 
-            // Menyimpan emel di bawah ID Ahli (contoh: ahli/KAF001/email)
+            // Menyimpan ke Firebase di bawah folder 'ahli'
             firebase.database().ref('ahli/' + idAhli).update({
-                email: userEmail
+                email: emailUser
             })
             .then(() => {
-                alert("Emel berjaya didaftarkan untuk " + idAhli);
-                location.reload();
+                alert("Berjaya! Emel " + emailUser + " telah didaftarkan untuk ID " + idAhli);
+                location.reload(); // Segarkan halaman
             })
             .catch((error) => {
                 console.error("Ralat Firebase: ", error);
