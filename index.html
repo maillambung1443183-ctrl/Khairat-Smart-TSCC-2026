@@ -1,31 +1,36 @@
-// Fungsi ini dipanggil apabila butang "Daftar Emel ke ID" ditekan
-function registerEmail(userEmail) {
-    // 1. Ambil ID yang ditaip oleh pengguna di ruangan input HTML
-    // Pastikan ID input anda dalam HTML adalah "inputID"
-    let idAhli = document.getElementById("inputID").value.trim();
+<div class="registration-form">
+    <h3>Pendaftaran Ahli</h3>
+    
+    <label for="inputID">Masukkan ID Ahli:</label>
+    <input type="text" id="inputID" placeholder="Contoh: KAF001">
+    
+    <br><br>
+    
+    <button onclick="registerEmail('maillambung1443@yahoo.com')">
+        Daftar Emel ke ID
+    </button>
+</div>
 
-    // 2. Validasi: Pastikan ID tidak kosong
-    if (!idAhli) {
-        alert("Sila masukkan ID ahli (contoh: KAF001)!");
-        return;
+<script>
+    // Pastikan fungsi ini ada di dalam fail .js atau di bawah tag <script> ini
+    function registerEmail(userEmail) {
+        let idAhli = document.getElementById("inputID").value.trim();
+
+        if (!idAhli) {
+            alert("Sila masukkan ID ahli (contoh: KAF001)!");
+            return;
+        }
+
+        firebase.database().ref('ahli/' + idAhli).update({
+            email: userEmail
+        })
+        .then(() => {
+            alert("Emel berjaya didaftarkan untuk " + idAhli);
+            location.reload();
+        })
+        .catch((error) => {
+            console.error("Ralat: ", error);
+            alert("Gagal menyimpan data.");
+        });
     }
-
-    // 3. Simpan data ke Firebase
-    // Kita simpan emel di dalam folder ID ahli (contoh: ahli/KAF045/email)
-    // Firebase akan mencipta struktur ahli -> KAF045 -> email secara automatik
-    firebase.database().ref('ahli/' + idAhli).update({
-        email: userEmail
-    })
-    .then(() => {
-        // Beritahu pengguna pendaftaran berjaya
-        alert("Emel berjaya didaftarkan!");
-        
-        // Segarkan halaman supaya nama ahli terus muncul di dashboard
-        location.reload();
-    })
-    .catch((error) => {
-        // Tangkap sebarang ralat (contoh: masalah sambungan internet)
-        console.error("Ralat Firebase: ", error);
-        alert("Pendaftaran gagal. Sila semak ID anda.");
-    });
-}
+</script>
