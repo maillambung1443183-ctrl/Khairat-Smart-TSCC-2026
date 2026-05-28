@@ -2,12 +2,42 @@
 <html lang="ms">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistem Khairat Smart TSCC</title>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+    
+    <style>
+        body { font-family: sans-serif; padding: 15px; }
+        input { width: 90%; padding: 10px; margin-bottom: 10px; }
+        button { padding: 10px 20px; }
+    </style>
 </head>
 <body>
+
+    <div id="page1">
+        <h2>Info Manfaat Khairat (RM1,000)</h2>
+        <p>Bantuan khairat kematian yang diberikan adalah seperti berikut:</p>
+        <ul>
+            <li><strong>RM 750:</strong> Pengurusan Jenazah</li>
+            <li><strong>RM 250:</strong> Bantuan Tunai</li>
+        </ul>
+    </div>
+
+    <hr>
+
+    <div id="page2">
+        <h2>Senarai AJK Khairat</h2>
+        <ol>
+            <li>Pengerusi: <strong>En Awang Mohd Fauzi</strong> - 0133333333</li>
+            <li>Setiausaha: <strong>En Ismail Bin Ishak</strong> - 0177000242</li>
+            <li>Bendahari: <strong>En Mohd Zan</strong> - 0111111111</li>
+        </ol>
+        <p><em>Sebarang pertanyaan boleh berhubung dengan pihak AJK di atas.</em></p>
+    </div>
+
+    <hr>
 
     <h2>Log Masuk</h2>
     <input type="email" id="loginEmail" placeholder="Emel"><br>
@@ -40,7 +70,6 @@
         };
         firebase.initializeApp(firebaseConfig);
 
-        // Fungsi Log Masuk
         function loginUser() {
             let email = document.getElementById("loginEmail").value;
             let pass = document.getElementById("loginPass").value;
@@ -49,7 +78,6 @@
             .catch((error) => { alert("Ralat: " + error.message); });
         }
 
-        // Fungsi Pendaftaran Data
         function registerData() {
             let idAhli = document.getElementById("inputID").value.trim();
             let emailUser = document.getElementById("inputEmail").value.trim();
@@ -58,7 +86,6 @@
             .catch((error) => { alert("Ralat: " + error.message); });
         }
 
-        // Fungsi Reset Kata Laluan
         function lupaKataLaluan() {
             let email = document.getElementById("emailLupa").value.trim();
             firebase.auth().sendPasswordResetEmail(email)
