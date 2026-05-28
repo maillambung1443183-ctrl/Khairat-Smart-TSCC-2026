@@ -3,29 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <title>Sistem Khairat Smart TSCC</title>
-    <!-- Firebase SDK v9 Compatibility -->
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
 </head>
 <body>
 
-    <h2>Pendaftaran Emel Ahli</h2>
-    
-    <!-- Ruangan Input ID -->
-    <label>Masukkan ID Ahli:</label><br>
-    <input type="text" id="inputID" placeholder="Contoh: KAF001">
-    <br><br>
+    <h2>Log Masuk</h2>
+    <input type="email" id="loginEmail" placeholder="Emel"><br>
+    <input type="password" id="loginPass" placeholder="Kata Laluan"><br>
+    <button onclick="loginUser()">Log Masuk</button>
 
-    <!-- Ruangan Input Emel (Pengguna taip sendiri) -->
-    <label>Masukkan Emel Anda:</label><br>
-    <input type="email" id="inputEmail" placeholder="contoh@email.com">
-    <br><br>
-    
-    <!-- Butang Pendaftaran -->
-    <button onclick="registerData()">Daftar Sekarang</button>
+    <hr>
+
+    <h2>Pendaftaran ID Ahli</h2>
+    <input type="text" id="inputID" placeholder="ID (Contoh: KAF001)"><br>
+    <input type="email" id="inputEmail" placeholder="Emel"><br>
+    <button onclick="registerData()">Daftar Data</button>
+
+    <hr>
+
+    <h2>Lupa Kata Laluan?</h2>
+    <input type="email" id="emailLupa" placeholder="Masukkan emel anda"><br>
+    <button onclick="lupaKataLaluan()">Reset Kata Laluan</button>
 
     <script>
-        // 1. Konfigurasi Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyAD_xdF9IDyWoFoPFuQZv7TcOM71m-7zbA",
             authDomain: "khairat-smart-al-falah-tscc.firebaseapp.com",
@@ -36,34 +38,32 @@
             appId: "1:90984659311:web:f82d82b83b59609c6b509a",
             measurementId: "G-YZSE1KBQHD"
         };
-
-        // 2. Inisialisasi Firebase
         firebase.initializeApp(firebaseConfig);
 
-        // 3. Fungsi Pendaftaran yang mengambil input daripada pengguna
+        // Fungsi Log Masuk
+        function loginUser() {
+            let email = document.getElementById("loginEmail").value;
+            let pass = document.getElementById("loginPass").value;
+            firebase.auth().signInWithEmailAndPassword(email, pass)
+            .then(() => { alert("Log masuk berjaya!"); })
+            .catch((error) => { alert("Ralat: " + error.message); });
+        }
+
+        // Fungsi Pendaftaran Data
         function registerData() {
-            // Mengambil nilai dari kotak input HTML
             let idAhli = document.getElementById("inputID").value.trim();
             let emailUser = document.getElementById("inputEmail").value.trim();
+            firebase.database().ref('ahli/' + idAhli).update({ email: emailUser })
+            .then(() => { alert("Data berjaya disimpan!"); })
+            .catch((error) => { alert("Ralat: " + error.message); });
+        }
 
-            // Validasi: Pastikan tiada kotak yang kosong
-            if (!idAhli || !emailUser) {
-                alert("Sila isi kedua-dua ID dan Emel!");
-                return;
-            }
-
-            // Menyimpan ke Firebase di bawah folder 'ahli'
-            firebase.database().ref('ahli/' + idAhli).update({
-                email: emailUser
-            })
-            .then(() => {
-                alert("Berjaya! Emel " + emailUser + " telah didaftarkan untuk ID " + idAhli);
-                location.reload(); // Segarkan halaman
-            })
-            .catch((error) => {
-                console.error("Ralat Firebase: ", error);
-                alert("Pendaftaran gagal: " + error.message);
-            });
+        // Fungsi Reset Kata Laluan
+        function lupaKataLaluan() {
+            let email = document.getElementById("emailLupa").value.trim();
+            firebase.auth().sendPasswordResetEmail(email)
+            .then(() => { alert("Pautan reset telah dihantar ke emel anda."); })
+            .catch((error) => { alert("Ralat: " + error.message); });
         }
     </script>
 </body>
