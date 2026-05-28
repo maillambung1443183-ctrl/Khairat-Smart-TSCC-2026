@@ -1,36 +1,50 @@
-<div class="registration-form">
-    <h3>Pendaftaran Ahli</h3>
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <title>Sistem Khairat Smart TSCC</title>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
+</head>
+<body>
+
+    <h2>Daftar Emel Ahli</h2>
     
-    <label for="inputID">Masukkan ID Ahli:</label>
+    <label>Masukkan ID Ahli:</label>
     <input type="text" id="inputID" placeholder="Contoh: KAF001">
-    
-    <br><br>
     
     <button onclick="registerEmail('maillambung1443@yahoo.com')">
         Daftar Emel ke ID
     </button>
-</div>
 
-<script>
-    // Pastikan fungsi ini ada di dalam fail .js atau di bawah tag <script> ini
-    function registerEmail(userEmail) {
-        let idAhli = document.getElementById("inputID").value.trim();
+    <script>
+        // Konfigurasi Firebase (Gunakan konfigurasi anda sendiri)
+        const firebaseConfig = {
+            // apiKey, authDomain, databaseURL, dll...
+        };
+        firebase.initializeApp(firebaseConfig);
 
-        if (!idAhli) {
-            alert("Sila masukkan ID ahli (contoh: KAF001)!");
-            return;
+        // Fungsi Register yang anda minta
+        function registerEmail(userEmail) {
+            let idAhli = document.getElementById("inputID").value.trim();
+
+            if (!idAhli) {
+                alert("Sila masukkan ID ahli (contoh: KAF001)!");
+                return;
+            }
+
+            firebase.database().ref('ahli/' + idAhli).update({
+                email: userEmail
+            })
+            .then(() => {
+                alert("Emel berjaya didaftarkan untuk " + idAhli);
+                location.reload();
+            })
+            .catch((error) => {
+                console.error("Ralat Firebase: ", error);
+                alert("Pendaftaran gagal. Sila semak ID anda.");
+            });
         }
-
-        firebase.database().ref('ahli/' + idAhli).update({
-            email: userEmail
-        })
-        .then(() => {
-            alert("Emel berjaya didaftarkan untuk " + idAhli);
-            location.reload();
-        })
-        .catch((error) => {
-            console.error("Ralat: ", error);
-            alert("Gagal menyimpan data.");
-        });
-    }
-</script>
+    </script>
+</body>
+</html>
