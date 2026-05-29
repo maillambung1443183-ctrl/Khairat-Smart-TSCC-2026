@@ -6,7 +6,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
-    
     <style>
         body { font-family: sans-serif; background: #f4f4f9; padding: 20px; }
         .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px; }
@@ -17,44 +16,54 @@
 </head>
 <body onload="checkLoginState()">
 
-    <!-- LOGIN/DAFTAR PAGE -->
+    <!-- LOGIN PAGE -->
     <div id="loginPage" class="card">
         <h2 id="formTitle">Log Masuk Ahli</h2>
-        <input type="text" id="memberID" placeholder="Member ID (Contoh: KAF000)">
+        <input type="text" id="memberID" placeholder="Member ID">
         <input type="password" id="loginPass" placeholder="Kata Laluan">
-        
         <div id="loginArea">
             <button class="btn" onclick="loginMember()">MASUK</button>
             <p style="text-align:center; cursor:pointer; color:blue;" onclick="tukarKeDaftar()">Belum daftar? Klik di sini</p>
         </div>
-
         <div id="daftarArea" style="display:none;">
             <input type="text" id="regNama" placeholder="Nama Penuh">
             <input type="text" id="regAlamat" placeholder="Alamat">
+            <input type="text" id="regTel" placeholder="No. Telefon">
+            <input type="text" id="regWaris" placeholder="Nama Waris">
             <button class="btn" style="background:#27ae60" onclick="registerMember()">DAFTAR</button>
-            <p style="text-align:center; cursor:pointer;" onclick="location.reload()">Kembali ke Log Masuk</p>
         </div>
     </div>
 
     <!-- MAIN DASHBOARD -->
     <div id="mainContent" class="page">
-        <button class="btn" style="background:#e74c3c" onclick="logoutUser()">KELUAR</button>
-        <div id="profil" class="card active">
-            <h2>Profil Saya</h2>
+        <nav style="display:flex; gap:5px;">
+            <button class="btn" onclick="showPage('info')">Info</button>
+            <button class="btn" onclick="showPage('profil')">Profil</button>
+            <button class="btn" style="background:#e74c3c" onclick="logoutUser()">Keluar</button>
+        </nav>
+
+        <div id="info" class="card page active">
+            <h2>📋 Manfaat Khairat</h2>
+            <p>1. Penyediaan Kubur: RM 300</p>
+            <p>2. Papan Lahad: RM 200</p>
+            <p>3. Kain Kafan: RM 250</p>
+            <p>4. Bantuan Tunai Waris: RM 250</p>
+            <h3>👥 Barisan AJK</h3>
+            <p>Pengerusi: En Awang (0133333333)</p>
+            <p>Setiausaha: En Ismail (0177000242)</p>
+            <p>Bendahari: En Mohd Zan (0111111111)</p>
+        </div>
+
+        <div id="profil" class="card page">
+            <h2>👤 Maklumat Ahli</h2>
             <p><b>Nama:</b> <span id="vNama">-</span></p>
             <p><b>Alamat:</b> <span id="vAlamat">-</span></p>
-            
-            <button class="btn" onclick="document.getElementById('formEdit').style.display='block'">Kemaskini Alamat</button>
-            
-            <div id="formEdit" style="display:none; margin-top:15px;">
-                <input type="text" id="pAlamat" placeholder="Alamat Baru">
-                <button class="btn" style="background:#27ae60" onclick="updateProfil()">Simpan</button>
-            </div>
+            <p><b>No. Telefon:</b> <span id="vTel">-</span></p>
+            <p><b>Waris:</b> <span id="vWaris">-</span></p>
         </div>
     </div>
 
     <script>
-        // CONFIG LENGKAP ANDA
         const firebaseConfig = {
             apiKey: "AIzaSyAD_xdF9IDyWoFoPFuQZv7TcOM71m-7zbA",
             authDomain: "khairat-smart-al-falah-tscc.firebaseapp.com",
@@ -72,11 +81,13 @@
                 if (user) {
                     document.getElementById('loginPage').style.display = 'none';
                     document.getElementById('mainContent').style.display = 'block';
-                    firebase.database().ref('ahli/' + user.uid).once('value', (snap) => {
-                        let data = snap.val();
-                        if(data) {
-                            document.getElementById('vNama').innerText = data.nama;
-                            document.getElementById('vAlamat').innerText = data.alamat;
+                    firebase.database().ref('ahli/' + user.uid).once('value', (s) => {
+                        let d = s.val();
+                        if(d) {
+                            document.getElementById('vNama').innerText = d.nama;
+                            document.getElementById('vAlamat').innerText = d.alamat;
+                            document.getElementById('vTel').innerText = d.tel;
+                            document.getElementById('vWaris').innerText = d.waris;
                         }
                     });
                 }
@@ -85,36 +96,24 @@
 
         function registerMember() {
             let id = document.getElementById('memberID').value;
-            let email = id.toLowerCase() + "@tscc.com";
-            let pass = document.getElementById('loginPass').value;
-            firebase.auth().createUserWithEmailAndPassword(email, pass)
-            .then((res) => {
-                firebase.database().ref('ahli/' + res.user.uid).set({
+            firebase.auth().createUserWithEmailAndPassword(id.toLowerCase() + "@tscc.com", document.getElementById('loginPass').value)
+            .then((r) => {
+                firebase.database().ref('ahli/' + r.user.uid).set({
                     nama: document.getElementById('regNama').value,
-                    alamat: document.getElementById('regAlamat').value
+                    alamat: document.getElementById('regAlamat').value,
+                    tel: document.getElementById('regTel').value,
+                    waris: document.getElementById('regWaris').value
                 }).then(() => location.reload());
             }).catch(e => alert(e.message));
         }
 
         function loginMember() {
-            let email = document.getElementById('memberID').value.toLowerCase() + "@tscc.com";
-            let pass = document.getElementById('loginPass').value;
-            firebase.auth().signInWithEmailAndPassword(email, pass).catch(e => alert(e.message));
-        }
-
-        function updateProfil() {
-            let uid = firebase.auth().currentUser.uid;
-            firebase.database().ref('ahli/' + uid).update({
-                alamat: document.getElementById('pAlamat').value
-            }).then(() => location.reload());
+            firebase.auth().signInWithEmailAndPassword(document.getElementById('memberID').value.toLowerCase() + "@tscc.com", document.getElementById('loginPass').value).catch(e => alert(e.message));
         }
 
         function logoutUser() { firebase.auth().signOut().then(() => location.reload()); }
-        function tukarKeDaftar() {
-            document.getElementById('formTitle').innerText = "Daftar Ahli Baru";
-            document.getElementById('loginArea').style.display = 'none';
-            document.getElementById('daftarArea').style.display = 'block';
-        }
+        function showPage(id) { document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+        function tukarKeDaftar() { document.getElementById('loginArea').style.display = 'none'; document.getElementById('daftarArea').style.display = 'block'; }
     </script>
 </body>
 </html>
