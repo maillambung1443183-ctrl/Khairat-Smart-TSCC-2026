@@ -21,7 +21,7 @@
     <!-- LOGIN PAGE -->
     <div id="loginPage" class="card">
         <h2 id="formTitle">Log Masuk Ahli</h2>
-        <input type="text" id="memberID" placeholder="Member ID">
+        <input type="email" id="loginEmail" placeholder="Emel Berdaftar">
         <input type="password" id="loginPass" placeholder="Kata Laluan">
         <div id="loginArea">
             <button class="btn" onclick="loginMember()">MASUK</button>
@@ -29,10 +29,12 @@
             <p style="text-align:center; cursor:pointer; color:blue;" onclick="tukarKeDaftar()">Belum daftar? Daftar di sini</p>
         </div>
         <div id="daftarArea" style="display:none;">
+            <input type="text" id="regID" placeholder="Member ID (Contoh: KAF000)">
             <input type="text" id="regNama" placeholder="Nama Penuh">
+            <input type="email" id="regEmail" placeholder="Emel Sah">
+            <input type="password" id="regPass" placeholder="Kata Laluan">
             <input type="text" id="regAlamat" placeholder="Alamat">
             <input type="text" id="regTel" placeholder="No. Telefon">
-            <input type="text" id="regWaris" placeholder="Nama Waris">
             <button class="btn" style="background:#27ae60" onclick="registerMember()">DAFTAR</button>
             <p style="text-align:center; cursor:pointer;" onclick="location.reload()">Kembali</p>
         </div>
@@ -48,22 +50,20 @@
 
         <div id="info" class="card page active">
             <h2>📋 Manfaat Khairat</h2>
-            <p>1. Penyediaan Kubur: RM 300</p>
-            <p>2. Papan Lahad: RM 200</p>
-            <p>3. Kain Kafan: RM 250</p>
-            <p>4. Bantuan Tunai Waris: RM 250</p>
+            <p>1. Penyediaan Kubur: RM 300 | 2. Papan Lahad: RM 200</p>
+            <p>3. Kain Kafan: RM 250 | 4. Bantuan Tunai Waris: RM 250</p>
             <h3>👥 Barisan AJK</h3>
             <p>Pengerusi: En Awang (0133333333)</p>
             <p>Setiausaha: En Ismail (0177000242)</p>
-            <p>Bendahari: En Mohd Zan (0111111111)</p>
         </div>
 
         <div id="profil" class="card page">
             <h2>👤 Maklumat Ahli</h2>
+            <p><b>Member ID:</b> <span id="vID">-</span></p>
             <p><b>Nama:</b> <span id="vNama">-</span></p>
+            <p><b>Emel:</b> <span id="vEmail">-</span></p>
             <p><b>Alamat:</b> <span id="vAlamat">-</span></p>
             <p><b>No. Telefon:</b> <span id="vTel">-</span></p>
-            <p><b>Waris:</b> <span id="vWaris">-</span></p>
         </div>
     </div>
 
@@ -85,40 +85,44 @@
                 if (user) {
                     document.getElementById('loginPage').style.display = 'none';
                     document.getElementById('mainContent').style.display = 'block';
+                    document.getElementById('vEmail').innerText = user.email;
                     firebase.database().ref('ahli/' + user.uid).once('value', (s) => {
                         let d = s.val() || {};
+                        document.getElementById('vID').innerText = d.id || "-";
                         document.getElementById('vNama').innerText = d.nama || "-";
                         document.getElementById('vAlamat').innerText = d.alamat || "-";
                         document.getElementById('vTel').innerText = d.tel || "-";
-                        document.getElementById('vWaris').innerText = d.waris || "-";
                     });
                 }
             });
         }
 
-        function lupaPassword() {
-            let id = document.getElementById('memberID').value;
-            if(!id) return alert("Sila masukkan Member ID dahulu.");
-            firebase.auth().sendPasswordResetEmail(id.toLowerCase() + "@tscc.com")
-            .then(() => alert("Pautan reset telah dihantar ke sistem."))
-            .catch(e => alert(e.message));
-        }
-
         function registerMember() {
-            let id = document.getElementById('memberID').value;
-            firebase.auth().createUserWithEmailAndPassword(id.toLowerCase() + "@tscc.com", document.getElementById('loginPass').value)
+            let email = document.getElementById('regEmail').value;
+            let pass = document.getElementById('regPass').value;
+            firebase.auth().createUserWithEmailAndPassword(email, pass)
             .then((r) => {
                 firebase.database().ref('ahli/' + r.user.uid).set({
+                    id: document.getElementById('regID').value,
                     nama: document.getElementById('regNama').value,
                     alamat: document.getElementById('regAlamat').value,
-                    tel: document.getElementById('regTel').value,
-                    waris: document.getElementById('regWaris').value
+                    tel: document.getElementById('regTel').value
                 }).then(() => location.reload());
             }).catch(e => alert(e.message));
         }
 
         function loginMember() {
-            firebase.auth().signInWithEmailAndPassword(document.getElementById('memberID').value.toLowerCase() + "@tscc.com", document.getElementById('loginPass').value).catch(e => alert(e.message));
+            let email = document.getElementById('loginEmail').value;
+            let pass = document.getElementById('loginPass').value;
+            firebase.auth().signInWithEmailAndPassword(email, pass).catch(e => alert(e.message));
+        }
+
+        function lupaPassword() {
+            let email = document.getElementById('loginEmail').value;
+            if(!email) return alert("Sila masukkan emel anda di ruangan atas.");
+            firebase.auth().sendPasswordResetEmail(email)
+            .then(() => alert("Pautan reset telah dihantar ke emel anda!"))
+            .catch(e => alert(e.message));
         }
 
         function logoutUser() { firebase.auth().signOut().then(() => location.reload()); }
