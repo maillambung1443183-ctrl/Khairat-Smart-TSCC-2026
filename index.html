@@ -14,9 +14,10 @@
         .page { display: none; }
         .active { display: block; }
         .btn { background: #2c3e50; color: white; padding: 12px; border: none; border-radius: 12px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        input { width: 90%; padding: 14px; margin: 10px 0; border: 2px solid #ddd; border-radius: 12px; }
+        input, select { width: 90%; padding: 14px; margin: 10px 0; border: 2px solid #ddd; border-radius: 12px; }
         h2 { color: #2c3e50; text-align: center; }
         .info-box { background: #3498db; color: white; padding: 20px; border-radius: 15px; margin-bottom: 15px; text-align: center; }
+        #formKemaskini { display: none; border-top: 2px solid #eee; margin-top: 20px; pt: 20px; }
     </style>
 </head>
 <body onload="checkLoginState()">
@@ -30,15 +31,7 @@
         <p style="text-align:center; cursor:pointer; color:blue;" onclick="showPage('reset')">Lupa Kata Laluan?</p>
     </div>
 
-    <!-- 2. RESET PASSWORD PAGE -->
-    <div id="reset" class="page card">
-        <h2>🔄 Reset Kata Laluan</h2>
-        <input type="email" id="emailLupa" placeholder="Masukkan Emel">
-        <button class="btn" onclick="lupaKataLaluan()">Hantar Pautan</button>
-        <p style="text-align:center; cursor:pointer;" onclick="showPage('loginPage')">Kembali ke Login</p>
-    </div>
-
-    <!-- 3. MAIN DASHBOARD -->
+    <!-- 2. MAIN DASHBOARD -->
     <div id="mainContent" class="page">
         <nav style="display:flex; gap:5px; margin-bottom:20px;">
             <button class="btn" onclick="showPage('info')">Info</button>
@@ -58,24 +51,37 @@
                 <p>2. Papan Lahad: <b>RM 200</b></p>
                 <p>3. Kain Kafan: <b>RM 250</b></p>
                 <p>4. Bantuan Tunai kepada Waris: <b>RM 250</b></p>
-                <hr>
-                <p><b>Mandi Jenazah (L/P):</b> Seikhlas hati waris</p>
-                <p><b>Van Jenazah:</b><br>
-                   - Dalam Kariah: <b>PERCUMA</b><br>
-                   - Luar Kariah (Dalam Melaka): <b>RM 80</b><br>
-                   - Luar Melaka: <b>Mengikut perbatuan</b></p>
-                <p><b>Pembacaan Talkin:</b> Pemberian seikhlas hati</p>
             </div>
         </div>
 
         <div id="profil" class="page card">
-            <h2>👤 Kemaskini Profil</h2>
-            <input type="text" id="pID" placeholder="ID Ahli (Contoh: KAF000)">
-            <input type="text" id="pAlamat" placeholder="Alamat Penuh">
-            <input type="text" id="pTel" placeholder="No Telefon">
-            <input type="text" id="pTanggungan" placeholder="Tanggungan (5 orang)">
-            <input type="text" id="pWaris" placeholder="Waris Utama">
-            <button class="btn" style="background:#27ae60" onclick="updateProfil()">Simpan Kemaskini</button>
+            <h2>👤 Profil Ahli</h2>
+            <input type="text" id="cariID" placeholder="Masukkan ID Ahli untuk semak">
+            <button class="btn" style="background:#3498db" onclick="paparDataProfil()">Semak Profil</button>
+            
+            <div id="paparanData" style="margin-top:20px; padding:15px; background:#f9f9f9; border-radius:10px; display:none;">
+                <p><b>Nama:</b> <span id="vNama">-</span></p>
+                <p><b>ID Member:</b> <span id="vID">-</span></p>
+                <p><b>Alamat:</b> <span id="vAlamat">-</span></p>
+                <p><b>Nama Waris:</b> <span id="vWaris">-</span></p>
+                <p><b>Tanggungan:</b> <span id="vTanggungan">-</span></p>
+                <button class="btn" onclick="toggleForm()">Kemaskini Profil</button>
+            </div>
+
+            <div id="formKemaskini">
+                <h3>Borang Kemaskini</h3>
+                <input type="text" id="pAlamat" placeholder="Alamat Baru">
+                <input type="text" id="pWaris" placeholder="Nama Waris Baru">
+                <select id="pTanggungan">
+                    <option value="">Pilih Bilangan Tanggungan</option>
+                    <option value="1">1 Orang</option>
+                    <option value="2">2 Orang</option>
+                    <option value="3">3 Orang</option>
+                    <option value="4">4 Orang</option>
+                    <option value="5">5 Orang</option>
+                </select>
+                <button class="btn" style="background:#27ae60" onclick="updateProfil()">Simpan Perubahan</button>
+            </div>
         </div>
 
         <div id="daftar" class="page card">
@@ -86,7 +92,13 @@
             <input type="text" id="dTel" placeholder="No Telefon">
             <input type="email" id="dEmail" placeholder="Email">
             <input type="text" id="dWaris" placeholder="Waris Utama">
-            <input type="text" id="dTanggungan" placeholder="Tanggungan (5 orang)">
+            <select id="dTanggungan">
+                <option value="1">1 Orang</option>
+                <option value="2">2 Orang</option>
+                <option value="3">3 Orang</option>
+                <option value="4">4 Orang</option>
+                <option value="5">5 Orang</option>
+            </select>
             <button class="btn" style="background:#e67e22" onclick="registerData()">Daftar Sekarang</button>
         </div>
     </div>
@@ -109,10 +121,41 @@
                 if (user) {
                     document.getElementById('loginPage').style.display = 'none';
                     document.getElementById('mainContent').style.display = 'block';
-                } else {
-                    document.getElementById('loginPage').style.display = 'block';
-                    document.getElementById('mainContent').style.display = 'none';
                 }
+            });
+        }
+
+        function paparDataProfil() {
+            let id = document.getElementById('cariID').value.trim();
+            firebase.database().ref('ahli/' + id).once('value', (snapshot) => {
+                if (snapshot.exists()) {
+                    let data = snapshot.val();
+                    document.getElementById('vNama').innerText = data.nama;
+                    document.getElementById('vID').innerText = id;
+                    document.getElementById('vAlamat').innerText = data.alamat;
+                    document.getElementById('vWaris').innerText = data.waris;
+                    document.getElementById('vTanggungan').innerText = data.tanggungan;
+                    document.getElementById('paparanData').style.display = 'block';
+                } else {
+                    alert("ID tidak dijumpai!");
+                }
+            });
+        }
+
+        function toggleForm() {
+            document.getElementById('formKemaskini').style.display = 'block';
+        }
+
+        function updateProfil() {
+            let id = document.getElementById('cariID').value.trim();
+            firebase.database().ref('ahli/' + id).update({
+                alamat: document.getElementById('pAlamat').value,
+                waris: document.getElementById('pWaris').value,
+                tanggungan: document.getElementById('pTanggungan').value
+            }).then(() => {
+                alert("Berjaya dikemaskini!");
+                document.getElementById('formKemaskini').style.display = 'none';
+                paparDataProfil(); // Refresh paparan
             });
         }
 
@@ -120,25 +163,12 @@
             let email = document.getElementById('loginEmail').value;
             let pass = document.getElementById('loginPass').value;
             firebase.auth().signInWithEmailAndPassword(email, pass)
-            .catch(err => alert("Ralat: " + err.message));
+            .catch(err => alert(err.message));
         }
 
-        function logoutUser() {
-            firebase.auth().signOut();
-        }
-
-        function lupaKataLaluan() {
-            let email = document.getElementById('emailLupa').value;
-            firebase.auth().sendPasswordResetEmail(email)
-            .then(() => alert("Pautan reset telah dihantar ke emel anda."))
-            .catch(err => alert("Ralat: " + err.message));
-        }
-
-        function showPage(id) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-        }
-
+        function logoutUser() { firebase.auth().signOut(); location.reload(); }
+        function showPage(id) { document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+        
         function registerData() {
             let id = document.getElementById('dID').value.trim();
             firebase.database().ref('ahli/' + id).set({
@@ -149,16 +179,6 @@
                 waris: document.getElementById('dWaris').value,
                 tanggungan: document.getElementById('dTanggungan').value
             }).then(() => alert("Berjaya Daftar!"));
-        }
-
-        function updateProfil() {
-            let id = document.getElementById('pID').value.trim();
-            firebase.database().ref('ahli/' + id).update({
-                alamat: document.getElementById('pAlamat').value,
-                tel: document.getElementById('pTel').value,
-                tanggungan: document.getElementById('pTanggungan').value,
-                waris: document.getElementById('pWaris').value
-            }).then(() => alert("Profil Dikemaskini!"));
         }
     </script>
 </body>
