@@ -2,7 +2,6 @@
 <html lang="ms">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistem Khairat Smart TSCC</title>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
@@ -14,29 +13,37 @@
         .page { display: none; }
         .active { display: block; }
         .btn { background: #2c3e50; color: white; padding: 12px; border: none; border-radius: 12px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        input, select { width: 90%; padding: 14px; margin: 10px 0; border: 2px solid #ddd; border-radius: 12px; }
+        input { width: 90%; padding: 14px; margin: 10px 0; border: 2px solid #ddd; border-radius: 12px; }
         h2 { color: #2c3e50; text-align: center; }
         .info-box { background: #3498db; color: white; padding: 20px; border-radius: 15px; margin-bottom: 15px; text-align: center; }
-        #formKemaskini { display: none; border-top: 2px solid #eee; margin-top: 20px; pt: 20px; }
     </style>
 </head>
 <body onload="checkLoginState()">
 
-    <!-- 1. LOGIN PAGE -->
+    <!-- 1. LOGIN & DAFTAR PAGE -->
     <div id="loginPage" class="card">
-        <h2>🔐 Log Masuk</h2>
+        <h2 id="formTitle">🔐 Log Masuk</h2>
         <input type="email" id="loginEmail" placeholder="Emel">
         <input type="password" id="loginPass" placeholder="Kata Laluan">
-        <button class="btn" onclick="loginUser()">MASUK</button>
-        <p style="text-align:center; cursor:pointer; color:blue;" onclick="showPage('reset')">Lupa Kata Laluan?</p>
+        
+        <div id="btnContainer">
+            <button class="btn" onclick="loginUser()">MASUK</button>
+            <p style="text-align:center; cursor:pointer; color:blue;" onclick="tukarKeDaftar()">Belum ada akaun? Daftar di sini</p>
+        </div>
+
+        <div id="daftarContainer" style="display:none;">
+            <input type="text" id="regNama" placeholder="Nama Penuh">
+            <input type="text" id="regAlamat" placeholder="Alamat Penuh">
+            <button class="btn" style="background:#27ae60" onclick="registerUser()">DAFTAR SEKARANG</button>
+            <p style="text-align:center; cursor:pointer;" onclick="location.reload()">Kembali ke Log Masuk</p>
+        </div>
     </div>
 
     <!-- 2. MAIN DASHBOARD -->
     <div id="mainContent" class="page">
         <nav style="display:flex; gap:5px; margin-bottom:20px;">
             <button class="btn" onclick="showPage('info')">Info</button>
-            <button class="btn" onclick="showPage('profil')">Profil</button>
-            <button class="btn" onclick="showPage('daftar')">Daftar</button>
+            <button class="btn" onclick="showPage('profil')">Profil Saya</button>
             <button class="btn" style="background:#e74c3c" onclick="logoutUser()">Keluar</button>
         </nav>
 
@@ -67,51 +74,11 @@
         </div>
 
         <div id="profil" class="page card">
-            <h2>👤 Profil Ahli</h2>
-            <input type="text" id="cariID" placeholder="Masukkan ID Ahli untuk semak">
-            <button class="btn" style="background:#3498db" onclick="paparDataProfil()">Semak Profil</button>
-            
-            <div id="paparanData" style="margin-top:20px; padding:15px; background:#f9f9f9; border-radius:10px; display:none;">
+            <h2>👤 Profil Saya</h2>
+            <div id="paparanData" style="padding:15px; background:#f9f9f9; border-radius:10px;">
                 <p><b>Nama:</b> <span id="vNama">-</span></p>
-                <p><b>ID Member:</b> <span id="vID">-</span></p>
                 <p><b>Alamat:</b> <span id="vAlamat">-</span></p>
-                <p><b>Nama Waris:</b> <span id="vWaris">-</span></p>
-                <p><b>Tanggungan:</b> <span id="vTanggungan">-</span></p>
-                <button class="btn" onclick="toggleForm()">Kemaskini Profil</button>
             </div>
-
-            <div id="formKemaskini">
-                <h3>Borang Kemaskini</h3>
-                <input type="text" id="pAlamat" placeholder="Alamat Baru">
-                <input type="text" id="pWaris" placeholder="Nama Waris Baru">
-                <select id="pTanggungan">
-                    <option value="">Pilih Bilangan Tanggungan</option>
-                    <option value="1">1 Orang</option>
-                    <option value="2">2 Orang</option>
-                    <option value="3">3 Orang</option>
-                    <option value="4">4 Orang</option>
-                    <option value="5">5 Orang</option>
-                </select>
-                <button class="btn" style="background:#27ae60" onclick="updateProfil()">Simpan Perubahan</button>
-            </div>
-        </div>
-
-        <div id="daftar" class="page card">
-            <h2>📝 Pendaftaran Baru</h2>
-            <input type="text" id="dID" placeholder="ID Ahli">
-            <input type="text" id="dNama" placeholder="Nama Penuh">
-            <input type="text" id="dAlamat" placeholder="Alamat">
-            <input type="text" id="dTel" placeholder="No Telefon">
-            <input type="email" id="dEmail" placeholder="Email">
-            <input type="text" id="dWaris" placeholder="Waris Utama">
-            <select id="dTanggungan">
-                <option value="1">1 Orang</option>
-                <option value="2">2 Orang</option>
-                <option value="3">3 Orang</option>
-                <option value="4">4 Orang</option>
-                <option value="5">5 Orang</option>
-            </select>
-            <button class="btn" style="background:#e67e22" onclick="registerData()">Daftar Sekarang</button>
         </div>
     </div>
 
@@ -133,65 +100,48 @@
                 if (user) {
                     document.getElementById('loginPage').style.display = 'none';
                     document.getElementById('mainContent').style.display = 'block';
+                    paparProfil(user.uid);
                 }
             });
         }
 
-        function paparDataProfil() {
-            let id = document.getElementById('cariID').value.trim();
-            firebase.database().ref('ahli/' + id).once('value', (snapshot) => {
-                if (snapshot.exists()) {
-                    let data = snapshot.val();
-                    document.getElementById('vNama').innerText = data.nama;
-                    document.getElementById('vID').innerText = id;
-                    document.getElementById('vAlamat').innerText = data.alamat;
-                    document.getElementById('vWaris').innerText = data.waris;
-                    document.getElementById('vTanggungan').innerText = data.tanggungan;
-                    document.getElementById('paparanData').style.display = 'block';
-                } else {
-                    alert("ID tidak dijumpai!");
-                }
-            });
+        function tukarKeDaftar() {
+            document.getElementById('formTitle').innerText = "📝 Pendaftaran Baru";
+            document.getElementById('btnContainer').style.display = 'none';
+            document.getElementById('daftarContainer').style.display = 'block';
         }
 
-        function toggleForm() {
-            document.getElementById('formKemaskini').style.display = 'block';
-        }
-
-        function updateProfil() {
-            let id = document.getElementById('cariID').value.trim();
-            firebase.database().ref('ahli/' + id).update({
-                alamat: document.getElementById('pAlamat').value,
-                waris: document.getElementById('pWaris').value,
-                tanggungan: document.getElementById('pTanggungan').value
-            }).then(() => {
-                alert("Berjaya dikemaskini!");
-                document.getElementById('formKemaskini').style.display = 'none';
-                paparDataProfil(); 
-            });
+        function registerUser() {
+            let email = document.getElementById('loginEmail').value;
+            let pass = document.getElementById('loginPass').value;
+            firebase.auth().createUserWithEmailAndPassword(email, pass)
+            .then((res) => {
+                firebase.database().ref('ahli/' + res.user.uid).set({
+                    nama: document.getElementById('regNama').value,
+                    alamat: document.getElementById('regAlamat').value
+                }).then(() => { alert("Berjaya Daftar!"); location.reload(); });
+            }).catch(err => alert(err.message));
         }
 
         function loginUser() {
-            let email = document.getElementById('loginEmail').value;
-            let pass = document.getElementById('loginPass').value;
-            firebase.auth().signInWithEmailAndPassword(email, pass)
-            .catch(err => alert(err.message));
+            firebase.auth().signInWithEmailAndPassword(
+                document.getElementById('loginEmail').value, 
+                document.getElementById('loginPass').value
+            ).catch(err => alert(err.message));
+        }
+
+        function paparProfil(uid) {
+            firebase.database().ref('ahli/' + uid).once('value', (snap) => {
+                if (snap.exists()) {
+                    let data = snap.val();
+                    document.getElementById('vNama').innerText = data.nama;
+                    document.getElementById('vAlamat').innerText = data.alamat;
+                }
+            });
         }
 
         function logoutUser() { firebase.auth().signOut(); location.reload(); }
         function showPage(id) { document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.getElementById(id).classList.add('active'); }
-        
-        function registerData() {
-            let id = document.getElementById('dID').value.trim();
-            firebase.database().ref('ahli/' + id).set({
-                nama: document.getElementById('dNama').value,
-                alamat: document.getElementById('dAlamat').value,
-                tel: document.getElementById('dTel').value,
-                email: document.getElementById('dEmail').value,
-                waris: document.getElementById('dWaris').value,
-                tanggungan: document.getElementById('dTanggungan').value
-            }).then(() => alert("Berjaya Daftar!"));
-        }
     </script>
 </body>
 </html>
