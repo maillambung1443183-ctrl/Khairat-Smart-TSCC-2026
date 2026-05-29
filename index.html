@@ -8,79 +8,46 @@
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
     <style>
-        body { font-family: sans-serif; background: #f4f4f9; padding: 15px; margin: 0; }
+        body { font-family: sans-serif; background: #f4f4f9; padding: 15px; }
         .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
         .btn { background: #3498db; color: white; padding: 12px; border: none; border-radius: 10px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 10px; }
         input { width: 90%; padding: 10px; margin: 5px 0; border: 1px solid #ccc; border-radius: 8px; }
         .page { display: none; } .active { display: block; }
-        h2 { color: #2c3e50; text-align: center; }
-        hr { border: 0; border-top: 1px solid #eee; margin: 20px 0; }
     </style>
 </head>
 <body onload="checkLoginState()">
 
     <!-- LOGIN PAGE -->
     <div id="loginPage" class="card">
-        <h2 id="formTitle">Log Masuk Ahli</h2>
-        <input type="email" id="loginEmail" placeholder="Emel Berdaftar">
+        <h2>Log Masuk</h2>
+        <input type="email" id="loginEmail" placeholder="Emel">
         <input type="password" id="loginPass" placeholder="Kata Laluan">
-        <div id="loginArea">
-            <button class="btn" onclick="loginMember()">MASUK</button>
-            <button class="btn" style="background:#e67e22;" onclick="lupaPassword()">LUPA KATA LALUAN?</button>
-            <p style="text-align:center; cursor:pointer; color:blue;" onclick="tukarKeDaftar()">Belum daftar? Daftar di sini</p>
-        </div>
-        <div id="daftarArea" style="display:none;">
-            <input type="text" id="regID" placeholder="Member ID">
-            <input type="text" id="regNama" placeholder="Nama Penuh">
-            <input type="email" id="regEmail" placeholder="Emel">
-            <input type="password" id="regPass" placeholder="Kata Laluan">
-            <input type="text" id="regAlamat" placeholder="Alamat">
-            <input type="text" id="regTel" placeholder="No. Telefon">
-            <button class="btn" style="background:#27ae60" onclick="registerMember()">DAFTAR</button>
-        </div>
+        <button class="btn" onclick="loginMember()">MASUK</button>
     </div>
 
     <!-- MAIN DASHBOARD -->
     <div id="mainContent" class="page">
-        <nav style="display:flex; gap:5px; margin-bottom:10px;">
-            <button class="btn" style="padding:10px" onclick="showPage('info')">Info</button>
-            <button class="btn" style="padding:10px" onclick="showPage('profil')">Profil</button>
-            <button class="btn" style="padding:10px; background:#e74c3c" onclick="logoutUser()">Keluar</button>
-        </nav>
-
-        <div id="info" class="card page active">
-            <h2>📋 Manfaat Khairat</h2>
-            <p>1. Penyediaan Kubur: RM 300 | 2. Papan Lahad: RM 200</p>
-            <p>3. Kain Kafan: RM 250 | 4. Bantuan Tunai Waris: RM 250</p>
-            
-            <hr>
-            <h3>🧼 Pengurusan Jenazah</h3>
-            <p><b>Mandi Jenazah:</b> Perkhidmatan disediakan oleh kariah (Seikhlas hati).</p>
-            <p><b>Taklin/Taklimat:</b> Pihak pengurusan akan memberi taklimat kepada waris mengenai tatacara pengurusan jenazah di kariah.</p>
-            
-            <hr>
-            <h3>👥 Barisan AJK</h3>
-            <p>Pengerusi: En Awang (0133333333)</p>
-            <p>Setiausaha: En Ismail (0177000242)</p>
-        </div>
-
-        <div id="profil" class="card page">
-            <h2>👤 Maklumat Ahli</h2>
-            <p><b>Member ID:</b> <span id="vID">-</span></p>
+        <div id="profil" class="card">
+            <h2>👤 Profil Ahli</h2>
             <p><b>Nama:</b> <span id="vNama">-</span></p>
-            <p><b>Emel:</b> <span id="vEmail">-</span></p>
             <p><b>Alamat:</b> <span id="vAlamat">-</span></p>
-            <p><b>No. Telefon:</b> <span id="vTel">-</span></p>
+            <p><b>No. Tel:</b> <span id="vTel">-</span></p>
+            <p><b>Alamat Waris:</b> <span id="vWarisAlamat">-</span></p>
+            <p><b>Tanggungan:</b> <span id="vTanggungan">-</span></p>
             
-            <button class="btn" style="background:#f39c12" onclick="document.getElementById('editForm').style.display='block'">KEMASKINI PROFIL</button>
+            <button class="btn" style="background:#f39c12" onclick="toggleEdit()">KEMASKINI PROFIL</button>
             
-            <div id="editForm" style="display:none; margin-top:20px; border-top: 1px solid #ccc; padding-top:10px;">
-                <h3>Borang Kemaskini</h3>
-                <input type="text" id="editID" placeholder="Member ID Baru">
-                <input type="text" id="editNama" placeholder="Nama Baru">
+            <div id="editForm" style="display:none; margin-top:20px; border-top:1px solid #ccc; padding-top:10px;">
+                <h3>Kemaskini Maklumat</h3>
                 <input type="text" id="editAlamat" placeholder="Alamat Baru">
-                <input type="text" id="editTel" placeholder="No. Telefon Baru">
-                <button class="btn" style="background:#27ae60" onclick="updateProfile()">SIMPAN PERUBAHAN</button>
+                <input type="text" id="editTel" placeholder="No. Tel Baru">
+                <input type="text" id="editWarisAlamat" placeholder="Alamat Waris Baru">
+                <hr>
+                <h4>Tambah Tanggungan</h4>
+                <input type="text" id="tNama" placeholder="Nama Tanggungan">
+                <input type="date" id="tLahir" onchange="kiraUmur()">
+                <p>Umur: <span id="tUmur">0</span> tahun</p>
+                <button class="btn" style="background:#27ae60" onclick="updateProfile()">SIMPAN SEMUA</button>
             </div>
         </div>
     </div>
@@ -102,56 +69,47 @@
                 if (user) {
                     document.getElementById('loginPage').style.display = 'none';
                     document.getElementById('mainContent').style.display = 'block';
-                    document.getElementById('vEmail').innerText = user.email;
                     firebase.database().ref('ahli/' + user.uid).once('value', (s) => {
                         let d = s.val() || {};
-                        document.getElementById('vID').innerText = d.id || "-";
                         document.getElementById('vNama').innerText = d.nama || "-";
                         document.getElementById('vAlamat').innerText = d.alamat || "-";
                         document.getElementById('vTel').innerText = d.tel || "-";
+                        document.getElementById('vWarisAlamat').innerText = d.warisAlamat || "-";
+                        document.getElementById('vTanggungan').innerText = (d.tanggunganNama || "-") + " (" + (d.tanggunganUmur || 0) + " thn)";
                     });
                 }
             });
         }
 
+        function kiraUmur() {
+            let lahir = new Date(document.getElementById('tLahir').value);
+            let hariIni = new Date();
+            let umur = hariIni.getFullYear() - lahir.getFullYear();
+            document.getElementById('tUmur').innerText = umur;
+        }
+
+        function toggleEdit() {
+            let form = document.getElementById('editForm');
+            form.style.display = (form.style.display === 'none') ? 'block' : 'none';
+        }
+
         function updateProfile() {
             let uid = firebase.auth().currentUser.uid;
             firebase.database().ref('ahli/' + uid).update({
-                id: document.getElementById('editID').value,
-                nama: document.getElementById('editNama').value,
                 alamat: document.getElementById('editAlamat').value,
-                tel: document.getElementById('editTel').value
+                tel: document.getElementById('editTel').value,
+                warisAlamat: document.getElementById('editWarisAlamat').value,
+                tanggunganNama: document.getElementById('tNama').value,
+                tanggunganUmur: document.getElementById('tUmur').innerText
             }).then(() => {
-                alert("Profil berjaya dikemaskini!");
+                alert("Berjaya dikemaskini!");
                 location.reload();
             });
-        }
-
-        function registerMember() {
-            firebase.auth().createUserWithEmailAndPassword(document.getElementById('regEmail').value, document.getElementById('regPass').value)
-            .then((r) => {
-                firebase.database().ref('ahli/' + r.user.uid).set({
-                    id: document.getElementById('regID').value,
-                    nama: document.getElementById('regNama').value,
-                    alamat: document.getElementById('regAlamat').value,
-                    tel: document.getElementById('regTel').value
-                }).then(() => location.reload());
-            }).catch(e => alert(e.message));
         }
 
         function loginMember() {
             firebase.auth().signInWithEmailAndPassword(document.getElementById('loginEmail').value, document.getElementById('loginPass').value).catch(e => alert(e.message));
         }
-
-        function lupaPassword() {
-            let email = document.getElementById('loginEmail').value;
-            if(!email) return alert("Sila masukkan emel anda di atas.");
-            firebase.auth().sendPasswordResetEmail(email).then(() => alert("Pautan reset telah dihantar ke emel anda!")).catch(e => alert(e.message));
-        }
-
-        function logoutUser() { firebase.auth().signOut().then(() => location.reload()); }
-        function showPage(id) { document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.getElementById(id).classList.add('active'); }
-        function tukarKeDaftar() { document.getElementById('loginArea').style.display = 'none'; document.getElementById('daftarArea').style.display = 'block'; }
     </script>
 </body>
 </html>
