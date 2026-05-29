@@ -6,67 +6,55 @@
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+    
     <style>
-        body { font-family: 'Poppins', sans-serif; background: #f0f2f5; padding: 20px; }
-        .card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        body { font-family: sans-serif; background: #f4f4f9; padding: 20px; }
+        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .btn { background: #3498db; color: white; padding: 10px; border: none; border-radius: 5px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        input { width: 90%; padding: 10px; margin: 5px 0; border: 1px solid #ccc; border-radius: 5px; }
         .page { display: none; } .active { display: block; }
-        .btn { background: #2c3e50; color: white; padding: 12px; border: none; border-radius: 12px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        input { width: 90%; padding: 14px; margin: 10px 0; border: 2px solid #ddd; border-radius: 12px; }
-        h2 { color: #2c3e50; text-align: center; }
     </style>
 </head>
 <body onload="checkLoginState()">
 
-    <!-- LOGIN PAGE -->
+    <!-- LOGIN/DAFTAR PAGE -->
     <div id="loginPage" class="card">
-        <h2 id="formTitle">🔐 Log Masuk Ahli</h2>
-        <input type="text" id="memberID" placeholder="Masukkan Member ID (Contoh: KAF001)">
+        <h2 id="formTitle">Log Masuk Ahli</h2>
+        <input type="text" id="memberID" placeholder="Member ID (Contoh: KAF001)">
         <input type="password" id="loginPass" placeholder="Kata Laluan">
         
-        <div id="btnContainer">
+        <div id="loginArea">
             <button class="btn" onclick="loginMember()">MASUK</button>
-            <p style="text-align:center; cursor:pointer; color:blue;" onclick="tukarKeDaftar()">Belum ada akaun? Daftar di sini</p>
+            <p style="text-align:center; cursor:pointer; color:blue;" onclick="tukarKeDaftar()">Belum daftar? Klik di sini</p>
         </div>
 
-        <div id="daftarContainer" style="display:none;">
+        <div id="daftarArea" style="display:none;">
             <input type="text" id="regNama" placeholder="Nama Penuh">
-            <input type="text" id="regAlamat" placeholder="Alamat Penuh">
-            <button class="btn" style="background:#27ae60" onclick="registerMember()">DAFTAR SEKARANG</button>
+            <input type="text" id="regAlamat" placeholder="Alamat">
+            <button class="btn" style="background:#27ae60" onclick="registerMember()">DAFTAR</button>
             <p style="text-align:center; cursor:pointer;" onclick="location.reload()">Kembali ke Log Masuk</p>
         </div>
     </div>
 
     <!-- MAIN DASHBOARD -->
     <div id="mainContent" class="page">
-        <nav style="display:flex; gap:5px; margin-bottom:20px;">
-            <button class="btn" onclick="showPage('info')">Info</button>
-            <button class="btn" onclick="showPage('profil')">Profil Saya</button>
-            <button class="btn" style="background:#e74c3c" onclick="logoutUser()">Keluar</button>
-        </nav>
-
-        <div id="info" class="page active card">
-            <h2>Manfaat Khairat</h2>
-            <p>Total: RM 1,000</p>
-        </div>
-
-        <div id="profil" class="page card">
-            <h2>👤 Profil Saya</h2>
-            <div id="paparanData" style="padding:15px; background:#f9f9f9; border-radius:10px;">
-                <p><b>Nama:</b> <span id="vNama">-</span></p>
-                <p><b>Alamat:</b> <span id="vAlamat">-</span></p>
-            </div>
+        <button class="btn" style="background:#e74c3c" onclick="logoutUser()">KELUAR</button>
+        <div id="profil" class="card active">
+            <h2>Profil Saya</h2>
+            <p><b>Nama:</b> <span id="vNama">-</span></p>
+            <p><b>Alamat:</b> <span id="vAlamat">-</span></p>
             
-            <button class="btn" style="background:#27ae60" onclick="document.getElementById('formEdit').style.display='block'">Kemaskini Profil</button>
+            <button class="btn" onclick="document.getElementById('formEdit').style.display='block'">Kemaskini Alamat</button>
             
-            <div id="formEdit" style="display:none; margin-top:20px; border-top: 2px solid #eee; padding-top:20px;">
-                <h3>Borang Kemaskini</h3>
+            <div id="formEdit" style="display:none; margin-top:15px;">
                 <input type="text" id="pAlamat" placeholder="Alamat Baru">
-                <button class="btn" onclick="updateProfilSendiri()">Simpan Perubahan</button>
+                <button class="btn" style="background:#27ae60" onclick="updateProfil()">Simpan</button>
             </div>
         </div>
     </div>
 
     <script>
+        // CONFIG LENGKAP ANDA
         const firebaseConfig = {
             apiKey: "AIzaSyAD_xdF9IDyWoFoPFuQZv7TcOM71m-7zbA",
             authDomain: "khairat-smart-al-falah-tscc.firebaseapp.com",
@@ -74,7 +62,8 @@
             projectId: "khairat-smart-al-falah-tscc",
             storageBucket: "khairat-smart-al-falah-tscc.firebasestorage.app",
             messagingSenderId: "90984659311",
-            appId: "1:90984659311:web:c66603de479fcaa66b509a"
+            appId: "1:90984659311:web:c66603de479fcaa66b509a",
+            measurementId: "G-9LYT85X94V"
         };
         firebase.initializeApp(firebaseConfig);
 
@@ -83,56 +72,49 @@
                 if (user) {
                     document.getElementById('loginPage').style.display = 'none';
                     document.getElementById('mainContent').style.display = 'block';
-                    paparProfil(user.uid);
+                    firebase.database().ref('ahli/' + user.uid).once('value', (snap) => {
+                        let data = snap.val();
+                        if(data) {
+                            document.getElementById('vNama').innerText = data.nama;
+                            document.getElementById('vAlamat').innerText = data.alamat;
+                        }
+                    });
                 }
             });
         }
 
-        function getFakeEmail(id) { return id.trim().toLowerCase() + "@tscc.com"; }
-
         function registerMember() {
             let id = document.getElementById('memberID').value;
-            let email = getFakeEmail(id);
+            let email = id.toLowerCase() + "@tscc.com";
             let pass = document.getElementById('loginPass').value;
-
             firebase.auth().createUserWithEmailAndPassword(email, pass)
             .then((res) => {
                 firebase.database().ref('ahli/' + res.user.uid).set({
                     nama: document.getElementById('regNama').value,
                     alamat: document.getElementById('regAlamat').value
-                }).then(() => { alert("Pendaftaran berjaya!"); location.reload(); });
-            }).catch(err => alert(err.message));
+                }).then(() => location.reload());
+            }).catch(e => alert(e.message));
         }
 
         function loginMember() {
-            let email = getFakeEmail(document.getElementById('memberID').value);
+            let email = document.getElementById('memberID').value.toLowerCase() + "@tscc.com";
             let pass = document.getElementById('loginPass').value;
-            firebase.auth().signInWithEmailAndPassword(email, pass).catch(err => alert(err.message));
+            firebase.auth().signInWithEmailAndPassword(email, pass).catch(e => alert(e.message));
         }
 
-        function paparProfil(uid) {
-            firebase.database().ref('ahli/' + uid).once('value', (snap) => {
-                if (snap.exists()) {
-                    let data = snap.val();
-                    document.getElementById('vNama').innerText = data.nama || "-";
-                    document.getElementById('vAlamat').innerText = data.alamat || "-";
-                }
-            });
-        }
-
-        function updateProfilSendiri() {
+        function updateProfil() {
             let uid = firebase.auth().currentUser.uid;
             firebase.database().ref('ahli/' + uid).update({
                 alamat: document.getElementById('pAlamat').value
-            }).then(() => {
-                alert("Berjaya dikemaskini!");
-                location.reload();
-            });
+            }).then(() => location.reload());
         }
 
-        function logoutUser() { firebase.auth().signOut(); location.reload(); }
-        function tukarKeDaftar() { document.getElementById('btnContainer').style.display = 'none'; document.getElementById('daftarContainer').style.display = 'block'; }
-        function showPage(id) { document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+        function logoutUser() { firebase.auth().signOut().then(() => location.reload()); }
+        function tukarKeDaftar() {
+            document.getElementById('formTitle').innerText = "Daftar Ahli Baru";
+            document.getElementById('loginArea').style.display = 'none';
+            document.getElementById('daftarArea').style.display = 'block';
+        }
     </script>
 </body>
 </html>
