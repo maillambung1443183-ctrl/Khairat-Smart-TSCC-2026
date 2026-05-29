@@ -58,18 +58,6 @@
                 <p>2. Papan Lahad: <b>RM 200</b></p>
                 <p>3. Kain Kafan: <b>RM 250</b></p>
                 <p>4. Bantuan Tunai kepada Waris: <b>RM 250</b></p>
-                <hr>
-                <p><b>Mandi Jenazah (L/P):</b> Seikhlas hati waris</p>
-                <p><b>Van Jenazah:</b><br>
-                   - Dalam Kariah: <b>PERCUMA</b><br>
-                   - Luar Kariah (Dalam Melaka): <b>RM 80</b><br>
-                   - Luar Melaka: <b>Mengikut perbatuan</b></p>
-                <p><b>Pembacaan Talkin:</b> Pemberian seikhlas hati</p>
-                <hr>
-                <h3>👥 Barisan AJK</h3>
-                <p>Pengerusi: En Awang (0133333333)</p>
-                <p>Setiausaha: En Ismail (0177000242)</p>
-                <p>Bendahari: En Mohd Zan (0111111111)</p>
             </div>
         </div>
 
@@ -78,6 +66,14 @@
             <div id="paparanData" style="padding:15px; background:#f9f9f9; border-radius:10px;">
                 <p><b>Nama:</b> <span id="vNama">-</span></p>
                 <p><b>Alamat:</b> <span id="vAlamat">-</span></p>
+            </div>
+            
+            <button class="btn" style="background:#27ae60" onclick="document.getElementById('formEdit').style.display='block'">Kemaskini Profil</button>
+            
+            <div id="formEdit" style="display:none; margin-top:20px; border-top: 2px solid #eee; padding-top:20px;">
+                <h3>Borang Kemaskini</h3>
+                <input type="text" id="pAlamat" placeholder="Alamat Baru">
+                <button class="btn" onclick="updateProfilSendiri()">Simpan Perubahan</button>
             </div>
         </div>
     </div>
@@ -134,9 +130,19 @@
             firebase.database().ref('ahli/' + uid).once('value', (snap) => {
                 if (snap.exists()) {
                     let data = snap.val();
-                    document.getElementById('vNama').innerText = data.nama;
-                    document.getElementById('vAlamat').innerText = data.alamat;
+                    document.getElementById('vNama').innerText = data.nama || "-";
+                    document.getElementById('vAlamat').innerText = data.alamat || "-";
                 }
+            });
+        }
+
+        function updateProfilSendiri() {
+            let uid = firebase.auth().currentUser.uid;
+            firebase.database().ref('ahli/' + uid).update({
+                alamat: document.getElementById('pAlamat').value
+            }).then(() => {
+                alert("Berjaya dikemaskini!");
+                location.reload();
             });
         }
 
