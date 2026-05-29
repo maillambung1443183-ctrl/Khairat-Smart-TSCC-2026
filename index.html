@@ -4,39 +4,42 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Khairat Smart TSCC</title>
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
     
     <style>
         body { font-family: 'Poppins', sans-serif; background: #f0f2f5; padding: 20px; }
-        .card { background: linear-gradient(135deg, #ffffff 0%, #f9f9f9 100%); padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); margin-bottom: 20px; border: 1px solid #eee; }
+        .card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); margin-bottom: 20px; }
         .page { display: none; }
         .active { display: block; }
-        .btn { background: #2c3e50; color: white; padding: 12px; border: none; border-radius: 12px; width: 100%; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        .btn:hover { background: #34495e; }
-        input { width: 90%; padding: 14px; margin: 10px 0; border: 2px solid #ddd; border-radius: 12px; outline: none; }
+        .btn { background: #2c3e50; color: white; padding: 12px; border: none; border-radius: 12px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        input { width: 90%; padding: 14px; margin: 10px 0; border: 2px solid #ddd; border-radius: 12px; }
         h2 { color: #2c3e50; text-align: center; }
-        .info-box { background: #3498db; color: white; padding: 20px; border-radius: 15px; margin-bottom: 15px; }
+        .info-box { background: #3498db; color: white; padding: 20px; border-radius: 15px; margin-bottom: 15px; text-align: center; }
     </style>
 </head>
 <body>
 
+    <!-- 1. LOGIN PAGE -->
     <div id="loginPage" class="card active">
-        <h2>🔐 Selamat Datang</h2>
+        <h2>🔐 Log Masuk</h2>
         <input type="email" id="loginEmail" placeholder="Emel">
         <input type="password" id="loginPass" placeholder="Kata Laluan">
-        <button class="btn" onclick="loginUser()">LOG MASUK</button>
+        <button class="btn" onclick="loginUser()">MASUK</button>
         <p style="text-align:center; cursor:pointer; color:blue;" onclick="showPage('reset')">Lupa Kata Laluan?</p>
     </div>
 
+    <!-- 2. RESET PASSWORD PAGE -->
     <div id="reset" class="page card">
         <h2>🔄 Reset Kata Laluan</h2>
-        <input type="email" id="emailLupa" placeholder="Masukkan Emel Anda">
+        <input type="email" id="emailLupa" placeholder="Masukkan Emel">
         <button class="btn" onclick="lupaKataLaluan()">Hantar Pautan</button>
         <p style="text-align:center; cursor:pointer;" onclick="showPage('loginPage')">Kembali ke Login</p>
     </div>
 
+    <!-- 3. MAIN DASHBOARD -->
     <div id="mainContent" class="page">
         <nav style="display:flex; gap:10px; margin-bottom:20px;">
             <button class="btn" onclick="showPage('info')">Info</button>
@@ -61,32 +64,40 @@
 
         <div id="profil" class="page card">
             <h2>👤 Kemaskini Profil</h2>
-            <input type="text" id="pID" placeholder="ID Ahli (KAF...)">
-            <input type="text" id="pAlamat" placeholder="Alamat">
+            <input type="text" id="pID" placeholder="ID Ahli (Contoh: KAF045)">
+            <input type="text" id="pAlamat" placeholder="Alamat Penuh">
             <input type="text" id="pTel" placeholder="No Telefon">
-            <input type="text" id="pTanggungan" placeholder="Tanggungan">
+            <input type="text" id="pTanggungan" placeholder="Tanggungan (5 orang)">
             <input type="text" id="pWaris" placeholder="Waris Utama">
-            <button class="btn" onclick="updateProfil()">Simpan</button>
+            <button class="btn" style="background:#27ae60" onclick="updateProfil()">Simpan Kemaskini</button>
         </div>
 
         <div id="daftar" class="page card">
-            <h2>📝 Pendaftaran</h2>
+            <h2>📝 Pendaftaran Baru</h2>
             <input type="text" id="dID" placeholder="ID Ahli">
             <input type="text" id="dNama" placeholder="Nama Penuh">
             <input type="text" id="dAlamat" placeholder="Alamat">
             <input type="text" id="dTel" placeholder="No Telefon">
             <input type="email" id="dEmail" placeholder="Email">
-            <input type="text" id="dWaris" placeholder="Waris">
-            <input type="text" id="dTanggungan" placeholder="Tanggungan">
-            <button class="btn" onclick="registerData()">Daftar Sekarang</button>
+            <input type="text" id="dWaris" placeholder="Waris Utama">
+            <input type="text" id="dTanggungan" placeholder="Tanggungan (5 orang)">
+            <button class="btn" style="background:#e67e22" onclick="registerData()">Daftar Sekarang</button>
         </div>
     </div>
 
     <script>
-        const firebaseConfig = { /* ("AIzaSyAD_xdF9IDyWoFoPFuQZv7TcOM71m-7zbA",) */ };
+        const firebaseConfig = {
+            apiKey: "AIzaSyAD_xdF9IDyWoFoPFuQZv7TcOM71m-7zbA",
+            authDomain: "khairat-smart-al-falah-tscc.firebaseapp.com",
+            databaseURL: "https://khairat-smart-al-falah-tscc-default-rtdb.firebaseio.com",
+            projectId: "khairat-smart-al-falah-tscc",
+            storageBucket: "khairat-smart-al-falah-tscc.firebasestorage.app",
+            messagingSenderId: "90984659311",
+            appId: "1:90984659311:web:c66603de479fcaa66b509a",
+            measurementId: "G-9LYT85X94V"
+        };
         firebase.initializeApp(firebaseConfig);
 
-        // Memastikan user kekal login
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
                 document.getElementById('loginPage').style.display = 'none';
@@ -98,7 +109,14 @@
             let email = document.getElementById('loginEmail').value;
             let pass = document.getElementById('loginPass').value;
             firebase.auth().signInWithEmailAndPassword(email, pass)
-            .catch(err => alert(err.message));
+            .catch(err => alert("Ralat: " + err.message));
+        }
+
+        function lupaKataLaluan() {
+            let email = document.getElementById('emailLupa').value;
+            firebase.auth().sendPasswordResetEmail(email)
+            .then(() => alert("Pautan reset telah dihantar ke emel anda."))
+            .catch(err => alert("Ralat: " + err.message));
         }
 
         function showPage(id) {
@@ -106,15 +124,27 @@
             document.getElementById(id).classList.add('active');
         }
 
-        function lupaKataLaluan() {
-            let email = document.getElementById('emailLupa').value;
-            firebase.auth().sendPasswordResetEmail(email)
-            .then(() => alert("Pautan telah dihantar!"))
-            .catch(err => alert(err.message));
+        function registerData() {
+            let id = document.getElementById('dID').value.trim();
+            firebase.database().ref('ahli/' + id).set({
+                nama: document.getElementById('dNama').value,
+                alamat: document.getElementById('dAlamat').value,
+                tel: document.getElementById('dTel').value,
+                email: document.getElementById('dEmail').value,
+                waris: document.getElementById('dWaris').value,
+                tanggungan: document.getElementById('dTanggungan').value
+            }).then(() => alert("Berjaya Daftar!"));
         }
-        
-        function registerData() { /* (Fungsi Daftar) */ }
-        function updateProfil() { /* (Fungsi Update) */ }
+
+        function updateProfil() {
+            let id = document.getElementById('pID').value.trim();
+            firebase.database().ref('ahli/' + id).update({
+                alamat: document.getElementById('pAlamat').value,
+                tel: document.getElementById('pTel').value,
+                tanggungan: document.getElementById('pTanggungan').value,
+                waris: document.getElementById('pWaris').value
+            }).then(() => alert("Profil Dikemaskini!"));
+        }
     </script>
 </body>
 </html>
