@@ -40,24 +40,30 @@
 
     <!-- 3. MAIN DASHBOARD -->
     <div id="mainContent" class="page">
-        <nav style="display:flex; gap:10px; margin-bottom:20px;">
+        <nav style="display:flex; gap:5px; margin-bottom:20px;">
             <button class="btn" onclick="showPage('info')">Info</button>
             <button class="btn" onclick="showPage('profil')">Profil</button>
             <button class="btn" onclick="showPage('daftar')">Daftar</button>
+            <button class="btn" style="background:#e74c3c" onclick="logoutUser()">Keluar</button>
         </nav>
 
         <div id="info" class="page active card">
             <div class="info-box">
                 <h2>Manfaat Khairat</h2>
-                <p style="font-size: 24px; font-weight:bold;">RM 1,000</p>
-                <p>RM 750: Pengurusan Jenazah</p>
-                <p>RM 250: Bantuan Tunai</p>
+                <p style="font-size: 28px; font-weight:bold;">Total: RM 750</p>
             </div>
-            <div style="background:#ecf0f1; padding:15px; border-radius:15px;">
-                <h3>📞 Hubungi AJK</h3>
-                <p>Pengerusi: En Awang (0133333333)</p>
-                <p>Setiausaha: En Ismail (0177000242)</p>
-                <p>Bendahari: En Mohd Zan (0111111111)</p>
+            <div style="background:#ecf0f1; padding:15px; border-radius:15px; line-height: 1.6;">
+                <h3>📋 Pecahan Pengurusan Jenazah</h3>
+                <p>1. Penyediaan Kubur: <b>RM 300</b></p>
+                <p>2. Papan Lahad: <b>RM 200</b></p>
+                <p>3. Kain Kafan: <b>RM 250</b></p>
+                <hr>
+                <p><b>Mandi Jenazah (L/P):</b> Seikhlas hati waris</p>
+                <p><b>Van Jenazah:</b><br>
+                   - Dalam Kariah: <b>PERCUMA</b><br>
+                   - Luar Kariah (Dalam Melaka): <b>RM 80</b><br>
+                   - Luar Melaka: <b>Mengikut perbatuan</b></p>
+                <p><b>Pembacaan Talkin:</b> Pemberian seikhlas hati</p>
             </div>
         </div>
 
@@ -114,6 +120,10 @@
             let pass = document.getElementById('loginPass').value;
             firebase.auth().signInWithEmailAndPassword(email, pass)
             .catch(err => alert("Ralat: " + err.message));
+        }
+
+        function logoutUser() {
+            firebase.auth().signOut();
         }
 
         function lupaKataLaluan() {
