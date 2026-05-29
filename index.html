@@ -10,10 +10,11 @@
     <style>
         body { font-family: sans-serif; background: #f4f4f9; padding: 15px; margin: 0; }
         .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        .btn { background: #3498db; color: white; padding: 15px; border: none; border-radius: 10px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 16px; }
-        input { width: 90%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; }
+        .btn { background: #3498db; color: white; padding: 12px; border: none; border-radius: 10px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        input { width: 90%; padding: 10px; margin: 5px 0; border: 1px solid #ccc; border-radius: 8px; }
         .page { display: none; } .active { display: block; }
-        h2 { text-align: center; color: #2c3e50; }
+        h2 { color: #2c3e50; text-align: center; }
+        hr { border: 0; border-top: 1px solid #eee; margin: 20px 0; }
     </style>
 </head>
 <body onload="checkLoginState()">
@@ -29,14 +30,13 @@
             <p style="text-align:center; cursor:pointer; color:blue;" onclick="tukarKeDaftar()">Belum daftar? Daftar di sini</p>
         </div>
         <div id="daftarArea" style="display:none;">
-            <input type="text" id="regID" placeholder="Member ID (Contoh: KAF000)">
+            <input type="text" id="regID" placeholder="Member ID">
             <input type="text" id="regNama" placeholder="Nama Penuh">
-            <input type="email" id="regEmail" placeholder="Emel Sah">
+            <input type="email" id="regEmail" placeholder="Emel">
             <input type="password" id="regPass" placeholder="Kata Laluan">
             <input type="text" id="regAlamat" placeholder="Alamat">
             <input type="text" id="regTel" placeholder="No. Telefon">
             <button class="btn" style="background:#27ae60" onclick="registerMember()">DAFTAR</button>
-            <p style="text-align:center; cursor:pointer;" onclick="location.reload()">Kembali</p>
         </div>
     </div>
 
@@ -52,6 +52,13 @@
             <h2>📋 Manfaat Khairat</h2>
             <p>1. Penyediaan Kubur: RM 300 | 2. Papan Lahad: RM 200</p>
             <p>3. Kain Kafan: RM 250 | 4. Bantuan Tunai Waris: RM 250</p>
+            
+            <hr>
+            <h3>🧼 Pengurusan Jenazah</h3>
+            <p><b>Mandi Jenazah:</b> Perkhidmatan disediakan oleh kariah (Seikhlas hati).</p>
+            <p><b>Taklin/Taklimat:</b> Pihak pengurusan akan memberi taklimat kepada waris mengenai tatacara pengurusan jenazah di kariah.</p>
+            
+            <hr>
             <h3>👥 Barisan AJK</h3>
             <p>Pengerusi: En Awang (0133333333)</p>
             <p>Setiausaha: En Ismail (0177000242)</p>
@@ -64,19 +71,29 @@
             <p><b>Emel:</b> <span id="vEmail">-</span></p>
             <p><b>Alamat:</b> <span id="vAlamat">-</span></p>
             <p><b>No. Telefon:</b> <span id="vTel">-</span></p>
+            
+            <button class="btn" style="background:#f39c12" onclick="document.getElementById('editForm').style.display='block'">KEMASKINI PROFIL</button>
+            
+            <div id="editForm" style="display:none; margin-top:20px; border-top: 1px solid #ccc; padding-top:10px;">
+                <h3>Borang Kemaskini</h3>
+                <input type="text" id="editID" placeholder="Member ID Baru">
+                <input type="text" id="editNama" placeholder="Nama Baru">
+                <input type="text" id="editAlamat" placeholder="Alamat Baru">
+                <input type="text" id="editTel" placeholder="No. Telefon Baru">
+                <button class="btn" style="background:#27ae60" onclick="updateProfile()">SIMPAN PERUBAHAN</button>
+            </div>
         </div>
     </div>
 
     <script>
         const firebaseConfig = {
-            apiKey: "AIzaSyAD_xdF9IDyWoFoPFuQZv7TcOM71m-7zbA",
-            authDomain: "khairat-smart-al-falah-tscc.firebaseapp.com",
-            databaseURL: "https://khairat-smart-al-falah-tscc-default-rtdb.firebaseio.com",
-            projectId: "khairat-smart-al-falah-tscc",
-            storageBucket: "khairat-smart-al-falah-tscc.firebasestorage.app",
-            messagingSenderId: "90984659311",
-            appId: "1:90984659311:web:c66603de479fcaa66b509a",
-            measurementId: "G-9LYT85X94V"
+            apiKey: "AIzaSyC_YDZfbKqgZjOBuz722XrSwOw7JPJx0u4",
+            authDomain: "khairatsmarttempat.firebaseapp.com",
+            projectId: "khairatsmarttempat",
+            storageBucket: "khairatsmarttempat.firebasestorage.app",
+            messagingSenderId: "356017221628",
+            appId: "1:356017221628:web:e9a56a3fa6dd0079904c79",
+            measurementId: "G-GQ38WMXCFG"
         };
         firebase.initializeApp(firebaseConfig);
 
@@ -97,10 +114,21 @@
             });
         }
 
+        function updateProfile() {
+            let uid = firebase.auth().currentUser.uid;
+            firebase.database().ref('ahli/' + uid).update({
+                id: document.getElementById('editID').value,
+                nama: document.getElementById('editNama').value,
+                alamat: document.getElementById('editAlamat').value,
+                tel: document.getElementById('editTel').value
+            }).then(() => {
+                alert("Profil berjaya dikemaskini!");
+                location.reload();
+            });
+        }
+
         function registerMember() {
-            let email = document.getElementById('regEmail').value;
-            let pass = document.getElementById('regPass').value;
-            firebase.auth().createUserWithEmailAndPassword(email, pass)
+            firebase.auth().createUserWithEmailAndPassword(document.getElementById('regEmail').value, document.getElementById('regPass').value)
             .then((r) => {
                 firebase.database().ref('ahli/' + r.user.uid).set({
                     id: document.getElementById('regID').value,
@@ -112,17 +140,13 @@
         }
 
         function loginMember() {
-            let email = document.getElementById('loginEmail').value;
-            let pass = document.getElementById('loginPass').value;
-            firebase.auth().signInWithEmailAndPassword(email, pass).catch(e => alert(e.message));
+            firebase.auth().signInWithEmailAndPassword(document.getElementById('loginEmail').value, document.getElementById('loginPass').value).catch(e => alert(e.message));
         }
 
         function lupaPassword() {
             let email = document.getElementById('loginEmail').value;
-            if(!email) return alert("Sila masukkan emel anda di ruangan atas.");
-            firebase.auth().sendPasswordResetEmail(email)
-            .then(() => alert("Pautan reset telah dihantar ke emel anda!"))
-            .catch(e => alert(e.message));
+            if(!email) return alert("Sila masukkan emel anda di atas.");
+            firebase.auth().sendPasswordResetEmail(email).then(() => alert("Pautan reset telah dihantar ke emel anda!")).catch(e => alert(e.message));
         }
 
         function logoutUser() { firebase.auth().signOut().then(() => location.reload()); }
