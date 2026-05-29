@@ -43,16 +43,40 @@
             <button class="btn" onclick="showPage('profil')">Profil Saya</button>
             <button class="btn" style="background:#e74c3c" onclick="logoutUser()">Keluar</button>
         </nav>
-        <div id="info" class="page active card"><h3>Manfaat Khairat</h3><p>Total: RM 1,000</p></div>
+
+        <div id="info" class="page active card">
+            <h2>Manfaat Khairat</h2>
+            <p>Total: RM 1,000</p>
+        </div>
+
         <div id="profil" class="page card">
             <h2>👤 Profil Saya</h2>
-            <p><b>Nama:</b> <span id="vNama">-</span></p>
-            <p><b>Alamat:</b> <span id="vAlamat">-</span></p>
+            <div id="paparanData" style="padding:15px; background:#f9f9f9; border-radius:10px;">
+                <p><b>Nama:</b> <span id="vNama">-</span></p>
+                <p><b>Alamat:</b> <span id="vAlamat">-</span></p>
+            </div>
+            
+            <button class="btn" style="background:#27ae60" onclick="document.getElementById('formEdit').style.display='block'">Kemaskini Profil</button>
+            
+            <div id="formEdit" style="display:none; margin-top:20px; border-top: 2px solid #eee; padding-top:20px;">
+                <h3>Borang Kemaskini</h3>
+                <input type="text" id="pAlamat" placeholder="Alamat Baru">
+                <button class="btn" onclick="updateProfilSendiri()">Simpan Perubahan</button>
+            </div>
         </div>
     </div>
 
     <script>
-        const firebaseConfig = { /* MASUKKAN CONFIG ANDA */ };
+        // MASUKKAN CONFIG ANDA DI SINI
+        const firebaseConfig = {
+            apiKey: "AIzaSy...",
+            authDomain: "...",
+            databaseURL: "...",
+            projectId: "...",
+            storageBucket: "...",
+            messagingSenderId: "...",
+            appId: "..."
+        };
         firebase.initializeApp(firebaseConfig);
 
         function checkLoginState() {
@@ -65,7 +89,6 @@
             });
         }
 
-        // TUKAR MEMBER ID KEPADA EMEL PALSU
         function getFakeEmail(id) { return id.trim().toLowerCase() + "@tscc.com"; }
 
         function registerMember() {
@@ -76,7 +99,6 @@
             firebase.auth().createUserWithEmailAndPassword(email, pass)
             .then((res) => {
                 firebase.database().ref('ahli/' + res.user.uid).set({
-                    id: id,
                     nama: document.getElementById('regNama').value,
                     alamat: document.getElementById('regAlamat').value
                 }).then(() => { alert("Pendaftaran berjaya!"); location.reload(); });
@@ -93,9 +115,19 @@
             firebase.database().ref('ahli/' + uid).once('value', (snap) => {
                 if (snap.exists()) {
                     let data = snap.val();
-                    document.getElementById('vNama').innerText = data.nama;
-                    document.getElementById('vAlamat').innerText = data.alamat;
+                    document.getElementById('vNama').innerText = data.nama || "-";
+                    document.getElementById('vAlamat').innerText = data.alamat || "-";
                 }
+            });
+        }
+
+        function updateProfilSendiri() {
+            let uid = firebase.auth().currentUser.uid;
+            firebase.database().ref('ahli/' + uid).update({
+                alamat: document.getElementById('pAlamat').value
+            }).then(() => {
+                alert("Berjaya dikemaskini!");
+                location.reload();
             });
         }
 
