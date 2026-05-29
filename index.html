@@ -13,6 +13,7 @@
         .btn { background: #3498db; color: white; padding: 12px; border: none; border-radius: 10px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 10px; }
         input { width: 90%; padding: 10px; margin: 5px 0; border: 1px solid #ccc; border-radius: 8px; }
         .page { display: none; } .active { display: block; }
+        .tanggungan-box { border: 1px solid #ddd; padding: 10px; margin: 5px 0; border-radius: 8px; background: #f9f9f9; }
     </style>
 </head>
 <body onload="checkLoginState()">
@@ -29,11 +30,10 @@
     <div id="mainContent" class="page">
         <div id="profil" class="card">
             <h2>👤 Profil Ahli</h2>
-            <p><b>Nama:</b> <span id="vNama">-</span></p>
             <p><b>Alamat:</b> <span id="vAlamat">-</span></p>
             <p><b>No. Tel:</b> <span id="vTel">-</span></p>
             <p><b>Alamat Waris:</b> <span id="vWarisAlamat">-</span></p>
-            <p><b>Tanggungan:</b> <span id="vTanggungan">-</span></p>
+            <p><b>Tanggungan:</b><br><span id="vTanggunganList">-</span></p>
             
             <button class="btn" style="background:#f39c12" onclick="toggleEdit()">KEMASKINI PROFIL</button>
             
@@ -42,27 +42,30 @@
                 <input type="text" id="editAlamat" placeholder="Alamat Baru">
                 <input type="text" id="editTel" placeholder="No. Tel Baru">
                 <input type="text" id="editWarisAlamat" placeholder="Alamat Waris Baru">
-                <hr>
-                <h4>Tambah Tanggungan</h4>
-                <input type="text" id="tNama" placeholder="Nama Tanggungan">
-                <input type="date" id="tLahir" onchange="kiraUmur()">
-                <p>Umur: <span id="tUmur">0</span> tahun</p>
+                
+                <h4>Senarai 5 Tanggungan</h4>
+                <div id="tanggunganInputs">
+                    <!-- Script akan jana 5 set input di sini -->
+                </div>
                 <button class="btn" style="background:#27ae60" onclick="updateProfile()">SIMPAN SEMUA</button>
             </div>
         </div>
     </div>
 
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyC_YDZfbKqgZjOBuz722XrSwOw7JPJx0u4",
-            authDomain: "khairatsmarttempat.firebaseapp.com",
-            projectId: "khairatsmarttempat",
-            storageBucket: "khairatsmarttempat.firebasestorage.app",
-            messagingSenderId: "356017221628",
-            appId: "1:356017221628:web:e9a56a3fa6dd0079904c79",
-            measurementId: "G-GQ38WMXCFG"
-        };
+        const firebaseConfig = { /* Sila masukkan semula config anda di sini */ };
         firebase.initializeApp(firebaseConfig);
+
+        // Jana 5 kotak input tanggungan secara automatik
+        let html = "";
+        for(let i=1; i<=5; i++) {
+            html += `<div class="tanggungan-box">
+                <input type="text" id="tNama${i}" placeholder="Nama Tanggungan ${i}">
+                <input type="date" id="tLahir${i}" onchange="kiraUmur(${i})">
+                <p>Umur: <span id="tUmur${i}">0</span> tahun</p>
+            </div>`;
+        }
+        document.getElementById('tanggunganInputs').innerHTML = html;
 
         function checkLoginState() {
             firebase.auth().onAuthStateChanged((user) => {
@@ -71,21 +74,24 @@
                     document.getElementById('mainContent').style.display = 'block';
                     firebase.database().ref('ahli/' + user.uid).once('value', (s) => {
                         let d = s.val() || {};
-                        document.getElementById('vNama').innerText = d.nama || "-";
                         document.getElementById('vAlamat').innerText = d.alamat || "-";
                         document.getElementById('vTel').innerText = d.tel || "-";
                         document.getElementById('vWarisAlamat').innerText = d.warisAlamat || "-";
-                        document.getElementById('vTanggungan').innerText = (d.tanggunganNama || "-") + " (" + (d.tanggunganUmur || 0) + " thn)";
+                        
+                        let list = "";
+                        for(let i=1; i<=5; i++) {
+                            if(d['tNama'+i]) list += `${i}. ${d['tNama'+i]} (${d['tUmur'+i]} thn)<br>`;
+                        }
+                        document.getElementById('vTanggunganList').innerHTML = list || "-";
                     });
                 }
             });
         }
 
-        function kiraUmur() {
-            let lahir = new Date(document.getElementById('tLahir').value);
-            let hariIni = new Date();
-            let umur = hariIni.getFullYear() - lahir.getFullYear();
-            document.getElementById('tUmur').innerText = umur;
+        function kiraUmur(i) {
+            let lahir = new Date(document.getElementById('tLahir'+i).value);
+            let umur = new Date().getFullYear() - lahir.getFullYear();
+            document.getElementById('tUmur'+i).innerText = umur;
         }
 
         function toggleEdit() {
@@ -95,14 +101,17 @@
 
         function updateProfile() {
             let uid = firebase.auth().currentUser.uid;
-            firebase.database().ref('ahli/' + uid).update({
+            let data = {
                 alamat: document.getElementById('editAlamat').value,
                 tel: document.getElementById('editTel').value,
-                warisAlamat: document.getElementById('editWarisAlamat').value,
-                tanggunganNama: document.getElementById('tNama').value,
-                tanggunganUmur: document.getElementById('tUmur').innerText
-            }).then(() => {
-                alert("Berjaya dikemaskini!");
+                warisAlamat: document.getElementById('editWarisAlamat').value
+            };
+            for(let i=1; i<=5; i++) {
+                data['tNama'+i] = document.getElementById('tNama'+i).value;
+                data['tUmur'+i] = document.getElementById('tUmur'+i).innerText;
+            }
+            firebase.database().ref('ahli/' + uid).update(data).then(() => {
+                alert("Profil dikemaskini!");
                 location.reload();
             });
         }
