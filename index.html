@@ -2,16 +2,18 @@
 <html lang="ms">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistem Khairat Smart TSCC</title>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
     <style>
-        body { font-family: sans-serif; background: #f4f4f9; padding: 20px; }
-        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        .btn { background: #3498db; color: white; padding: 10px; border: none; border-radius: 5px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        input { width: 90%; padding: 10px; margin: 5px 0; border: 1px solid #ccc; border-radius: 5px; }
+        body { font-family: sans-serif; background: #f4f4f9; padding: 15px; margin: 0; }
+        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .btn { background: #3498db; color: white; padding: 15px; border: none; border-radius: 10px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 16px; }
+        input { width: 90%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; }
         .page { display: none; } .active { display: block; }
+        h2 { text-align: center; color: #2c3e50; }
     </style>
 </head>
 <body onload="checkLoginState()">
@@ -23,7 +25,8 @@
         <input type="password" id="loginPass" placeholder="Kata Laluan">
         <div id="loginArea">
             <button class="btn" onclick="loginMember()">MASUK</button>
-            <p style="text-align:center; cursor:pointer; color:blue;" onclick="tukarKeDaftar()">Belum daftar? Klik di sini</p>
+            <button class="btn" style="background:#e67e22;" onclick="lupaPassword()">LUPA KATA LALUAN?</button>
+            <p style="text-align:center; cursor:pointer; color:blue;" onclick="tukarKeDaftar()">Belum daftar? Daftar di sini</p>
         </div>
         <div id="daftarArea" style="display:none;">
             <input type="text" id="regNama" placeholder="Nama Penuh">
@@ -31,15 +34,16 @@
             <input type="text" id="regTel" placeholder="No. Telefon">
             <input type="text" id="regWaris" placeholder="Nama Waris">
             <button class="btn" style="background:#27ae60" onclick="registerMember()">DAFTAR</button>
+            <p style="text-align:center; cursor:pointer;" onclick="location.reload()">Kembali</p>
         </div>
     </div>
 
     <!-- MAIN DASHBOARD -->
     <div id="mainContent" class="page">
-        <nav style="display:flex; gap:5px;">
-            <button class="btn" onclick="showPage('info')">Info</button>
-            <button class="btn" onclick="showPage('profil')">Profil</button>
-            <button class="btn" style="background:#e74c3c" onclick="logoutUser()">Keluar</button>
+        <nav style="display:flex; gap:5px; margin-bottom:10px;">
+            <button class="btn" style="padding:10px" onclick="showPage('info')">Info</button>
+            <button class="btn" style="padding:10px" onclick="showPage('profil')">Profil</button>
+            <button class="btn" style="padding:10px; background:#e74c3c" onclick="logoutUser()">Keluar</button>
         </nav>
 
         <div id="info" class="card page active">
@@ -82,16 +86,22 @@
                     document.getElementById('loginPage').style.display = 'none';
                     document.getElementById('mainContent').style.display = 'block';
                     firebase.database().ref('ahli/' + user.uid).once('value', (s) => {
-                        let d = s.val();
-                        if(d) {
-                            document.getElementById('vNama').innerText = d.nama;
-                            document.getElementById('vAlamat').innerText = d.alamat;
-                            document.getElementById('vTel').innerText = d.tel;
-                            document.getElementById('vWaris').innerText = d.waris;
-                        }
+                        let d = s.val() || {};
+                        document.getElementById('vNama').innerText = d.nama || "-";
+                        document.getElementById('vAlamat').innerText = d.alamat || "-";
+                        document.getElementById('vTel').innerText = d.tel || "-";
+                        document.getElementById('vWaris').innerText = d.waris || "-";
                     });
                 }
             });
+        }
+
+        function lupaPassword() {
+            let id = document.getElementById('memberID').value;
+            if(!id) return alert("Sila masukkan Member ID dahulu.");
+            firebase.auth().sendPasswordResetEmail(id.toLowerCase() + "@tscc.com")
+            .then(() => alert("Pautan reset telah dihantar ke sistem."))
+            .catch(e => alert(e.message));
         }
 
         function registerMember() {
