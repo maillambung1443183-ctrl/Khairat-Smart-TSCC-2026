@@ -2,55 +2,42 @@
 <html lang="ms">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Khairat Smart TSCC - Pro</title>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
     <style>
-        :root { --primary: #2c3e50; --accent: #27ae60; --bg: #f0f2f5; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 20px; }
-        .container { max-width: 500px; margin: auto; }
-        .card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); margin-bottom: 20px; }
-        h2 { color: var(--primary); margin-top: 0; }
-        .input-group { margin: 15px 0; }
-        input { width: 100%; padding: 12px; border: 2px solid #e1e8ed; border-radius: 12px; box-sizing: border-box; }
-        button { width: 100%; padding: 14px; background: var(--accent); color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        button:hover { opacity: 0.9; }
-        .page { display: none; } .active { display: block; }
-        .nav-btn { background: #3498db; margin-bottom: 10px; }
-        .tag-info { font-size: 0.9em; color: #666; background: #f9f9f9; padding: 10px; border-radius: 10px; margin-top: 5px; }
+        body { font-family: sans-serif; background: #f0f2f5; padding: 20px; }
+        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .page { display: none; }
+        .active { display: block; }
+        input { width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #27ae60; color: white; border: none; border-radius: 8px; cursor: pointer; margin-top: 10px; }
     </style>
 </head>
 <body onload="checkLoginState()">
 
-<div class="container">
-    <div id="authPage" class="card">
-        <h2 id="title">Selamat Datang</h2>
-        <div id="loginForm">
-            <input type="email" id="email" placeholder="Emel">
-            <input type="password" id="pass" placeholder="Kata Laluan" style="margin:10px 0;">
-            <button onclick="login()">LOG MASUK</button>
-            <p style="text-align:center">Baru? <a href="#" onclick="toggleAuth()">Daftar di sini</a></p>
-        </div>
+<div id="authPage" class="card">
+    <h2>Log Masuk</h2>
+    <input type="email" id="email" placeholder="Emel">
+    <input type="password" id="pass" placeholder="Kata Laluan">
+    <button onclick="login()">LOG MASUK</button>
+</div>
+
+<div id="mainPage" class="page">
+    <div class="card">
+        <h2>Dashboard Ahli</h2>
+        <button onclick="show('profil')">Profil & Tanggungan</button>
+        <button onclick="logout()" style="background:#e74c3c">KELUAR</button>
     </div>
 
-    <div id="mainPage" class="page">
-        <div class="card">
-            <h2>Dashboard Ahli</h2>
-            <button class="nav-btn" onclick="show('profil')">Profil & Kemaskini</button>
-            <button class="nav-btn" onclick="show('manfaat')" style="background:#e67e22">Info Manfaat</button>
-            <button onclick="logout()" style="background:#e74c3c">KELUAR</button>
-        </div>
-
-        <div id="profil" class="card page">
-            <h3>Profil Anda</h3>
-            <div id="profilData" class="tag-info"></div>
-            <hr>
-            <h4>Kemaskini Tanggungan (5 Nama)</h4>
-            <div id="tanggunganFields"></div>
-            <button onclick="saveProfile()" style="background:var(--accent)">SIMPAN PROFIL</button>
-        </div>
+    <div id="profil" class="card page">
+        <h3>Profil Anda</h3>
+        <div id="profilData">Memuatkan data...</div>
+        <hr>
+        <h4>Kemaskini Tanggungan</h4>
+        <div id="tanggunganFields"></div>
+        <button onclick="saveProfile()">SIMPAN</button>
     </div>
 </div>
 
@@ -65,22 +52,13 @@
     };
     firebase.initializeApp(firebaseConfig);
 
-    // Jana input tanggungan automatik
+    // Jana input tanggungan 5 orang
     let tFields = "";
     for(let i=1; i<=5; i++) {
-        tFields += `<div class="tag-info">
-            <input type="text" id="nama${i}" placeholder="Nama Tanggungan ${i}">
-            <input type="date" id="tgl${i}" onchange="hitungUmur(${i})">
-            <p>Umur: <b id="umur${i}">0</b> thn</p>
-        </div>`;
+        tFields += `<div><input type="text" id="nama${i}" placeholder="Nama Tanggungan ${i}">
+                    <input type="date" id="tgl${i}"></div>`;
     }
     document.getElementById('tanggunganFields').innerHTML = tFields;
-
-    function hitungUmur(i) {
-        let bday = new Date(document.getElementById('tgl'+i).value);
-        let age = new Date().getFullYear() - bday.getFullYear();
-        document.getElementById('umur'+i).innerText = age;
-    }
 
     function checkLoginState() {
         firebase.auth().onAuthStateChanged(user => {
@@ -93,9 +71,13 @@
     }
 
     function loadData(uid) {
-        firebase.database().ref('ahli/' + uid).once('value', s => {
-            let d = s.val() || {};
-            document.getElementById('profilData').innerHTML = `ID: ${d.id||'-'}<br>Nama: ${d.nama||'-'}`;
+        firebase.database().ref('ahli/' + uid).on('value', s => {
+            let d = s.val();
+            if(d) {
+                document.getElementById('profilData').innerHTML = `Nama: ${d.nama||'Tiada'}`;
+            } else {
+                document.getElementById('profilData').innerHTML = "Tiada data dijumpai.";
+            }
         });
     }
 
@@ -104,9 +86,8 @@
         let data = {};
         for(let i=1; i<=5; i++) {
             data['nama'+i] = document.getElementById('nama'+i).value;
-            data['umur'+i] = document.getElementById('umur'+i).innerText;
         }
-        firebase.database().ref('ahli/' + uid).update(data).then(() => alert("Berjaya disimpan!"));
+        firebase.database().ref('ahli/' + uid).update(data).then(() => alert("Berjaya!"));
     }
 
     function login() {
