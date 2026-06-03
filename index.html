@@ -11,11 +11,9 @@
         html, body { margin: 0; padding: 0; width: 100%; overflow-x: hidden; font-family: sans-serif; background: #f4f4f9; }
         .card { background: white; padding: 15px; margin: 10px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .btn { background: #3498db; color: white; padding: 12px; border: none; border-radius: 8px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 5px; }
-        input { width: 100%; padding: 12px; margin: 5px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
-        
+        input, select { width: 100%; padding: 12px; margin: 5px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
         .page { display: none; }
         .active { display: block; }
-        
         .nav-container { display: flex; gap: 5px; padding: 20px 10px 10px 10px; }
         .tab-btn { background: #3498db; padding: 10px; color: white; border: none; border-radius: 5px; cursor: pointer; flex: 1; }
     </style>
@@ -54,20 +52,12 @@
             <p><b><h2>📋 Info Khairat</h2></b></p>
             <p><b>Jumlah Manfaat: RM1000</b></p>
             <hr>
-            <p><b>Penyediaan kubur: RM300</b><br>
-            <b>Papan lahad: RM200</b><br>
-            <b>Kain kafan: RM250</b><br>
-            <b>Bantuan tunai: RM250</b></p>
+            <p><b>Penyediaan kubur: RM300</b><br><b>Papan lahad: RM200</b><br><b>Kain kafan: RM250</b><br><b>Bantuan tunai: RM250</b></p>
             <hr>
-            <p><b>Mandi Jenazah L/P: Seikhlas hati</b><br>
-            <b>Van jenazah dalam kariah: Percuma</b><br>
-            <b>Luar kariah dalam Melaka: RM80</b><br>
-            <b>Luar Melaka: Mengikut perbatuan</b></p>
+            <p><b>Mandi Jenazah L/P: Seikhlas hati</b><br><b>Van jenazah dalam kariah: Percuma</b></p>
             <hr>
             <p><b><h3>👤 Maklumat AJK</h3></b></p>
-            <p><b>1. En Awang Mohd Fauzi Bin Abu Samah (Pengerusi): 0113333333</b><br>
-            <b>2. En Ismail Bin Ishak (Setiausaha): 0177000242</b><br>
-            <b>3. En Mohd Zan Bin Mohd Nor (Bendahari): 012222222</b></p>
+            <p><b>1. En Awang Mohd Fauzi Bin Abu Samah (Pengerusi): 0113333333</b><br><b>2. En Ismail Bin Ishak (Setiausaha): 0177000242</b><br><b>3. En Mohd Zan Bin Mohd Nor (Bendahari): 012222222</b></p>
         </div>
 
         <div id="profil" class="card page">
@@ -85,7 +75,17 @@
                 <input type="text" id="eAlamat" placeholder="Alamat Baru">
                 <input type="text" id="eTel" placeholder="No Tel Baru">
                 <input type="text" id="eWaris" placeholder="Nama Waris">
+                <select id="eHubunganWaris">
+                    <option value="">Pilih Hubungan</option>
+                    <option value="Isteri">Isteri</option>
+                    <option value="Suami">Suami</option>
+                    <option value="Anak">Anak</option>
+                    <option value="Keluarga">Keluarga</option>
+                </select>
+                <input type="text" id="eTelWaris" placeholder="No Tel Waris">
                 <input type="text" id="eTanggungan" placeholder="Nama Tanggungan">
+                <input type="date" id="eTanggunganLahir" onchange="kiraUmur()">
+                <p>Umur: <span id="vUmur">-</span></p>
                 <button class="btn" style="background:#27ae60" onclick="saveProfile()">SIMPAN</button>
                 <button class="btn" style="background:#7f8c8d" onclick="toggleEdit()">BATAL</button>
             </div>
@@ -120,9 +120,16 @@
                 document.getElementById('vNoAhli').innerText = d.id || '-';
                 document.getElementById('vAlamat').innerText = d.alamat || '-';
                 document.getElementById('vTel').innerText = d.tel || '-';
-                document.getElementById('vWaris').innerText = d.waris || '-';
-                document.getElementById('vTanggungan').innerText = d.tanggungan || '-';
+                document.getElementById('vWaris').innerText = (d.waris || '-') + (d.hubunganWaris ? ' (' + d.hubunganWaris + ')' : '') + (d.telWaris ? ', Tel: ' + d.telWaris : '');
+                document.getElementById('vTanggungan').innerText = (d.tanggungan || '-') + (d.tanggunganLahir ? ' (Lahir: ' + d.tanggunganLahir + ')' : '');
             });
+        }
+
+        function kiraUmur() {
+            let lahir = new Date(document.getElementById('eTanggunganLahir').value);
+            let skrg = new Date();
+            let umur = skrg.getFullYear() - lahir.getFullYear();
+            document.getElementById('vUmur').innerText = umur;
         }
 
         function toggleEdit() {
@@ -134,43 +141,22 @@
 
         function saveProfile() {
             let uid = firebase.auth().currentUser.uid;
-            firebase.database().ref('ahli/' + uid).once('value', (s) => {
-                let d = s.val() || {};
-                let updateData = {};
-                
-                if(document.getElementById('eAlamat').value) updateData.alamat = document.getElementById('eAlamat').value;
-                if(document.getElementById('eTel').value) updateData.tel = document.getElementById('eTel').value;
-                if(document.getElementById('eWaris').value) {
-                    updateData.waris = d.waris ? d.waris + ", " + document.getElementById('eWaris').value : document.getElementById('eWaris').value;
-                }
-                if(document.getElementById('eTanggungan').value) {
-                    updateData.tanggungan = d.tanggungan ? d.tanggungan + ", " + document.getElementById('eTanggungan').value : document.getElementById('eTanggungan').value;
-                }
-
-                firebase.database().ref('ahli/' + uid).update(updateData).then(() => { alert("Berjaya disimpan!"); toggleEdit(); });
-            });
+            firebase.database().ref('ahli/' + uid).update({
+                alamat: document.getElementById('eAlamat').value || '-',
+                tel: document.getElementById('eTel').value || '-',
+                waris: document.getElementById('eWaris').value || '-',
+                hubunganWaris: document.getElementById('eHubunganWaris').value,
+                telWaris: document.getElementById('eTelWaris').value,
+                tanggungan: document.getElementById('eTanggungan').value || '-',
+                tanggunganLahir: document.getElementById('eTanggunganLahir').value
+            }).then(() => { alert("Berjaya disimpan!"); toggleEdit(); });
         }
 
-        function showPage(id) { 
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); 
-            document.getElementById(id).classList.add('active'); 
-        }
-
+        function showPage(id) { document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.getElementById(id).classList.add('active'); }
         function loginMember() { firebase.auth().signInWithEmailAndPassword(document.getElementById('loginEmail').value, document.getElementById('loginPass').value).catch(e => alert(e.message)); }
         function logoutUser() { firebase.auth().signOut().then(() => location.reload()); }
         function tukarKeDaftar() { document.getElementById('loginArea').style.display = 'none'; document.getElementById('daftarArea').style.display = 'block'; }
-        
-        function registerMember() {
-            firebase.auth().createUserWithEmailAndPassword(document.getElementById('regEmail').value, document.getElementById('regPass').value).then((r) => {
-                firebase.database().ref('ahli/' + r.user.uid).set({
-                    id: document.getElementById('regID').value,
-                    nama: document.getElementById('regNama').value,
-                    alamat: document.getElementById('regAlamat').value,
-                    tel: document.getElementById('regTel').value
-                }).then(() => location.reload());
-            }).catch(e => alert(e.message));
-        }
-
+        function registerMember() { firebase.auth().createUserWithEmailAndPassword(document.getElementById('regEmail').value, document.getElementById('regPass').value).then((r) => { firebase.database().ref('ahli/' + r.user.uid).set({ id: document.getElementById('regID').value, nama: document.getElementById('regNama').value, alamat: document.getElementById('regAlamat').value, tel: document.getElementById('regTel').value }).then(() => location.reload()); }).catch(e => alert(e.message)); }
         function lupaPassword() { firebase.auth().sendPasswordResetEmail(document.getElementById('loginEmail').value).then(() => alert("Semak emel!")).catch(e => alert(e.message)); }
     </script>
 </body>
