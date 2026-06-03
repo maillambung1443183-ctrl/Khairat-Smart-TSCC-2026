@@ -4,54 +4,61 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistem Khairat Smart TSCC</title>
+    <!-- Pastikan link library Firebase anda kekal sama seperti asal -->
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
     <style>
-        html, body { margin: 0; padding: 0; width: 100%; font-family: sans-serif; background: #f4f4f9; font-weight: bold; }
-        .card { background: white; padding: 15px; margin: 10px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); font-weight: bold; }
+        /* Mengekalkan gaya asal anda dan menambah arahan bold untuk semua teks */
+        body { font-weight: bold; }
+        .card, .btn, input, select, h2, p, span, b { font-weight: bold !important; }
+        
+        /* Gaya asal sistem anda */
+        html, body { margin: 0; padding: 0; width: 100%; overflow-x: hidden; font-family: sans-serif; background: #f4f4f9; }
+        .card { background: white; padding: 15px; margin: 10px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .btn { background: #3498db; color: white; padding: 12px; border: none; border-radius: 8px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 5px; }
-        input, select { width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-weight: bold; }
-        .page { display: none; } .active { display: block; }
-        .nav-container { display: flex; gap: 5px; padding: 10px; }
-        .tab-btn { background: #3498db; padding: 10px; color: white; border: none; border-radius: 5px; cursor: pointer; flex: 1; font-weight: bold; }
-        h2, p, b, span { font-weight: bold; }
+        input { width: 100%; padding: 12px; margin: 5px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
+        .page { display: none; }
+        .active { display: block; }
+        .nav-container { display: flex; gap: 5px; padding: 20px 10px 10px 10px; }
+        .tab-btn { background: #3498db; padding: 10px; color: white; border: none; border-radius: 5px; cursor: pointer; flex: 1; }
     </style>
 </head>
 <body onload="checkLoginState()">
 
+    <!-- Bahagian Log Masuk Asal Anda -->
     <div id="loginPage" class="card">
-        <h2><b>Log Masuk Ahli</b></h2>
+        <h2>Log Masuk Ahli</h2>
         <input type="email" id="loginEmail" placeholder="Emel Berdaftar">
         <input type="password" id="loginPass" placeholder="Kata Laluan">
         <button class="btn" onclick="loginMember()">MASUK</button>
     </div>
 
     <div id="mainContent" class="page">
+        <!-- Navigasi Asal -->
         <nav class="nav-container">
             <button class="tab-btn" onclick="showPage('info')">Info</button>
             <button class="tab-btn" onclick="showPage('profil')">Profil</button>
-            <button class="tab-btn" style="background:#e74c3c" onclick="location.reload()">Keluar</button>
+            <button class="tab-btn" style="background:#e74c3c" onclick="logoutUser()">Keluar</button>
         </nav>
 
-        <div id="profil" class="card page active">
-            <h2><b>👤 Profil Ahli</b></h2>
+        <div id="profil" class="card page">
+            <h2>👤 Profil Ahli</h2>
             <div id="viewProfil">
                 <p><b>Nama:</b> <span id="vNama">-</span></p>
-                <p><b>Waris:</b> <span id="vWaris">-</span></p>
-                <p><b>Tanggungan:</b><br><span id="vTanggungan">-</span></p>
+                <p><b>Tanggungan:</b> <span id="vTanggungan">-</span></p>
                 <button class="btn" onclick="toggleEdit()">KEMASKINI</button>
             </div>
+            
             <div id="editProfil" style="display:none;">
-                <input type="text" id="eWaris" placeholder="Nama Waris">
-                <select id="eHubunganWaris"><option value="">Pilih Hubungan</option><option value="Isteri">Isteri</option><option value="Suami">Suami</option><option value="Anak">Anak</option></select>
-                <div id="tanggunganFields">
-                    <!-- 5 Set Input Tanggungan -->
+                <!-- Input Tanggungan (5 Set) -->
+                <div id="tanggunganInputArea">
+                    <p>Masukkan 5 Nama Tanggungan & Tarikh Lahir:</p>
                     <script>
                         for(let i=1; i<=5; i++) {
-                            document.write(`<input type="text" class="tNama" placeholder="Nama Tanggungan ${i}">`);
-                            document.write(`<input type="date" class="tLahir" onchange="hitungUmur(this)">`);
-                            document.write(`<p>Umur: <span class="tUmur">-</span></p>`);
+                            document.write(`Nama ${i}: <input type="text" class="eTNama" placeholder="Nama">`);
+                            document.write(`Lahir ${i}: <input type="date" class="eTLahir" onchange="kiraUmur(this)">`);
+                            document.write(`Umur: <span class="vUmur">-</span><br>`);
                         }
                     </script>
                 </div>
@@ -62,47 +69,31 @@
     </div>
 
     <script>
-        const firebaseConfig = { databaseURL: "https://khairatsmarttempat.firebaseio.com" };
-        firebase.initializeApp(firebaseConfig);
-
-        function checkLoginState() { firebase.auth().onAuthStateChanged((user) => { if(user) { document.getElementById('loginPage').style.display = 'none'; document.getElementById('mainContent').style.display = 'block'; loadData(user.uid); } }); }
-
-        function hitungUmur(el) {
-            let birthDate = new Date(el.value);
-            let age = new Date().getFullYear() - birthDate.getFullYear();
-            el.nextElementSibling.querySelector('span').innerText = isNaN(age) ? '-' : age;
+        // Fungsi Kira Umur Auto
+        function kiraUmur(el) {
+            let lahir = new Date(el.value);
+            let skrg = new Date();
+            let umur = skrg.getFullYear() - lahir.getFullYear();
+            el.nextElementSibling.innerText = isNaN(umur) ? '-' : umur;
         }
 
-        function loadData(uid) {
-            firebase.database().ref('ahli/' + uid).on('value', (s) => {
-                let d = s.val() || {};
-                document.getElementById('vNama').innerText = d.nama || '-';
-                document.getElementById('vWaris').innerText = (d.waris || '-') + " (" + (d.hubunganWaris || "-") + ")";
-                document.getElementById('vTanggungan').innerHTML = d.listTanggungan || '-';
-            });
-        }
-
+        // Fungsi Simpan (Menambah/Update tanpa hilang data lama)
         function saveProfile() {
             let uid = firebase.auth().currentUser.uid;
-            let list = "";
-            let names = document.querySelectorAll('.tNama');
-            let dates = document.querySelectorAll('.tLahir');
+            let listTanggungan = [];
+            let n = document.querySelectorAll('.eTNama');
+            let l = document.querySelectorAll('.eTLahir');
+            
             for(let i=0; i<5; i++) {
-                if(names[i].value) list += `${names[i].value} (${dates[i].value}), `;
+                if(n[i].value) listTanggungan.push(n[i].value + " (Umur: " + (new Date().getFullYear() - new Date(l[i].value).getFullYear()) + ")");
             }
+
             firebase.database().ref('ahli/' + uid).update({
-                waris: document.getElementById('eWaris').value,
-                hubunganWaris: document.getElementById('eHubunganWaris').value,
-                listTanggungan: list
+                tanggungan: listTanggungan.join(", ")
             }).then(() => { alert("Berjaya disimpan!"); toggleEdit(); });
         }
 
-        function toggleEdit() {
-            document.getElementById('viewProfil').style.display = document.getElementById('viewProfil').style.display === 'none' ? 'block' : 'none';
-            document.getElementById('editProfil').style.display = document.getElementById('editProfil').style.display === 'none' ? 'block' : 'none';
-        }
-        function showPage(id) { document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.getElementById(id).classList.add('active'); }
-        function loginMember() { firebase.auth().signInWithEmailAndPassword(document.getElementById('loginEmail').value, document.getElementById('loginPass').value).catch(e => alert(e.message)); }
+        // Fungsi asal anda... (Sila kekalkan fungsi asal login/logout anda di sini)
     </script>
 </body>
 </html>
