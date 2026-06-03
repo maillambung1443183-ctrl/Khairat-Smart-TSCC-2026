@@ -84,7 +84,8 @@
             <div id="editProfil" style="display:none;">
                 <input type="text" id="eAlamat" placeholder="Alamat Baru">
                 <input type="text" id="eTel" placeholder="No Tel Baru">
-                <input type="text" id="eTanggungan" placeholder="Tambah Tanggungan">
+                <input type="text" id="eWaris" placeholder="Nama Waris">
+                <input type="text" id="eTanggungan" placeholder="Nama Tanggungan">
                 <button class="btn" style="background:#27ae60" onclick="saveProfile()">SIMPAN</button>
                 <button class="btn" style="background:#7f8c8d" onclick="toggleEdit()">BATAL</button>
             </div>
@@ -136,6 +137,7 @@
             firebase.database().ref('ahli/' + uid).update({
                 alamat: document.getElementById('eAlamat').value,
                 tel: document.getElementById('eTel').value,
+                waris: document.getElementById('eWaris').value,
                 tanggungan: document.getElementById('eTanggungan').value
             }).then(() => { alert("Berjaya disimpan!"); toggleEdit(); });
         }
