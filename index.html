@@ -18,13 +18,11 @@
 </head>
 <body onload="checkLoginState()">
 
-    <!-- Bahagian Log Masuk (Lengkap dengan Lupa Kata Laluan) -->
     <div id="loginPage" class="card">
         <h2>Log Masuk Ahli</h2>
-        <input type="email" id="loginEmail" placeholder="Emel Berdaftar">
+        <input type="email" id="loginEmail" placeholder="Emel">
         <input type="password" id="loginPass" placeholder="Kata Laluan">
         <button class="btn" onclick="loginMember()">MASUK</button>
-        <!-- Butang Lupa Kata Laluan ditambah balik -->
         <button class="btn" style="background:#e67e22;" onclick="lupaPassword()">LUPA KATA LALUAN?</button>
     </div>
 
@@ -44,14 +42,15 @@
                 <input type="text" id="eAlamat" placeholder="Alamat">
                 <input type="text" id="eTel" placeholder="No Tel">
                 <input type="text" id="eWaris" placeholder="Nama Waris">
-                <select id="eHubunganWaris"><option value="Isteri">Isteri</option><option value="Suami">Suami</option><option value="Anak">Anak</option></select>
+                <select id="eHubunganWaris">
+                    <option value="Isteri">Isteri</option><option value="Suami">Suami</option><option value="Anak">Anak</option>
+                </select>
                 <input type="text" id="eTelWaris" placeholder="No Tel Waris">
                 <div id="inputTanggungan">
                     <script>
                         for(let i=1; i<=5; i++) {
                             document.write(`Nama ${i}: <input type="text" class="tNama" id="tNama${i}">`);
-                            document.write(`Lahir ${i}: <input type="date" class="tLahir" id="tLahir${i}" onchange="kiraUmur(this, 'u${i}')">`);
-                            document.write(`Umur: <span id="u${i}">-</span><br>`);
+                            document.write(`Lahir ${i}: <input type="date" class="tLahir" id="tLahir${i}"><br>`);
                         }
                     </script>
                 </div>
@@ -75,15 +74,6 @@
             });
         }
 
-        // Fungsi Lupa Kata Laluan
-        function lupaPassword() {
-            let email = document.getElementById('loginEmail').value;
-            if(!email) { alert("Sila masukkan emel anda di kotak atas dahulu!"); return; }
-            firebase.auth().sendPasswordResetEmail(email)
-            .then(() => { alert("Pautan set semula kata laluan telah dihantar ke emel anda."); })
-            .catch((e) => { alert("Ralat: " + e.message); });
-        }
-
         function loadData(uid) {
             firebase.database().ref('ahli/' + uid).on('value', (s) => {
                 let d = s.val() || {};
@@ -99,13 +89,6 @@
             });
         }
 
-        function bukaEdit() {
-            let v = document.getElementById('viewProfil');
-            let e = document.getElementById('editProfil');
-            v.style.display = (v.style.display === 'none') ? 'block' : 'none';
-            e.style.display = (e.style.display === 'none') ? 'block' : 'none';
-        }
-
         function saveProfile() {
             let uid = firebase.auth().currentUser.uid;
             let dataT = "";
@@ -114,20 +97,36 @@
                 let l = document.getElementById('tLahir'+i).value;
                 if(n) dataT += n + " (" + l + "), ";
             }
-            firebase.database().ref('ahli/' + uid).update({
-                alamat: document.getElementById('eAlamat').value,
-                tel: document.getElementById('eTel').value,
-                waris: document.getElementById('eWaris').value,
-                hubunganWaris: document.getElementById('eHubunganWaris').value,
-                telWaris: document.getElementById('eTelWaris').value,
-                tanggunganRaw: dataT
-            }).then(() => { alert("Berjaya disimpan!"); location.reload(); });
+            
+            // Menggunakan .once() untuk mendapatkan data semasa sebelum update
+            firebase.database().ref('ahli/' + uid).once('value', (snapshot) => {
+                let currentData = snapshot.val() || {};
+                let newData = {
+                    nama: currentData.nama || 'Tiada Nama',
+                    alamat: document.getElementById('eAlamat').value,
+                    tel: document.getElementById('eTel').value,
+                    waris: document.getElementById('eWaris').value,
+                    hubunganWaris: document.getElementById('eHubunganWaris').value,
+                    telWaris: document.getElementById('eTelWaris').value,
+                    tanggunganRaw: dataT
+                };
+                
+                firebase.database().ref('ahli/' + uid).set(newData)
+                .then(() => { alert("Berjaya Disimpan!"); bukaEdit(); });
+            });
         }
 
-        function kiraUmur(el, id) {
-            let thn = new Date(el.value).getFullYear();
-            let umur = new Date().getFullYear() - thn;
-            document.getElementById(id).innerText = isNaN(umur) ? '-' : umur;
+        function bukaEdit() {
+            let v = document.getElementById('viewProfil');
+            let e = document.getElementById('editProfil');
+            v.style.display = (v.style.display === 'none') ? 'block' : 'none';
+            e.style.display = (e.style.display === 'none') ? 'block' : 'none';
+        }
+
+        function lupaPassword() {
+            let email = document.getElementById('loginEmail').value;
+            if(!email) { alert("Masukkan emel dulu!"); return; }
+            firebase.auth().sendPasswordResetEmail(email).then(() => alert("Pautan dihantar!")).catch(e => alert(e.message));
         }
 
         function loginMember() { firebase.auth().signInWithEmailAndPassword(document.getElementById('loginEmail').value, document.getElementById('loginPass').value).catch(e => alert(e.message)); }
