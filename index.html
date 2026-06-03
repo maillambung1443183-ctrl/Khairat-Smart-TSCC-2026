@@ -2,6 +2,7 @@
 <html lang="ms">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistem Khairat Smart TSCC</title>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
@@ -12,15 +13,14 @@
         .btn { background: #3498db; color: white; padding: 12px; border: none; border-radius: 10px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 10px; }
         input { width: 90%; padding: 10px; margin: 5px 0; border: 1px solid #ccc; border-radius: 8px; }
         
-        /* Tab System */
         .page { display: none; }
         .active { display: block; }
-        .tab-btn { background: #3498db; padding: 10px; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        .tab-btn { background: #3498db; padding: 10px; color: white; border: none; border-radius: 5px; cursor: pointer; flex: 1; }
     </style>
 </head>
 <body onload="checkLoginState()">
 
-    <!-- LOGIN PAGE (Mengekalkan reka bentuk asal) -->
+    <!-- LOGIN PAGE -->
     <div id="loginPage" class="card">
         <h2 id="formTitle">Log Masuk Ahli</h2>
         <input type="email" id="loginEmail" placeholder="Emel Berdaftar">
@@ -42,7 +42,7 @@
         </div>
     </div>
 
-    <!-- MAIN DASHBOARD (Dengan Tab Info & Profil) -->
+    <!-- MAIN DASHBOARD -->
     <div id="mainContent" class="page">
         <nav style="display:flex; gap:5px; margin-bottom:10px;">
             <button class="tab-btn" onclick="showPage('info')">Info</button>
@@ -74,7 +74,6 @@
         };
         firebase.initializeApp(firebaseConfig);
 
-        // Jana input 5 tanggungan
         let tFields = "<h4>5 Tanggungan</h4>";
         for(let i=1; i<=5; i++) {
             tFields += `<input type="text" id="tNama${i}" placeholder="Nama Tanggungan ${i}">`;
