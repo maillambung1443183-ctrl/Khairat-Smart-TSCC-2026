@@ -2,16 +2,18 @@
 <html lang="ms">
 <head>
     <meta charset="UTF-8">
+    <!-- Meta tag wajib untuk skrin telefon -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistem Khairat Smart TSCC</title>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
     <style>
-        body { font-family: sans-serif; background: #f4f4f9; padding: 15px; margin: 0; }
-        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        .btn { background: #3498db; color: white; padding: 12px; border: none; border-radius: 10px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        input { width: 90%; padding: 10px; margin: 5px 0; border: 1px solid #ccc; border-radius: 8px; }
+        /* Tetapan paksa untuk lebar skrin telefon */
+        html, body { margin: 0; padding: 0; width: 100%; overflow-x: hidden; font-family: sans-serif; background: #f4f4f9; }
+        .card { background: white; padding: 15px; margin: 10px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .btn { background: #3498db; color: white; padding: 12px; border: none; border-radius: 8px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 5px; }
+        input { width: 100%; padding: 12px; margin: 5px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
         
         .page { display: none; }
         .active { display: block; }
@@ -20,7 +22,6 @@
 </head>
 <body onload="checkLoginState()">
 
-    <!-- LOGIN PAGE -->
     <div id="loginPage" class="card">
         <h2 id="formTitle">Log Masuk Ahli</h2>
         <input type="email" id="loginEmail" placeholder="Emel Berdaftar">
@@ -42,9 +43,8 @@
         </div>
     </div>
 
-    <!-- MAIN DASHBOARD -->
     <div id="mainContent" class="page">
-        <nav style="display:flex; gap:5px; margin-bottom:10px;">
+        <nav style="display:flex; gap:5px; padding: 0 10px;">
             <button class="tab-btn" onclick="showPage('info')">Info</button>
             <button class="tab-btn" onclick="showPage('profil')">Profil</button>
             <button class="tab-btn" style="background:#e74c3c" onclick="logoutUser()">Keluar</button>
