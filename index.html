@@ -8,81 +8,43 @@
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
     <style>
-        /* Memastikan semua tulisan menjadi BOLD */
-        * { font-weight: bold !important; }
-        html, body { margin: 0; padding: 0; width: 100%; overflow-x: hidden; font-family: sans-serif; background: #f4f4f9; }
-        .card { background: white; padding: 15px; margin: 10px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        * { font-weight: bold !important; font-family: sans-serif; }
+        body { background: #f4f4f9; padding: 10px; }
+        .card { background: white; padding: 15px; margin-bottom: 10px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .btn { background: #3498db; color: white; padding: 12px; border: none; border-radius: 8px; width: 100%; cursor: pointer; margin-top: 5px; }
-        input, select { width: 100%; padding: 12px; margin: 5px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
-        .page { display: none; }
-        .active { display: block; }
-        .nav-container { display: flex; gap: 5px; padding: 20px 10px 10px 10px; }
-        .tab-btn { background: #3498db; padding: 10px; color: white; border: none; border-radius: 5px; cursor: pointer; flex: 1; }
+        input, select { width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
+        .page { display: none; } .active { display: block; }
     </style>
 </head>
 <body onload="checkLoginState()">
 
+    <!-- Bahagian Log Masuk (Lengkap dengan Lupa Kata Laluan) -->
     <div id="loginPage" class="card">
-        <h2 id="formTitle">Log Masuk Ahli</h2>
+        <h2>Log Masuk Ahli</h2>
         <input type="email" id="loginEmail" placeholder="Emel Berdaftar">
         <input type="password" id="loginPass" placeholder="Kata Laluan">
-        <div id="loginArea">
-            <button class="btn" onclick="loginMember()">MASUK</button>
-            <button class="btn" style="background:#e67e22;" onclick="lupaPassword()">LUPA KATA LALUAN?</button>
-            <p style="text-align:center; cursor:pointer; color:blue;" onclick="tukarKeDaftar()">Belum daftar? Daftar di sini</p>
-        </div>
-        <div id="daftarArea" style="display:none;">
-            <input type="text" id="regID" placeholder="Member ID">
-            <input type="text" id="regNama" placeholder="Nama Penuh">
-            <input type="email" id="regEmail" placeholder="Emel">
-            <input type="password" id="regPass" placeholder="Kata Laluan">
-            <input type="password" id="regPassConfirm" placeholder="Sah Kata Laluan">
-            <input type="text" id="regAlamat" placeholder="Alamat">
-            <input type="text" id="regTel" placeholder="No. Telefon">
-            <button class="btn" style="background:#27ae60" onclick="registerMember()">DAFTAR</button>
-        </div>
+        <button class="btn" onclick="loginMember()">MASUK</button>
+        <!-- Butang Lupa Kata Laluan ditambah balik -->
+        <button class="btn" style="background:#e67e22;" onclick="lupaPassword()">LUPA KATA LALUAN?</button>
     </div>
 
     <div id="mainContent" class="page">
-        <nav class="nav-container">
-            <button class="tab-btn" onclick="showPage('info')">Info</button>
-            <button class="tab-btn" onclick="showPage('profil')">Profil</button>
-            <button class="tab-btn" style="background:#e74c3c" onclick="logoutUser()">Keluar</button>
-        </nav>
-
-        <div id="info" class="card page active">
-            <p><b><h2>📋 Info Khairat</h2></b></p>
-            <p><b>Jumlah Manfaat: RM1000</b></p>
-            <hr>
-            <p><b>Penyediaan kubur: RM300</b><br><b>Papan lahad: RM200</b><br><b>Kain kafan: RM250</b><br><b>Bantuan tunai: RM250</b></p>
-            <hr>
-            <p><b>Mandi Jenazah L/P: Seikhlas hati</b><br><b>Van jenazah dalam kariah: Percuma</b></p>
-            <hr>
-            <p><b><h3>👤 Maklumat AJK</h3></b></p>
-            <p><b>1. En Awang Mohd Fauzi Bin Abu Samah (Pengerusi): 0113333333</b><br><b>2. En Ismail Bin Ishak (Setiausaha): 0177000242</b><br><b>3. En Mohd Zan Bin Mohd Nor (Bendahari): 012222222</b></p>
-        </div>
-
-        <div id="profil" class="card page">
+        <div id="profil" class="card">
             <h2>👤 Profil Ahli</h2>
             <div id="viewProfil">
-                <p><b>Nama:</b> <span id="vNama">-</span></p>
-                <p><b>No Ahli:</b> <span id="vNoAhli">-</span></p>
-                <p><b>Alamat:</b> <span id="vAlamat">-</span></p>
-                <p><b>No Tel:</b> <span id="vTel">-</span></p>
-                <p><b>Waris:</b> <span id="vWaris">-</span></p>
-                <p><b>Tanggungan:</b> <span id="vTanggungan">-</span></p>
+                <p>Nama: <span id="vNama">-</span></p>
+                <p>Alamat: <span id="vAlamat">-</span></p>
+                <p>No Tel: <span id="vTel">-</span></p>
+                <p>Waris: <span id="vWaris">-</span></p>
+                <p>Tanggungan: <span id="vTanggungan">-</span></p>
                 <button class="btn" onclick="bukaEdit()">KEMASKINI</button>
             </div>
+            
             <div id="editProfil" style="display:none;">
                 <input type="text" id="eAlamat" placeholder="Alamat">
-                <input type="text" id="eTel" placeholder="No Telefon">
+                <input type="text" id="eTel" placeholder="No Tel">
                 <input type="text" id="eWaris" placeholder="Nama Waris">
-                <select id="eHubunganWaris">
-                    <option value="Isteri">Isteri</option>
-                    <option value="Suami">Suami</option>
-                    <option value="Anak">Anak</option>
-                    <option value="Keluarga">Keluarga</option>
-                </select>
+                <select id="eHubunganWaris"><option value="Isteri">Isteri</option><option value="Suami">Suami</option><option value="Anak">Anak</option></select>
                 <input type="text" id="eTelWaris" placeholder="No Tel Waris">
                 <div id="inputTanggungan">
                     <script>
@@ -113,34 +75,35 @@
             });
         }
 
+        // Fungsi Lupa Kata Laluan
+        function lupaPassword() {
+            let email = document.getElementById('loginEmail').value;
+            if(!email) { alert("Sila masukkan emel anda di kotak atas dahulu!"); return; }
+            firebase.auth().sendPasswordResetEmail(email)
+            .then(() => { alert("Pautan set semula kata laluan telah dihantar ke emel anda."); })
+            .catch((e) => { alert("Ralat: " + e.message); });
+        }
+
         function loadData(uid) {
             firebase.database().ref('ahli/' + uid).on('value', (s) => {
                 let d = s.val() || {};
                 document.getElementById('vNama').innerText = d.nama || '-';
-                document.getElementById('vNoAhli').innerText = d.id || '-';
                 document.getElementById('vAlamat').innerText = d.alamat || '-';
                 document.getElementById('vTel').innerText = d.tel || '-';
-                document.getElementById('vWaris').innerText = (d.waris || '-') + " (" + (d.hubunganWaris || "-") + ") Tel: " + (d.telWaris || "-");
+                document.getElementById('vWaris').innerText = (d.waris || '-') + " (" + (d.hubunganWaris || "-") + ")";
                 document.getElementById('vTanggungan').innerText = d.tanggunganRaw || '-';
+                
+                document.getElementById('eAlamat').value = d.alamat || '';
+                document.getElementById('eTel').value = d.tel || '';
+                document.getElementById('eWaris').value = d.waris || '';
             });
         }
 
         function bukaEdit() {
             let v = document.getElementById('viewProfil');
             let e = document.getElementById('editProfil');
-            if(e.style.display === 'none') {
-                v.style.display = 'none';
-                e.style.display = 'block';
-            } else {
-                v.style.display = 'block';
-                e.style.display = 'none';
-            }
-        }
-
-        function kiraUmur(el, targetId) {
-            let lahir = new Date(el.value);
-            let umur = new Date().getFullYear() - lahir.getFullYear();
-            document.getElementById(targetId).innerText = isNaN(umur) ? '-' : umur;
+            v.style.display = (v.style.display === 'none') ? 'block' : 'none';
+            e.style.display = (e.style.display === 'none') ? 'block' : 'none';
         }
 
         function saveProfile() {
@@ -158,15 +121,16 @@
                 hubunganWaris: document.getElementById('eHubunganWaris').value,
                 telWaris: document.getElementById('eTelWaris').value,
                 tanggunganRaw: dataT
-            }).then(() => { alert("Berjaya disimpan!"); bukaEdit(); });
+            }).then(() => { alert("Berjaya disimpan!"); location.reload(); });
         }
 
-        function showPage(id) { document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+        function kiraUmur(el, id) {
+            let thn = new Date(el.value).getFullYear();
+            let umur = new Date().getFullYear() - thn;
+            document.getElementById(id).innerText = isNaN(umur) ? '-' : umur;
+        }
+
         function loginMember() { firebase.auth().signInWithEmailAndPassword(document.getElementById('loginEmail').value, document.getElementById('loginPass').value).catch(e => alert(e.message)); }
-        function logoutUser() { firebase.auth().signOut().then(() => location.reload()); }
-        function tukarKeDaftar() { document.getElementById('loginArea').style.display = 'none'; document.getElementById('daftarArea').style.display = 'block'; }
-        function registerMember() { firebase.auth().createUserWithEmailAndPassword(document.getElementById('regEmail').value, document.getElementById('regPass').value).then((r) => { firebase.database().ref('ahli/' + r.user.uid).set({ id: document.getElementById('regID').value, nama: document.getElementById('regNama').value }).then(() => location.reload()); }).catch(e => alert(e.message)); }
-        function lupaPassword() { firebase.auth().sendPasswordResetEmail(document.getElementById('loginEmail').value).then(() => alert("Semak emel!")).catch(e => alert(e.message)); }
     </script>
 </body>
 </html>
