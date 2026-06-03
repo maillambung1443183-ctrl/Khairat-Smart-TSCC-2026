@@ -134,12 +134,15 @@
 
         function saveProfile() {
             let uid = firebase.auth().currentUser.uid;
-            firebase.database().ref('ahli/' + uid).update({
-                alamat: document.getElementById('eAlamat').value,
-                tel: document.getElementById('eTel').value,
-                waris: document.getElementById('eWaris').value,
-                tanggungan: document.getElementById('eTanggungan').value
-            }).then(() => { alert("Berjaya disimpan!"); toggleEdit(); });
+            let updateData = {};
+            
+            // Hanya masukkan data yang ditaip sahaja
+            if(document.getElementById('eAlamat').value) updateData.alamat = document.getElementById('eAlamat').value;
+            if(document.getElementById('eTel').value) updateData.tel = document.getElementById('eTel').value;
+            if(document.getElementById('eWaris').value) updateData.waris = document.getElementById('eWaris').value;
+            if(document.getElementById('eTanggungan').value) updateData.tanggungan = document.getElementById('eTanggungan').value;
+
+            firebase.database().ref('ahli/' + uid).update(updateData).then(() => { alert("Berjaya disimpan!"); toggleEdit(); });
         }
 
         function showPage(id) { 
