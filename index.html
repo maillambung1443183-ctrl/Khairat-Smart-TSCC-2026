@@ -5,27 +5,30 @@
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
 </head>
 <body>
-    <div id="debug">
-        <h2>Uji Masuk ID</h2>
-        <input type="text" id="idTest" placeholder="Masukkan ID (contoh: KAF045)">
-        <button onclick="testMasuk()">MASUK</button>
-        <p id="hasil"></p>
-    </div>
+    <h2>Uji Sambungan Database</h2>
+    <input type="text" id="idTest" placeholder="Masukkan ID (cth: KAF045)">
+    <button onclick="testMasuk()">MASUK</button>
+    <p id="hasil"></p>
 
     <script>
-        const firebaseConfig = { databaseURL: "https://khairat-smart-al-falah-tscc-default-rtdb.firebaseio.com/" };
+        // Gunakan konfigurasi yang anda baru beri
+        const firebaseConfig = {
+            databaseURL: "https://khairat-smart-al-falah-tscc-default-rtdb.firebaseio.com",
+            projectId: "khairat-smart-al-falah-tscc"
+        };
         firebase.initializeApp(firebaseConfig);
 
         function testMasuk() {
             let id = document.getElementById('idTest').value;
-            // Kita terus baca ID tersebut dari database tanpa log masuk
+            // Terus rujuk ID tanpa folder 'ahli/'
             firebase.database().ref(id).once('value', (s) => {
                 if(s.exists()) {
-                    document.getElementById('hasil').innerText = "Berjaya! Data ditemui: " + JSON.stringify(s.val());
-                    console.log(s.val()); // Anda boleh lihat data dalam Inspect > Console
+                    document.getElementById('hasil').innerHTML = "<b>BERJAYA!</b> Data dijumpai:<br>" + JSON.stringify(s.val());
                 } else {
-                    document.getElementById('hasil').innerText = "Gagal: ID " + id + " tidak dijumpai dalam database.";
+                    document.getElementById('hasil').innerText = "Gagal: ID " + id + " tidak dijumpai dalam database ini.";
                 }
+            }).catch(e => {
+                document.getElementById('hasil').innerText = "Ralat: " + e.message;
             });
         }
     </script>
