@@ -12,32 +12,47 @@
         .page { display: none; }
         .active { display: block; }
         input { width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background: #27ae60; color: white; border: none; border-radius: 8px; cursor: pointer; margin-top: 10px; }
+        button { width: 100%; padding: 12px; border: none; border-radius: 8px; cursor: pointer; margin-top: 10px; font-weight: bold; }
+        .btn-masuk { background: #27ae60; color: white; }
+        .btn-daftar { background: #3498db; color: white; }
     </style>
 </head>
 <body onload="checkLoginState()">
 
-<div id="authPage" class="card">
-    <h2>Log Masuk</h2>
+<!-- LOGIN & DAFTAR PAGE -->
+<div id="authPage" class="card active">
+    <h2 id="formTitle">Log Masuk</h2>
     <input type="email" id="email" placeholder="Emel">
     <input type="password" id="pass" placeholder="Kata Laluan">
-    <button onclick="login()">LOG MASUK</button>
+    
+    <div id="loginArea">
+        <button class="btn-masuk" onclick="login()">LOG MASUK</button>
+        <button onclick="lupaPassword()" style="background:#e67e22; color:white;">LUPA KATA LALUAN?</button>
+        <p style="text-align:center; cursor:pointer; color:blue;" onclick="tukarMod()">Belum daftar? Daftar di sini</p>
+    </div>
+    
+    <div id="daftarArea" style="display:none;">
+        <input type="text" id="regNama" placeholder="Nama Penuh">
+        <button class="btn-daftar" onclick="daftar()">DAFTAR SEKARANG</button>
+        <p style="text-align:center; cursor:pointer; color:red;" onclick="tukarMod()">Kembali ke Log Masuk</p>
+    </div>
 </div>
 
+<!-- DASHBOARD -->
 <div id="mainPage" class="page">
     <div class="card">
         <h2>Dashboard Ahli</h2>
-        <button onclick="show('profil')">Profil & Tanggungan</button>
-        <button onclick="logout()" style="background:#e74c3c">KELUAR</button>
+        <button onclick="show('profil')" style="background:#3498db; color:white;">Profil & Tanggungan</button>
+        <button onclick="logout()" style="background:#e74c3c; color:white;">KELUAR</button>
     </div>
 
     <div id="profil" class="card page">
         <h3>Profil Anda</h3>
-        <div id="profilData">Memuatkan data...</div>
+        <div id="profilData">Memuatkan...</div>
         <hr>
         <h4>Kemaskini Tanggungan</h4>
         <div id="tanggunganFields"></div>
-        <button onclick="saveProfile()">SIMPAN</button>
+        <button onclick="saveProfile()" style="background:#27ae60; color:white;">SIMPAN</button>
     </div>
 </div>
 
@@ -52,55 +67,63 @@
     };
     firebase.initializeApp(firebaseConfig);
 
-    // Jana input tanggungan 5 orang
+    // Jana input 5 tanggungan
     let tFields = "";
     for(let i=1; i<=5; i++) {
-        tFields += `<div><input type="text" id="nama${i}" placeholder="Nama Tanggungan ${i}">
-                    <input type="date" id="tgl${i}"></div>`;
+        tFields += `<div><input type="text" id="nama${i}" placeholder="Nama Tanggungan ${i}"></div>`;
     }
     document.getElementById('tanggunganFields').innerHTML = tFields;
 
     function checkLoginState() {
         firebase.auth().onAuthStateChanged(user => {
             if (user) {
-                document.getElementById('authPage').style.display = 'none';
-                document.getElementById('mainPage').style.display = 'block';
+                document.getElementById('authPage').classList.remove('active');
+                document.getElementById('mainPage').classList.add('active');
                 loadData(user.uid);
             }
         });
     }
 
+    function tukarMod() {
+        let isLogin = document.getElementById('loginArea').style.display !== 'none';
+        document.getElementById('loginArea').style.display = isLogin ? 'none' : 'block';
+        document.getElementById('daftarArea').style.display = isLogin ? 'block' : 'none';
+        document.getElementById('formTitle').innerText = isLogin ? 'Daftar Akaun' : 'Log Masuk';
+    }
+
+    function login() {
+        firebase.auth().signInWithEmailAndPassword(document.getElementById('email').value, document.getElementById('pass').value)
+        .catch(e => alert(e.message));
+    }
+
+    function daftar() {
+        firebase.auth().createUserWithEmailAndPassword(document.getElementById('email').value, document.getElementById('pass').value)
+        .then(r => {
+            firebase.database().ref('ahli/'+r.user.uid).set({nama: document.getElementById('regNama').value});
+            alert("Berjaya daftar!"); location.reload();
+        }).catch(e => alert(e.message));
+    }
+
+    function lupaPassword() {
+        firebase.auth().sendPasswordResetEmail(document.getElementById('email').value)
+        .then(() => alert("Pautan telah dihantar ke emel anda.")).catch(e => alert(e.message));
+    }
+
     function loadData(uid) {
-        firebase.database().ref('ahli/' + uid).on('value', s => {
-            let d = s.val();
-            if(d) {
-                document.getElementById('profilData').innerHTML = `Nama: ${d.nama||'Tiada'}`;
-            } else {
-                document.getElementById('profilData').innerHTML = "Tiada data dijumpai.";
-            }
+        firebase.database().ref('ahli/'+uid).on('value', s => {
+            let d = s.val() || {};
+            document.getElementById('profilData').innerHTML = `Nama: ${d.nama||'Tiada'}`;
         });
     }
 
     function saveProfile() {
         let uid = firebase.auth().currentUser.uid;
         let data = {};
-        for(let i=1; i<=5; i++) {
-            data['nama'+i] = document.getElementById('nama'+i).value;
-        }
-        firebase.database().ref('ahli/' + uid).update(data).then(() => alert("Berjaya!"));
+        for(let i=1; i<=5; i++) { data['nama'+i] = document.getElementById('nama'+i).value; }
+        firebase.database().ref('ahli/'+uid).update(data).then(() => alert("Berjaya!"));
     }
 
-    function login() {
-        let e = document.getElementById('email').value;
-        let p = document.getElementById('pass').value;
-        firebase.auth().signInWithEmailAndPassword(e, p).catch(err => alert(err.message));
-    }
-    
-    function show(id) {
-        document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
-        document.getElementById(id).style.display = 'block';
-    }
-    
+    function show(id) { document.getElementById(id).style.display = 'block'; }
     function logout() { firebase.auth().signOut().then(() => location.reload()); }
 </script>
 </body>
