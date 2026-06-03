@@ -2,14 +2,12 @@
 <html lang="ms">
 <head>
     <meta charset="UTF-8">
-    <!-- Meta tag wajib untuk skrin telefon -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistem Khairat Smart TSCC</title>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
     <style>
-        /* Tetapan paksa untuk lebar skrin telefon */
         html, body { margin: 0; padding: 0; width: 100%; overflow-x: hidden; font-family: sans-serif; background: #f4f4f9; }
         .card { background: white; padding: 15px; margin: 10px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .btn { background: #3498db; color: white; padding: 12px; border: none; border-radius: 8px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 5px; }
@@ -17,6 +15,9 @@
         
         .page { display: none; }
         .active { display: block; }
+        
+        /* Navigasi direndahkan sedikit dengan padding-top */
+        .nav-container { display: flex; gap: 5px; padding: 20px 10px 10px 10px; }
         .tab-btn { background: #3498db; padding: 10px; color: white; border: none; border-radius: 5px; cursor: pointer; flex: 1; }
     </style>
 </head>
@@ -44,7 +45,8 @@
     </div>
 
     <div id="mainContent" class="page">
-        <nav style="display:flex; gap:5px; padding: 0 10px;">
+        <!-- Navigasi direndahkan dengan div nav-container -->
+        <nav class="nav-container">
             <button class="tab-btn" onclick="showPage('info')">Info</button>
             <button class="tab-btn" onclick="showPage('profil')">Profil</button>
             <button class="tab-btn" style="background:#e74c3c" onclick="logoutUser()">Keluar</button>
@@ -52,7 +54,17 @@
 
         <div id="info" class="card page active">
             <h2>📋 Info Khairat</h2>
-            <p>Maklumat manfaat dan pengurusan jenazah di sini.</p>
+            <p><b>Jumlah Manfaat: RM1000</b></p>
+            <hr>
+            <p>Penyediaan kubur: RM300<br>
+            Papan lahad: RM200<br>
+            Kain kafan: RM250<br>
+            Bantuan tunai: RM250</p>
+            <hr>
+            <p>Mandi Jenazah L/P: Seikhlas hati<br>
+            Van jenazah dalam kariah: Percuma<br>
+            Luar kariah dalam Melaka: RM80<br>
+            Luar Melaka: Mengikut perbatuan</p>
         </div>
 
         <div id="profil" class="card page">
