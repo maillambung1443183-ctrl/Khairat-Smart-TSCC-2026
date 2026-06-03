@@ -8,13 +8,12 @@
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
     <style>
-        /* Tetapan Bold untuk semua teks */
-        body, html, .card, .btn, input, select, h2, p, span, b { font-weight: bold !important; font-family: sans-serif; }
-        
-        html, body { margin: 0; padding: 0; width: 100%; overflow-x: hidden; background: #f4f4f9; }
+        /* Memastikan semua tulisan menjadi BOLD */
+        * { font-weight: bold !important; }
+        html, body { margin: 0; padding: 0; width: 100%; overflow-x: hidden; font-family: sans-serif; background: #f4f4f9; }
         .card { background: white; padding: 15px; margin: 10px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .btn { background: #3498db; color: white; padding: 12px; border: none; border-radius: 8px; width: 100%; cursor: pointer; margin-top: 5px; }
-        input { width: 100%; padding: 12px; margin: 5px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
+        input, select { width: 100%; padding: 12px; margin: 5px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
         .page { display: none; }
         .active { display: block; }
         .nav-container { display: flex; gap: 5px; padding: 20px 10px 10px 10px; }
@@ -51,70 +50,123 @@
             <button class="tab-btn" style="background:#e74c3c" onclick="logoutUser()">Keluar</button>
         </nav>
 
+        <div id="info" class="card page active">
+            <p><b><h2>📋 Info Khairat</h2></b></p>
+            <p><b>Jumlah Manfaat: RM1000</b></p>
+            <hr>
+            <p><b>Penyediaan kubur: RM300</b><br><b>Papan lahad: RM200</b><br><b>Kain kafan: RM250</b><br><b>Bantuan tunai: RM250</b></p>
+            <hr>
+            <p><b>Mandi Jenazah L/P: Seikhlas hati</b><br><b>Van jenazah dalam kariah: Percuma</b></p>
+            <hr>
+            <p><b><h3>👤 Maklumat AJK</h3></b></p>
+            <p><b>1. En Awang Mohd Fauzi Bin Abu Samah (Pengerusi): 0113333333</b><br><b>2. En Ismail Bin Ishak (Setiausaha): 0177000242</b><br><b>3. En Mohd Zan Bin Mohd Nor (Bendahari): 012222222</b></p>
+        </div>
+
         <div id="profil" class="card page">
             <h2>👤 Profil Ahli</h2>
             <div id="viewProfil">
                 <p><b>Nama:</b> <span id="vNama">-</span></p>
+                <p><b>No Ahli:</b> <span id="vNoAhli">-</span></p>
+                <p><b>Alamat:</b> <span id="vAlamat">-</span></p>
+                <p><b>No Tel:</b> <span id="vTel">-</span></p>
                 <p><b>Waris:</b> <span id="vWaris">-</span></p>
                 <p><b>Tanggungan:</b> <span id="vTanggungan">-</span></p>
-                <button class="btn" onclick="toggleEdit()">KEMASKINI</button>
+                <button class="btn" onclick="bukaEdit()">KEMASKINI</button>
             </div>
             <div id="editProfil" style="display:none;">
+                <input type="text" id="eAlamat" placeholder="Alamat">
+                <input type="text" id="eTel" placeholder="No Telefon">
                 <input type="text" id="eWaris" placeholder="Nama Waris">
                 <select id="eHubunganWaris">
-                    <option value="">Pilih Hubungan Waris</option>
                     <option value="Isteri">Isteri</option>
                     <option value="Suami">Suami</option>
                     <option value="Anak">Anak</option>
                     <option value="Keluarga">Keluarga</option>
                 </select>
                 <input type="text" id="eTelWaris" placeholder="No Tel Waris">
-                <hr>
-                <p><b>Tanggungan (5 Orang):</b></p>
-                <div id="tanggunganContainer">
+                <div id="inputTanggungan">
                     <script>
                         for(let i=1; i<=5; i++) {
-                            document.write(`Nama ${i}: <input type="text" class="tNama" placeholder="Nama">`);
-                            document.write(`Lahir ${i}: <input type="date" class="tLahir" onchange="kiraUmur(this)">`);
-                            document.write(`Umur: <span class="tUmur">-</span><br>`);
+                            document.write(`Nama ${i}: <input type="text" class="tNama" id="tNama${i}">`);
+                            document.write(`Lahir ${i}: <input type="date" class="tLahir" id="tLahir${i}" onchange="kiraUmur(this, 'u${i}')">`);
+                            document.write(`Umur: <span id="u${i}">-</span><br>`);
                         }
                     </script>
                 </div>
                 <button class="btn" style="background:#27ae60" onclick="saveProfile()">SIMPAN</button>
-                <button class="btn" style="background:#7f8c8d" onclick="toggleEdit()">BATAL</button>
+                <button class="btn" style="background:#7f8c8d" onclick="bukaEdit()">BATAL</button>
             </div>
         </div>
     </div>
 
     <script>
-        // Gunakan firebaseConfig asal anda di sini
         const firebaseConfig = { apiKey: "AIzaSyC_YDZfbKqgZjOBuz722XrSwOw7JPJx0u4", authDomain: "khairatsmarttempat.firebaseapp.com", projectId: "khairatsmarttempat", storageBucket: "khairatsmarttempat.firebasestorage.app", messagingSenderId: "356017221628", appId: "1:356017221628:web:e9a56a3fa6dd0079904c79" };
         firebase.initializeApp(firebaseConfig);
 
-        function checkLoginState() { firebase.auth().onAuthStateChanged((user) => { if (user) { document.getElementById('loginPage').style.display = 'none'; document.getElementById('mainContent').style.display = 'block'; } }); }
-        function kiraUmur(el) { let l = new Date(el.value); let u = new Date().getFullYear() - l.getFullYear(); el.nextElementSibling.innerText = isNaN(u) ? '-' : u; }
-        function toggleEdit() { 
-            let v = document.getElementById('viewProfil'); let e = document.getElementById('editProfil');
-            v.style.display = (v.style.display === 'none') ? 'block' : 'none';
-            e.style.display = (e.style.display === 'none') ? 'block' : 'none';
+        function checkLoginState() {
+            firebase.auth().onAuthStateChanged((user) => {
+                if (user) {
+                    document.getElementById('loginPage').style.display = 'none';
+                    document.getElementById('mainContent').style.display = 'block';
+                    loadData(user.uid);
+                }
+            });
         }
+
+        function loadData(uid) {
+            firebase.database().ref('ahli/' + uid).on('value', (s) => {
+                let d = s.val() || {};
+                document.getElementById('vNama').innerText = d.nama || '-';
+                document.getElementById('vNoAhli').innerText = d.id || '-';
+                document.getElementById('vAlamat').innerText = d.alamat || '-';
+                document.getElementById('vTel').innerText = d.tel || '-';
+                document.getElementById('vWaris').innerText = (d.waris || '-') + " (" + (d.hubunganWaris || "-") + ") Tel: " + (d.telWaris || "-");
+                document.getElementById('vTanggungan').innerText = d.tanggunganRaw || '-';
+            });
+        }
+
+        function bukaEdit() {
+            let v = document.getElementById('viewProfil');
+            let e = document.getElementById('editProfil');
+            if(e.style.display === 'none') {
+                v.style.display = 'none';
+                e.style.display = 'block';
+            } else {
+                v.style.display = 'block';
+                e.style.display = 'none';
+            }
+        }
+
+        function kiraUmur(el, targetId) {
+            let lahir = new Date(el.value);
+            let umur = new Date().getFullYear() - lahir.getFullYear();
+            document.getElementById(targetId).innerText = isNaN(umur) ? '-' : umur;
+        }
+
         function saveProfile() {
             let uid = firebase.auth().currentUser.uid;
-            let t = "";
-            let names = document.querySelectorAll('.tNama');
-            let ages = document.querySelectorAll('.tUmur');
-            for(let i=0; i<5; i++) { if(names[i].value) t += names[i].value + " (" + ages[i].innerText + " thn), "; }
+            let dataT = "";
+            for(let i=1; i<=5; i++) {
+                let n = document.getElementById('tNama'+i).value;
+                let l = document.getElementById('tLahir'+i).value;
+                if(n) dataT += n + " (" + l + "), ";
+            }
             firebase.database().ref('ahli/' + uid).update({
+                alamat: document.getElementById('eAlamat').value,
+                tel: document.getElementById('eTel').value,
                 waris: document.getElementById('eWaris').value,
                 hubunganWaris: document.getElementById('eHubunganWaris').value,
                 telWaris: document.getElementById('eTelWaris').value,
-                tanggungan: t
-            }).then(() => { alert("Berjaya disimpan!"); toggleEdit(); location.reload(); });
+                tanggunganRaw: dataT
+            }).then(() => { alert("Berjaya disimpan!"); bukaEdit(); });
         }
-        // Fungsi asal anda (login/logout/daftar) kekal di sini
+
+        function showPage(id) { document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.getElementById(id).classList.add('active'); }
         function loginMember() { firebase.auth().signInWithEmailAndPassword(document.getElementById('loginEmail').value, document.getElementById('loginPass').value).catch(e => alert(e.message)); }
         function logoutUser() { firebase.auth().signOut().then(() => location.reload()); }
-        function showPage(id) { document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+        function tukarKeDaftar() { document.getElementById('loginArea').style.display = 'none'; document.getElementById('daftarArea').style.display = 'block'; }
+        function registerMember() { firebase.auth().createUserWithEmailAndPassword(document.getElementById('regEmail').value, document.getElementById('regPass').value).then((r) => { firebase.database().ref('ahli/' + r.user.uid).set({ id: document.getElementById('regID').value, nama: document.getElementById('regNama').value }).then(() => location.reload()); }).catch(e => alert(e.message)); }
+        function lupaPassword() { firebase.auth().sendPasswordResetEmail(document.getElementById('loginEmail').value).then(() => alert("Semak emel!")).catch(e => alert(e.message)); }
     </script>
 </body>
 </html>
