@@ -71,10 +71,23 @@
         </div>
 
         <div id="profil" class="card page">
-            <h2>👤 Maklumat Ahli</h2>
-            <p><b>Nama:</b> <span id="vNama">-</span></p>
-            <div id="tanggunganInputs"></div>
-            <button class="btn" onclick="updateProfile()">SIMPAN TANGGUNGAN</button>
+            <h2>👤 Profil Ahli</h2>
+            <div id="viewProfil">
+                <p><b>1. Nama:</b> <span id="vNama">-</span></p>
+                <p><b>2. No Ahli:</b> <span id="vNoAhli">-</span></p>
+                <p><b>3. Alamat:</b> <span id="vAlamat">-</span></p>
+                <p><b>4. No Tel:</b> <span id="vTel">-</span></p>
+                <p><b>5. Waris:</b> <span id="vWaris">-</span></p>
+                <p><b>6. Tanggungan:</b> <span id="vTanggungan">-</span></p>
+                <button class="btn" onclick="toggleEdit()">KEMASKINI</button>
+            </div>
+            <div id="editProfil" style="display:none;">
+                <input type="text" id="eAlamat" placeholder="Alamat Baru">
+                <input type="text" id="eTel" placeholder="No Tel Baru">
+                <input type="text" id="eTanggungan" placeholder="Tambah Tanggungan">
+                <button class="btn" style="background:#27ae60" onclick="saveProfile()">SIMPAN</button>
+                <button class="btn" style="background:#7f8c8d" onclick="toggleEdit()">BATAL</button>
+            </div>
         </div>
     </div>
 
@@ -89,19 +102,42 @@
         };
         firebase.initializeApp(firebaseConfig);
 
-        let tFields = "<h4>5 Tanggungan</h4>";
-        for(let i=1; i<=5; i++) {
-            tFields += `<input type="text" id="tNama${i}" placeholder="Nama Tanggungan ${i}">`;
-        }
-        document.getElementById('tanggunganInputs').innerHTML = tFields;
-
         function checkLoginState() {
             firebase.auth().onAuthStateChanged((user) => {
                 if (user) {
                     document.getElementById('loginPage').style.display = 'none';
                     document.getElementById('mainContent').style.display = 'block';
+                    loadData(user.uid);
                 }
             });
+        }
+
+        function loadData(uid) {
+            firebase.database().ref('ahli/' + uid).on('value', (s) => {
+                let d = s.val() || {};
+                document.getElementById('vNama').innerText = d.nama || '-';
+                document.getElementById('vNoAhli').innerText = d.id || '-';
+                document.getElementById('vAlamat').innerText = d.alamat || '-';
+                document.getElementById('vTel').innerText = d.tel || '-';
+                document.getElementById('vWaris').innerText = d.waris || '-';
+                document.getElementById('vTanggungan').innerText = d.tanggungan || '-';
+            });
+        }
+
+        function toggleEdit() {
+            let v = document.getElementById('viewProfil');
+            let e = document.getElementById('editProfil');
+            v.style.display = (v.style.display === 'none') ? 'block' : 'none';
+            e.style.display = (e.style.display === 'none') ? 'block' : 'none';
+        }
+
+        function saveProfile() {
+            let uid = firebase.auth().currentUser.uid;
+            firebase.database().ref('ahli/' + uid).update({
+                alamat: document.getElementById('eAlamat').value,
+                tel: document.getElementById('eTel').value,
+                tanggungan: document.getElementById('eTanggungan').value
+            }).then(() => { alert("Berjaya disimpan!"); toggleEdit(); });
         }
 
         function showPage(id) { 
@@ -114,19 +150,16 @@
         function tukarKeDaftar() { document.getElementById('loginArea').style.display = 'none'; document.getElementById('daftarArea').style.display = 'block'; }
         
         function registerMember() {
-            let p1 = document.getElementById('regPass').value;
-            let p2 = document.getElementById('regPassConfirm').value;
-            if(p1 !== p2) return alert("Kata laluan tidak sepadan!");
-            firebase.auth().createUserWithEmailAndPassword(document.getElementById('regEmail').value, p1).then(() => location.reload()).catch(e => alert(e.message));
+            firebase.auth().createUserWithEmailAndPassword(document.getElementById('regEmail').value, document.getElementById('regPass').value).then((r) => {
+                firebase.database().ref('ahli/' + r.user.uid).set({
+                    id: document.getElementById('regID').value,
+                    nama: document.getElementById('regNama').value,
+                    alamat: document.getElementById('regAlamat').value,
+                    tel: document.getElementById('regTel').value
+                }).then(() => location.reload());
+            }).catch(e => alert(e.message));
         }
 
-        function updateProfile() {
-            let uid = firebase.auth().currentUser.uid;
-            let data = {};
-            for(let i=1; i<=5; i++) { data['tNama'+i] = document.getElementById('tNama'+i).value; }
-            firebase.database().ref('ahli/' + uid).update(data).then(() => alert("Berjaya!"));
-        }
-        
         function lupaPassword() { firebase.auth().sendPasswordResetEmail(document.getElementById('loginEmail').value).then(() => alert("Semak emel!")).catch(e => alert(e.message)); }
     </script>
 </body>
