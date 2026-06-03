@@ -2,80 +2,141 @@
 <html lang="ms">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistem Khairat Smart TSCC</title>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
     <style>
-        * { font-weight: bold !important; font-family: sans-serif; }
-        .card { background: white; padding: 15px; margin: 10px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .btn { background: #3498db; color: white; padding: 10px; border: none; border-radius: 5px; width: 100%; cursor: pointer; margin-top: 5px; }
-        input { width: 100%; padding: 8px; margin: 5px 0; border: 1px solid #ccc; border-radius: 5px; }
+        html, body { margin: 0; padding: 0; width: 100%; overflow-x: hidden; font-family: sans-serif; background: #f4f4f9; font-weight: bold; }
+        .card { background: white; padding: 15px; margin: 10px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); font-weight: bold; }
+        .btn { background: #3498db; color: white; padding: 12px; border: none; border-radius: 8px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 5px; }
+        input, select { width: 100%; padding: 12px; margin: 5px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-weight: bold; }
+        .page { display: none; }
+        .active { display: block; }
+        .nav-container { display: flex; gap: 5px; padding: 20px 10px 10px 10px; }
+        .tab-btn { background: #3498db; padding: 10px; color: white; border: none; border-radius: 5px; cursor: pointer; flex: 1; font-weight: bold; }
+        h2, p, b, span { font-weight: bold; }
     </style>
 </head>
-<body>
+<body onload="checkLoginState()">
 
-    <div id="app" class="card">
+    <div id="loginPage" class="card">
+        <h2><b>Log Masuk Ahli</b></h2>
+        <input type="email" id="loginEmail" placeholder="Emel Berdaftar">
+        <input type="password" id="loginPass" placeholder="Kata Laluan">
         <div id="loginArea">
-            <input type="text" id="inputIdAhli" placeholder="Masukkan ID Ahli (cth: KAF045)">
-            <button class="btn" onclick="muatData()">LOAD DATA</button>
+            <button class="btn" onclick="loginMember()">MASUK</button>
+            <button class="btn" style="background:#e67e22;" onclick="lupaPassword()">LUPA KATA LALUAN?</button>
+            <p style="text-align:center; cursor:pointer; color:blue;" onclick="tukarKeDaftar()">Belum daftar? Daftar di sini</p>
+        </div>
+        <div id="daftarArea" style="display:none;">
+            <input type="text" id="regID" placeholder="Member ID">
+            <input type="text" id="regNama" placeholder="Nama Penuh">
+            <input type="email" id="regEmail" placeholder="Emel">
+            <input type="password" id="regPass" placeholder="Kata Laluan">
+            <input type="password" id="regPassConfirm" placeholder="Sah Kata Laluan">
+            <input type="text" id="regAlamat" placeholder="Alamat">
+            <input type="text" id="regTel" placeholder="No. Telefon">
+            <button class="btn" style="background:#27ae60" onclick="registerMember()">DAFTAR</button>
+        </div>
+    </div>
+
+    <div id="mainContent" class="page">
+        <nav class="nav-container">
+            <button class="tab-btn" onclick="showPage('info')">Info</button>
+            <button class="tab-btn" onclick="showPage('profil')">Profil</button>
+            <button class="tab-btn" style="background:#e74c3c" onclick="logoutUser()">Keluar</button>
+        </nav>
+
+        <div id="info" class="card page active">
+            <p><b><h2>📋 Info Khairat</h2></b></p>
+            <p><b>Jumlah Manfaat: RM1000</b></p>
+            <hr>
+            <p><b>Penyediaan kubur: RM300</b><br><b>Papan lahad: RM200</b><br><b>Kain kafan: RM250</b><br><b>Bantuan tunai: RM250</b></p>
+            <hr>
+            <p><b>Mandi Jenazah L/P: Seikhlas hati</b><br><b>Van jenazah dalam kariah: Percuma</b></p>
+            <hr>
+            <p><b><h3>👤 Maklumat AJK</h3></b></p>
+            <p><b>1. En Awang Mohd Fauzi Bin Abu Samah (Pengerusi): 0113333333</b><br><b>2. En Ismail Bin Ishak (Setiausaha): 0177000242</b><br><b>3. En Mohd Zan Bin Mohd Nor (Bendahari): 012222222</b></p>
         </div>
 
-        <div id="paparanProfil" style="display:none;">
-            <h3>Profil Ahli</h3>
-            <p>Nama: <span id="vNama">-</span></p>
-            <p>Alamat: <span id="vAlamat">-</span></p>
-            <p>Tel: <span id="vTel">-</span></p>
-            <p>Waris: <span id="vWaris">-</span></p>
-            <p>Tanggungan: <span id="vTanggungan">-</span></p>
-            <button class="btn" onclick="bukaEdit()">KEMASKINI</button>
-        </div>
-
-        <div id="editProfil" style="display:none;">
-            <input type="text" id="eAlamat" placeholder="Alamat">
-            <input type="text" id="eTel" placeholder="No Tel">
-            <input type="text" id="eWaris" placeholder="Nama Waris">
-            <input type="text" id="eTanggungan" placeholder="Bilangan/Nama Tanggungan">
-            <button class="btn" style="background:#27ae60" onclick="simpanData()">SIMPAN</button>
+        <div id="profil" class="card page">
+            <h2><b>👤 Profil Ahli</b></h2>
+            <div id="viewProfil">
+                <p><b>1. Nama:</b> <span id="vNama">-</span></p>
+                <p><b>2. No Ahli:</b> <span id="vNoAhli">-</span></p>
+                <p><b>3. Alamat:</b> <span id="vAlamat">-</span></p>
+                <p><b>4. No Tel:</b> <span id="vTel">-</span></p>
+                <p><b>5. Waris:</b> <span id="vWaris">-</span></p>
+                <p><b>6. Tanggungan:</b> <span id="vTanggungan">-</span></p>
+                <button class="btn" onclick="toggleEdit()">KEMASKINI</button>
+            </div>
+            <div id="editProfil" style="display:none;">
+                <input type="text" id="eAlamat" placeholder="Alamat Baru">
+                <input type="text" id="eTel" placeholder="No Tel Baru">
+                <input type="text" id="eWaris" placeholder="Nama Waris">
+                <select id="eHubunganWaris"><option value="">Pilih Hubungan</option><option value="Isteri">Isteri</option><option value="Suami">Suami</option><option value="Anak">Anak</option><option value="Keluarga">Keluarga</option></select>
+                <input type="text" id="eTelWaris" placeholder="No Tel Waris">
+                <div id="tanggunganFields">
+                    <input type="text" class="tNama" placeholder="Nama Tanggungan 1"> <input type="date" class="tLahir">
+                    <input type="text" class="tNama" placeholder="Nama Tanggungan 2"> <input type="date" class="tLahir">
+                    <input type="text" class="tNama" placeholder="Nama Tanggungan 3"> <input type="date" class="tLahir">
+                    <input type="text" class="tNama" placeholder="Nama Tanggungan 4"> <input type="date" class="tLahir">
+                    <input type="text" class="tNama" placeholder="Nama Tanggungan 5"> <input type="date" class="tLahir">
+                </div>
+                <button class="btn" style="background:#27ae60" onclick="saveProfile()">SIMPAN</button>
+                <button class="btn" style="background:#7f8c8d" onclick="toggleEdit()">BATAL</button>
+            </div>
         </div>
     </div>
 
     <script>
-        const firebaseConfig = { databaseURL: "https://khairat-smart-al-falah-tscc-default-rtdb.firebaseio.com/" };
+        const firebaseConfig = { apiKey: "AIzaSyC_YDZfbKqgZjOBuz722XrSwOw7JPJx0u4", authDomain: "khairatsmarttempat.firebaseapp.com", projectId: "khairatsmarttempat", storageBucket: "khairatsmarttempat.firebasestorage.app", messagingSenderId: "356017221628", appId: "1:356017221628:web:e9a56a3fa6dd0079904c79" };
         firebase.initializeApp(firebaseConfig);
 
-        let currentId = "";
+        function checkLoginState() { firebase.auth().onAuthStateChanged((user) => { if (user) { document.getElementById('loginPage').style.display = 'none'; document.getElementById('mainContent').style.display = 'block'; loadData(user.uid); } }); }
 
-        function muatData() {
-            currentId = document.getElementById('inputIdAhli').value;
-            firebase.database().ref(currentId).on('value', (s) => {
+        function loadData(uid) {
+            firebase.database().ref('ahli/' + uid).on('value', (s) => {
                 let d = s.val() || {};
                 document.getElementById('vNama').innerText = d.nama || '-';
+                document.getElementById('vNoAhli').innerText = d.id || '-';
                 document.getElementById('vAlamat').innerText = d.alamat || '-';
                 document.getElementById('vTel').innerText = d.tel || '-';
-                document.getElementById('vWaris').innerText = d.waris || '-';
+                document.getElementById('vWaris').innerText = (d.waris || '-') + " " + (d.hubunganWaris || "") + " " + (d.telWaris || "");
                 document.getElementById('vTanggungan').innerText = d.tanggungan || '-';
-                
-                document.getElementById('eAlamat').value = d.alamat || '';
-                document.getElementById('eTel').value = d.tel || '';
-                document.getElementById('eWaris').value = d.waris || '';
-                document.getElementById('eTanggungan').value = d.tanggungan || '';
-                
-                document.getElementById('paparanProfil').style.display = 'block';
             });
         }
 
-        function simpanData() {
-            // .update() akan simpan hanya medan yang kita tulis, data lain takkan hilang
-            firebase.database().ref(currentId).update({
-                alamat: document.getElementById('eAlamat').value,
-                tel: document.getElementById('eTel').value,
-                waris: document.getElementById('eWaris').value,
-                tanggungan: document.getElementById('eTanggungan').value
-            }).then(() => { alert("Berjaya disimpan!"); document.getElementById('editProfil').style.display = 'none'; });
+        function toggleEdit() {
+            let v = document.getElementById('viewProfil');
+            let e = document.getElementById('editProfil');
+            v.style.display = (v.style.display === 'none') ? 'block' : 'none';
+            e.style.display = (e.style.display === 'none') ? 'block' : 'none';
         }
 
-        function bukaEdit() { document.getElementById('editProfil').style.display = 'block'; }
+        function saveProfile() {
+            let uid = firebase.auth().currentUser.uid;
+            firebase.database().ref('ahli/' + uid).once('value', (snapshot) => {
+                let oldData = snapshot.val() || {};
+                let updateData = {
+                    alamat: document.getElementById('eAlamat').value || oldData.alamat,
+                    tel: document.getElementById('eTel').value || oldData.tel,
+                    waris: document.getElementById('eWaris').value || oldData.waris,
+                    hubunganWaris: document.getElementById('eHubunganWaris').value || oldData.hubunganWaris,
+                    telWaris: document.getElementById('eTelWaris').value || oldData.telWaris
+                };
+                firebase.database().ref('ahli/' + uid).update(updateData).then(() => { alert("Berjaya dikemaskini!"); toggleEdit(); });
+            });
+        }
+
+        function showPage(id) { document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+        function loginMember() { firebase.auth().signInWithEmailAndPassword(document.getElementById('loginEmail').value, document.getElementById('loginPass').value).catch(e => alert(e.message)); }
+        function logoutUser() { firebase.auth().signOut().then(() => location.reload()); }
+        function tukarKeDaftar() { document.getElementById('loginArea').style.display = 'none'; document.getElementById('daftarArea').style.display = 'block'; }
+        function registerMember() { firebase.auth().createUserWithEmailAndPassword(document.getElementById('regEmail').value, document.getElementById('regPass').value).then((r) => { firebase.database().ref('ahli/' + r.user.uid).set({ id: document.getElementById('regID').value, nama: document.getElementById('regNama').value, alamat: document.getElementById('regAlamat').value, tel: document.getElementById('regTel').value }).then(() => location.reload()); }).catch(e => alert(e.message)); }
+        function lupaPassword() { firebase.auth().sendPasswordResetEmail(document.getElementById('loginEmail').value).then(() => alert("Semak emel!")).catch(e => alert(e.message)); }
     </script>
 </body>
 </html>
