@@ -14,6 +14,8 @@
         .btn { background: #3498db; color: white; padding: 12px; border: none; border-radius: 8px; width: 100%; cursor: pointer; margin-top: 5px; }
         input, select { width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
         .page { display: none; } .active { display: block; }
+        .nav-container { display: flex; gap: 5px; margin-bottom: 10px; }
+        .tab-btn { background: #3498db; padding: 10px; color: white; border: none; border-radius: 5px; cursor: pointer; flex: 1; }
     </style>
 </head>
 <body onload="checkLoginState()">
@@ -27,7 +29,18 @@
     </div>
 
     <div id="mainContent" class="page">
-        <div id="profil" class="card">
+        <nav class="nav-container">
+            <button class="tab-btn" onclick="showPage('info')">Info</button>
+            <button class="tab-btn" onclick="showPage('profil')">Profil</button>
+            <button class="tab-btn" style="background:#e74c3c" onclick="logoutUser()">Keluar</button>
+        </nav>
+
+        <div id="info" class="card page active">
+            <h2>📋 Info Khairat</h2>
+            <p>Jumlah Manfaat: RM1000</p>
+        </div>
+
+        <div id="profil" class="card page">
             <h2>👤 Profil Ahli</h2>
             <div id="viewProfil">
                 <p>Nama: <span id="vNama">-</span></p>
@@ -42,9 +55,7 @@
                 <input type="text" id="eAlamat" placeholder="Alamat">
                 <input type="text" id="eTel" placeholder="No Tel">
                 <input type="text" id="eWaris" placeholder="Nama Waris">
-                <select id="eHubunganWaris">
-                    <option value="Isteri">Isteri</option><option value="Suami">Suami</option><option value="Anak">Anak</option>
-                </select>
+                <select id="eHubunganWaris"><option value="Isteri">Isteri</option><option value="Suami">Suami</option><option value="Anak">Anak</option></select>
                 <input type="text" id="eTelWaris" placeholder="No Tel Waris">
                 <div id="inputTanggungan">
                     <script>
@@ -86,6 +97,7 @@
                 document.getElementById('eAlamat').value = d.alamat || '';
                 document.getElementById('eTel').value = d.tel || '';
                 document.getElementById('eWaris').value = d.waris || '';
+                document.getElementById('eTelWaris').value = d.telWaris || '';
             });
         }
 
@@ -98,22 +110,15 @@
                 if(n) dataT += n + " (" + l + "), ";
             }
             
-            // Menggunakan .once() untuk mendapatkan data semasa sebelum update
-            firebase.database().ref('ahli/' + uid).once('value', (snapshot) => {
-                let currentData = snapshot.val() || {};
-                let newData = {
-                    nama: currentData.nama || 'Tiada Nama',
-                    alamat: document.getElementById('eAlamat').value,
-                    tel: document.getElementById('eTel').value,
-                    waris: document.getElementById('eWaris').value,
-                    hubunganWaris: document.getElementById('eHubunganWaris').value,
-                    telWaris: document.getElementById('eTelWaris').value,
-                    tanggunganRaw: dataT
-                };
-                
-                firebase.database().ref('ahli/' + uid).set(newData)
-                .then(() => { alert("Berjaya Disimpan!"); bukaEdit(); });
-            });
+            // Menggunakan .update() supaya data lain TIDAK HILANG
+            firebase.database().ref('ahli/' + uid).update({
+                alamat: document.getElementById('eAlamat').value,
+                tel: document.getElementById('eTel').value,
+                waris: document.getElementById('eWaris').value,
+                hubunganWaris: document.getElementById('eHubunganWaris').value,
+                telWaris: document.getElementById('eTelWaris').value,
+                tanggunganRaw: dataT
+            }).then(() => { alert("Berjaya disimpan!"); bukaEdit(); });
         }
 
         function bukaEdit() {
@@ -123,13 +128,10 @@
             e.style.display = (e.style.display === 'none') ? 'block' : 'none';
         }
 
-        function lupaPassword() {
-            let email = document.getElementById('loginEmail').value;
-            if(!email) { alert("Masukkan emel dulu!"); return; }
-            firebase.auth().sendPasswordResetEmail(email).then(() => alert("Pautan dihantar!")).catch(e => alert(e.message));
-        }
-
+        function showPage(id) { document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.getElementById(id).classList.add('active'); }
         function loginMember() { firebase.auth().signInWithEmailAndPassword(document.getElementById('loginEmail').value, document.getElementById('loginPass').value).catch(e => alert(e.message)); }
+        function logoutUser() { firebase.auth().signOut().then(() => location.reload()); }
+        function lupaPassword() { let email = document.getElementById('loginEmail').value; if(!email) { alert("Masukkan emel!"); return; } firebase.auth().sendPasswordResetEmail(email).then(() => alert("Pautan dihantar!")).catch(e => alert(e.message)); }
     </script>
 </body>
 </html>
