@@ -7,14 +7,13 @@
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
     <style>
         body { font-family: sans-serif; background: #f4f4f9; padding: 20px; }
-        .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 500px; margin: auto; }
-        h1 { font-size: 1.3rem; color: #2c3e50; text-align: center; margin-bottom: 20px; }
+        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 500px; margin: auto; }
+        h1 { font-size: 1.2rem; color: #2c3e50; text-align: center; }
         input, button { width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
         button { background: #3498db; color: white; border: none; cursor: pointer; font-weight: bold; }
         .hidden { display: none; }
         .section-box { background: #f9f9f9; padding: 15px; border-left: 5px solid #27ae60; margin-top: 15px; }
         ul { padding-left: 20px; }
-        li { margin-bottom: 5px; }
     </style>
 </head>
 <body>
@@ -27,29 +26,45 @@
         <button onclick="tukarView('daftar')" style="background:#27ae60">DAFTAR AHLI BARU</button>
     </div>
 
+    <!-- LOG MASUK -->
     <div id="loginSection" class="hidden">
         <h2>Log Masuk</h2>
         <input type="text" id="loginId" placeholder="No. Ahli">
         <button onclick="prosesLogin()">MASUK</button>
+        <p style="text-align:center; cursor:pointer; color:blue;" onclick="alert('Hubungi En. Ismail: 017-000000')">Lupa No. Ahli?</p>
     </div>
 
+    <!-- DAFTAR -->
     <div id="daftarSection" class="hidden">
-        <h2>Pendaftaran Ahli</h2>
+        <h2>Pendaftaran</h2>
         <input type="text" id="regId" placeholder="No. Ahli">
         <input type="text" id="regNama" placeholder="Nama Penuh">
         <input type="text" id="regAlamat" placeholder="Alamat">
+        <input type="email" id="regEmail" placeholder="Email">
         <input type="tel" id="regTel" placeholder="No. Telefon">
         <input type="text" id="regWaris" placeholder="Nama Waris">
         <input type="tel" id="regWarisTel" placeholder="No. Tel Waris">
-        <input type="text" id="regHubungan" placeholder="Hubungan Waris">
-        <input type="text" id="regTang" placeholder="Nama Tanggungan (Jika ada)">
-        <button onclick="prosesDaftar()" style="background:#27ae60">HANTAR PENDAFTARAN</button>
+        <input type="text" id="regHubungan" placeholder="Hubungan">
+        <h4>Tanggungan (Max 5)</h4>
+        <div id="tanggunganFields">
+            <script>
+                for(let i=1; i<=5; i++){
+                    document.write(`<div>
+                        <input type="text" id="tNama${i}" placeholder="Nama ${i}">
+                        <input type="date" id="tLahir${i}" onchange="kiraUmur(${i})">
+                        <small>Umur: <span id="tUmur${i}">0</span></small>
+                    </div>`);
+                }
+            </script>
+        </div>
+        <button onclick="cekDaftar()" style="background:#27ae60">HANTAR PENDAFTARAN</button>
     </div>
 
+    <!-- PROFIL -->
     <div id="profileSection" class="hidden">
         <div id="manfaatPage">
             <div class="section-box">
-                <h3>Manfaat Kematian (Jumlah: RM 1,000)</h3>
+                <h3>Manfaat Kematian (RM 1,000)</h3>
                 <ul>
                     <li>Pengurusan Kubur: RM 300</li>
                     <li>Kain Kafan: RM 250</li>
@@ -58,94 +73,81 @@
                 </ul>
             </div>
             <div class="section-box">
-                <h3>Perkhidmatan Van Jenazah</h3>
+                <h3>Van Jenazah</h3>
                 <ul>
-                    <li>Dalam Kariah: <b>Percuma</b></li>
-                    <li>Luar Kariah (Melaka): <b>RM 80</b></li>
-                    <li>Luar Melaka: <b>Mengikut perbatuan Masjid Al Jonid</b></li>
+                    <li>Dalam Kariah: Percuma</li>
+                    <li>Luar Kariah: RM 80</li>
+                    <li>Luar Melaka: Ikut perbatuan</li>
                 </ul>
             </div>
             <div class="section-box">
-                <h3>Senarai AJK</h3>
-                <ul style="list-style: none;">
-                    <li><b>Pengerusi:</b> En. Awang Mohd Fauzi (011-333333)</li>
-                    <li><b>Setiausaha:</b> En. Ismail Bin Ishak (017-000000)</li>
-                    <li><b>AJK:</b> En. Mohd Zan Bin Mohd Nor (012-222222)</li>
+                <h3>AJK</h3>
+                <ul>
+                    <li>Pengerusi: En. Awang (011-333333)</li>
+                    <li>Setiausaha: En. Ismail (017-000000)</li>
+                    <li>AJK: En. Mohd Zan (012-222222)</li>
                 </ul>
             </div>
-            <button onclick="tukarPage('info')">LIHAT MAKLUMAT AHLI</button>
+            <button onclick="tukarPage('info')">LIHAT DATA PERIBADI</button>
         </div>
 
         <div class="section-box hidden" id="infoPage">
-            <h3>Maklumat Peribadi</h3>
+            <h3>Data Peribadi</h3>
             <p><strong>Nama:</strong> <span id="pNama"></span></p>
-            <p><strong>No. Ahli:</strong> <span id="pId"></span></p>
             <p><strong>Alamat:</strong> <span id="pAlamat"></span></p>
-            <p><strong>No. Tel:</strong> <span id="pTel"></span></p>
-            <p><strong>Waris:</strong> <span id="pWaris"></span> (<span id="pHubungan"></span>) - <span id="pWarisTel"></span></p>
-            <p id="pTangBox"><strong>Tanggungan:</strong> <span id="pTang"></span></p>
+            <p><strong>Waris:</strong> <span id="pWaris"></span></p>
+            <ul id="pTangList"></ul>
             <button onclick="tukarPage('manfaat')">KEMBALI KE MANFAAT</button>
         </div>
-        <button onclick="location.reload()" style="background:#e74c3c; margin-top:20px;">LOG KELUAR</button>
+        <button onclick="location.reload()" style="background:#e74c3c; margin-top:10px;">LOG KELUAR</button>
     </div>
 </div>
 
 <script>
-    const firebaseConfig = { databaseURL: "https://khairatsmarttempat-default-rtdb.firebaseio.com" };
-    firebase.initializeApp(firebaseConfig);
+    const db = firebase.initializeApp({ databaseURL: "https://khairatsmarttempat-default-rtdb.firebaseio.com" }).database();
 
-    function tukarView(v) {
-        document.getElementById('navView').classList.add('hidden');
-        if(v === 'login') document.getElementById('loginSection').classList.remove('hidden');
-        else document.getElementById('daftarSection').classList.remove('hidden');
+    function tukarView(v) { document.getElementById('navView').classList.add('hidden'); document.getElementById(v+'Section').classList.remove('hidden'); }
+    function tukarPage(p) { document.getElementById('manfaatPage').style.display = p === 'manfaat' ? 'block' : 'none'; document.getElementById('infoPage').style.display = p === 'info' ? 'block' : 'none'; }
+    
+    function kiraUmur(i) {
+        let umur = new Date().getFullYear() - new Date(document.getElementById('tLahir'+i).value).getFullYear();
+        document.getElementById('tUmur'+i).innerText = umur > 0 ? umur : 0;
     }
 
-    function tukarPage(p) {
-        document.getElementById('manfaatPage').style.display = p === 'manfaat' ? 'block' : 'none';
-        document.getElementById('infoPage').style.display = p === 'info' ? 'block' : 'none';
-    }
-
-    function prosesDaftar() {
-        let data = {
-            id: document.getElementById('regId').value,
-            nama: document.getElementById('regNama').value,
-            alamat: document.getElementById('regAlamat').value,
-            noTel: document.getElementById('regTel').value,
-            waris: document.getElementById('regWaris').value,
-            warisTel: document.getElementById('regWarisTel').value,
-            hubungan: document.getElementById('regHubungan').value,
-            tanggungan: document.getElementById('regTang').value
-        };
-        firebase.database().ref('ahli').push(data).then(() => {
-            alert("Pendaftaran Berjaya!");
-            location.reload();
+    function cekDaftar() {
+        let idBaru = document.getElementById('regId').value;
+        db.ref('ahli').orderByChild('id').equalTo(idBaru).once('value', (s) => {
+            if(s.exists()) { alert("ID sudah wujud!"); } else { prosesDaftar(); }
         });
     }
 
+    function prosesDaftar() {
+        let tanggungan = [];
+        for(let i=1; i<=5; i++){
+            let n = document.getElementById('tNama'+i).value;
+            if(n) tanggungan.push({nama: n, umur: document.getElementById('tUmur'+i).innerText});
+        }
+        db.ref('ahli').push({
+            id: document.getElementById('regId').value, nama: document.getElementById('regNama').value,
+            alamat: document.getElementById('regAlamat').value, email: document.getElementById('regEmail').value,
+            noTel: document.getElementById('regTel').value, waris: document.getElementById('regWaris').value,
+            warisTel: document.getElementById('regWarisTel').value, hubungan: document.getElementById('regHubungan').value,
+            tanggungan: tanggungan
+        }).then(() => { alert("Berjaya!"); location.reload(); });
+    }
+
     function prosesLogin() {
-        let idDicari = document.getElementById('loginId').value;
-        firebase.database().ref('ahli').orderByChild('id').equalTo(idDicari).once('value', (s) => {
+        db.ref('ahli').orderByChild('id').equalTo(document.getElementById('loginId').value).once('value', (s) => {
             if(s.exists()) {
                 let data = Object.values(s.val())[0];
-                document.getElementById('pNama').innerText = data.nama || '-';
-                document.getElementById('pId').innerText = data.id || '-';
-                document.getElementById('pAlamat').innerText = data.alamat || '-';
-                document.getElementById('pTel').innerText = data.noTel || '-';
-                document.getElementById('pWaris').innerText = data.waris || '-';
-                document.getElementById('pWarisTel').innerText = data.warisTel || '-';
-                document.getElementById('pHubungan').innerText = data.hubungan || '-';
-                
-                // Papar tanggungan hanya jika ada data
-                if(data.tanggungan) {
-                    document.getElementById('pTang').innerText = data.tanggungan;
-                    document.getElementById('pTangBox').style.display = 'block';
-                } else {
-                    document.getElementById('pTangBox').style.display = 'none';
-                }
-
+                document.getElementById('pNama').innerText = data.nama;
+                document.getElementById('pAlamat').innerText = data.alamat;
+                document.getElementById('pWaris').innerText = data.waris;
+                let list = document.getElementById('pTangList'); list.innerHTML = '';
+                if(data.tanggungan) data.tanggungan.forEach(t => list.innerHTML += `<li>${t.nama} (${t.umur} thn)</li>`);
                 document.getElementById('loginSection').classList.add('hidden');
                 document.getElementById('profileSection').classList.remove('hidden');
-            } else { alert("ID tidak ditemui!"); }
+            } else { alert("ID salah!"); }
         });
     }
 </script>
