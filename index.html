@@ -8,10 +8,11 @@
     <style>
         body { font-family: sans-serif; background: #f4f4f9; padding: 20px; }
         .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 500px; margin: auto; }
-        h1 { font-size: 1.5rem; color: #2c3e50; text-align: center; margin-bottom: 20px; }
+        h1 { font-size: 1.3rem; color: #2c3e50; text-align: center; margin-bottom: 20px; }
         input, button { width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
         button { background: #3498db; color: white; border: none; cursor: pointer; font-weight: bold; }
         .hidden { display: none; }
+        .section-box { background: #f9f9f9; padding: 15px; border-left: 5px solid #27ae60; margin-top: 15px; }
     </style>
 </head>
 <body>
@@ -39,7 +40,6 @@
         <input type="tel" id="regTel" placeholder="No. Telefon">
         <input type="text" id="regWaris" placeholder="Nama Waris Utama">
         <input type="tel" id="regWarisTel" placeholder="No. Tel Waris">
-        
         <h4>Tanggungan (5 Orang)</h4>
         <div id="tanggunganInput">
             <script>
@@ -59,13 +59,23 @@
         <h2>Profil Ahli</h2>
         <p><strong>Nama:</strong> <span id="pNama"></span></p>
         <p><strong>No. Ahli:</strong> <span id="pId"></span></p>
-        <hr>
-        <h3>Manfaat Khairat</h3>
-        <ul>
-            <li>Pengurusan Jenazah (Van & Kafan)</li>
-            <li>Bantuan Kewangan Waris</li>
-        </ul>
-        <button onclick="location.reload()" style="background:#e74c3c">LOG KELUAR</button>
+        
+        <div class="section-box">
+            <h3>Manfaat Kematian</h3>
+            <ul>
+                <li>Pengurusan Jenazah (Van & Kafan)</li>
+                <li>Bantuan Kewangan Keluarga</li>
+            </ul>
+        </div>
+
+        <div class="section-box">
+            <h3>Senarai AJK Khairat</h3>
+            <p><strong>Pengerusi:</strong> En. Awang Mohd Fauzi (011-333333)</p>
+            <p><strong>Setiausaha:</strong> En. Ismail Bin Ishak (017-000000)</p>
+            <p><strong>AJK:</strong> En. Mohd Zan Bin Mohd Nor (012-222222)</p>
+        </div>
+
+        <button onclick="location.reload()" style="background:#e74c3c; margin-top:20px;">LOG KELUAR</button>
     </div>
 </div>
 
@@ -99,7 +109,7 @@
             data.tanggungan['t'+i] = { nama: document.getElementById('tNama'+i).value, umur: document.getElementById('tUmur'+i).innerText };
         }
         firebase.database().ref('ahli').push(data).then(() => {
-            alert("Pendaftaran Berjaya! Sila log masuk.");
+            alert("Pendaftaran Berjaya!");
             location.reload();
         });
     }
