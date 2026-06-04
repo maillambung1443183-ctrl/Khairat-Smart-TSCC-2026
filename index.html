@@ -83,6 +83,7 @@
                 <ul><li>Dalam Kariah: Percuma</li><li>Luar Kariah: RM 80</li><li>Luar Melaka: Ikut perbatuan</li></ul>
             </div>
             <button onclick="tukarPage('info')">LIHAT DATA PERIBADI</button>
+            <button onclick="tukarPage('ajk')" style="background:#f39c12; margin-top:5px;">SENARAI AJK</button>
         </div>
 
         <div class="section-box hidden" id="infoPage">
@@ -96,6 +97,21 @@
             <ul id="pTangList"></ul>
             <button onclick="tukarPage('manfaat')">KEMBALI KE MANFAAT</button>
         </div>
+
+        <div class="section-box hidden" id="ajkPage">
+            <h3>Senarai AJK Khairat</h3>
+            <p>1. EN AWANG MOHD FAUZI (013333333) - PENGERUSI</p>
+            <p>2. EN FADZIL BIN SULAIMAN - TIMB PENGERUSI</p>
+            <p>3. EN ISMAIL BIN ISHAK (017700000) - SETIAUSAHA</p>
+            <p>4. EN MOHD ZAN BIN MOHD NOR (0111111111) - BENDAHARI</p>
+            <h3>AJK KUTIPAN</h3>
+            <p>1. EN HJ NAZRI BIN ABU BAKAR (019999999)</p>
+            <p>2. EN NORMAN BIN NORMAN (011111111)</p>
+            <p>3. PN ROSNI BIN MOKHTAR (01333333)</p>
+            <p>4. EN AMIRUDDIN BIN OTHMAN (013333333)</p>
+            <p>5. PN SURAYA BINTI UNAN (013333333)</p>
+            <button onclick="tukarPage('manfaat')">KEMBALI KE MANFAAT</button>
+        </div>
         <button onclick="location.reload()" style="background:#e74c3c; margin-top:10px;">LOG KELUAR</button>
     </div>
 </div>
@@ -105,7 +121,11 @@
     let userFirebaseKey = "";
 
     function tukarView(v) { document.getElementById('navView').classList.add('hidden'); document.getElementById(v+'Section').classList.remove('hidden'); }
-    function tukarPage(p) { document.getElementById('manfaatPage').style.display = p === 'manfaat' ? 'block' : 'none'; document.getElementById('infoPage').style.display = p === 'info' ? 'block' : 'none'; }
+    function tukarPage(p) { 
+        document.getElementById('manfaatPage').style.display = p === 'manfaat' ? 'block' : 'none'; 
+        document.getElementById('infoPage').style.display = p === 'info' ? 'block' : 'none'; 
+        document.getElementById('ajkPage').style.display = p === 'ajk' ? 'block' : 'none'; 
+    }
     function lupaPassword() { alert("Sila hubungi Setiausaha, En. Ismail Bin Ishak (017-000000) untuk bantuan kata laluan."); }
     
     function kiraUmur(i) {
