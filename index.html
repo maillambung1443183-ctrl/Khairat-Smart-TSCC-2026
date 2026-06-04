@@ -33,7 +33,7 @@
         <input type="text" id="loginId" placeholder="No. Ahli">
         <input type="password" id="loginPass" placeholder="Kata Laluan">
         <button onclick="prosesLogin()">MASUK</button>
-        <p style="text-align:center; cursor:pointer; color:blue;" onclick="alert('Hubungi En. Ismail: 017-000000')">Lupa Kata Laluan?</p>
+        <p style="text-align:center; cursor:pointer; color:blue;" onclick="lupaPassword()">Lupa Kata Laluan?</p>
     </div>
 
     <!-- DAFTAR -->
@@ -68,7 +68,14 @@
         <div id="manfaatPage">
             <div class="section-box">
                 <h3>Manfaat Kematian (RM 1,000)</h3>
-                <ul><li>Pengurusan Kubur: RM 300</li><li>Kain Kafan: RM 250</li><li>Papan Lahad: RM 200</li><li>Bantuan Tunai: RM 250</li></ul>
+                <ul>
+                    <li>Pengurusan Kubur: RM 300</li>
+                    <li>Kain Kafan: RM 250</li>
+                    <li>Papan Lahad: RM 200</li>
+                    <li>Bantuan Tunai: RM 250</li>
+                    <li>Mandi Jenazah (L/P): Seikhlas Hati</li>
+                    <li>Bacaan Talkin: Seikhlas Hati</li>
+                </ul>
             </div>
             <div class="section-box">
                 <h3>Van Jenazah</h3>
@@ -98,6 +105,7 @@
 
     function tukarView(v) { document.getElementById('navView').classList.add('hidden'); document.getElementById(v+'Section').classList.remove('hidden'); }
     function tukarPage(p) { document.getElementById('manfaatPage').style.display = p === 'manfaat' ? 'block' : 'none'; document.getElementById('infoPage').style.display = p === 'info' ? 'block' : 'none'; }
+    function lupaPassword() { alert("Sila hubungi Setiausaha, En. Ismail Bin Ishak (017-000000) untuk bantuan kata laluan."); }
     
     function kiraUmur(i) {
         let umur = new Date().getFullYear() - new Date(document.getElementById('tLahir'+i).value).getFullYear();
@@ -110,6 +118,16 @@
             db.ref('ahli/' + userFirebaseKey).update({ [field]: newValue }).then(() => {
                 document.getElementById(elementId).innerText = newValue;
                 alert("Berjaya dikemaskini!");
+            });
+        }
+    }
+
+    function updateTanggungan(index) {
+        let newName = prompt("Kemaskini nama tanggungan:");
+        if (newName) {
+            db.ref('ahli/' + userFirebaseKey + '/tanggungan/' + index).update({ nama: newName }).then(() => {
+                alert("Berjaya dikemaskini!");
+                location.reload();
             });
         }
     }
@@ -150,7 +168,11 @@
                     document.getElementById('pWaris').innerText = data.waris || '-';
                     document.getElementById('pWarisTel').innerText = data.warisTel || '-';
                     let list = document.getElementById('pTangList'); list.innerHTML = '';
-                    if(data.tanggungan) data.tanggungan.forEach(t => list.innerHTML += `<li>${t.nama} (${t.umur} thn)</li>`);
+                    if(data.tanggungan) {
+                        data.tanggungan.forEach((t, index) => {
+                            list.innerHTML += `<li>${t.nama} (${t.umur} thn) <span class="edit-btn" onclick="updateTanggungan(${index})">✎</span></li>`;
+                        });
+                    }
                     document.getElementById('loginSection').classList.add('hidden');
                     document.getElementById('profileSection').classList.remove('hidden');
                 } else { alert("Kata laluan salah!"); }
