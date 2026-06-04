@@ -1,13 +1,26 @@
-<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
-<script>
-    const firebaseConfig = { databaseURL: "https://khairatsmarttempat-default-rtdb.firebaseio.com" };
-    firebase.initializeApp(firebaseConfig);
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Penyiasat Database</title>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
+</head>
+<body>
+    <h3>Mencari Struktur Data... Sila tunggu sebentar.</h3>
+    <pre id="output"></pre>
 
-    // Kita cari KAF045 dalam keseluruhan database
-    firebase.database().ref().once('value', (s) => {
-        let semuaData = s.val();
-        console.log("Database anda mengandungi:", semuaData);
-        alert("Semak Console (Klik kanan > Inspect > Console) untuk melihat struktur sebenar database anda.");
-    });
-</script>
+    <script>
+        const firebaseConfig = {
+            databaseURL: "https://khairatsmarttempat-default-rtdb.firebaseio.com"
+        };
+        firebase.initializeApp(firebaseConfig);
+
+        // Membaca punca (root) database
+        firebase.database().ref('/').once('value', (s) => {
+            document.getElementById('output').innerText = JSON.stringify(s.val(), null, 2);
+        }).catch((e) => {
+            document.getElementById('output').innerText = "Ralat: " + e.message;
+        });
+    </script>
+</body>
+</html>
