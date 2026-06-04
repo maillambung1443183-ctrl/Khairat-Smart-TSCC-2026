@@ -2,27 +2,39 @@
 <html lang="ms">
 <head>
     <meta charset="UTF-8">
-    <title>Log Masuk Ahli</title>
+    <title>Sistem Khairat Smart TSCC</title>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
     <style>
-        body { font-family: sans-serif; background: #f4f4f9; padding: 20px; display: flex; justify-content: center; align-items: center; height: 100vh; }
-        .card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 100%; max-width: 350px; text-align: center; }
-        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background: #3498db; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; }
-        h2 { color: #2c3e50; }
-        a { color: #3498db; text-decoration: none; font-size: 14px; }
+        body { font-family: sans-serif; background: #f4f4f9; padding: 20px; display: flex; justify-content: center; }
+        .card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+        input, button { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
+        button { background: #3498db; color: white; border: none; cursor: pointer; font-weight: bold; }
+        .hidden { display: none; }
+        h2 { text-align: center; color: #2c3e50; }
     </style>
 </head>
 <body>
 
-<div class="card">
+<div id="loginSection" class="card">
     <h2>Log Masuk Ahli</h2>
-    <p>Sila masukkan No. Ahli anda</p>
-    <input type="text" id="loginId" placeholder="No. Ahli (cth: KAF000)">
+    <input type="text" id="loginId" placeholder="No. Ahli (cth: KAF045)">
     <button onclick="prosesLogin()">LOG MASUK</button>
-    <br><br>
-    <a href="daftar.html">Belum daftar? Klik di sini</a>
+</div>
+
+<div id="profileSection" class="card hidden">
+    <h2>Profil & Manfaat</h2>
+    <p><strong>Nama:</strong> <span id="pNama"></span></p>
+    <p><strong>No. Ahli:</strong> <span id="pId"></span></p>
+    <p><strong>Alamat:</strong> <span id="pAlamat"></span></p>
+    <hr>
+    <h3>Manfaat Khairat</h3>
+    <ul>
+        <li>Pengurusan Jenazah (Van & Kafan)</li>
+        <li>Bantuan Kewangan Waris</li>
+        <li>Khidmat Nasihat Pengurusan</li>
+    </ul>
+    <button onclick="location.reload()" style="background:#e74c3c">LOG KELUAR</button>
 </div>
 
 <script>
@@ -34,10 +46,16 @@
         
         firebase.database().ref('ahli').orderByChild('id').equalTo(idDicari).once('value', (s) => {
             if(s.exists()) {
-                alert("Log Masuk Berjaya! Selamat datang.");
-                // Boleh tambah kod untuk terus ke halaman profil di sini
+                let data = Object.values(s.val())[0];
+                
+                document.getElementById('pNama').innerText = data.nama || '-';
+                document.getElementById('pId').innerText = data.id || '-';
+                document.getElementById('pAlamat').innerText = data.alamat || '-';
+                
+                document.getElementById('loginSection').classList.add('hidden');
+                document.getElementById('profileSection').classList.remove('hidden');
             } else {
-                alert("ID tidak ditemui! Sila semak semula.");
+                alert("ID tidak ditemui!");
             }
         });
     }
