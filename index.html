@@ -38,11 +38,24 @@
         <input type="text" id="regId" placeholder="No. Ahli">
         <input type="text" id="regNama" placeholder="Nama Penuh">
         <input type="text" id="regAlamat" placeholder="Alamat">
+        <input type="email" id="regEmail" placeholder="Email">
         <input type="tel" id="regTel" placeholder="No. Telefon">
         <input type="text" id="regWaris" placeholder="Nama Waris">
         <input type="tel" id="regWarisTel" placeholder="No. Tel Waris">
         <input type="text" id="regHubungan" placeholder="Hubungan Waris">
-        <input type="text" id="regTang" placeholder="Nama Tanggungan (Jika ada)">
+        
+        <h4>Tanggungan (5 Orang)</h4>
+        <div id="tanggunganFields">
+            <script>
+                for(let i=1; i<=5; i++){
+                    document.write(`<div>
+                        <input type="text" id="tNama${i}" placeholder="Nama Tanggungan ${i}">
+                        <input type="date" id="tLahir${i}" onchange="kiraUmur(${i})">
+                        <small>Umur: <span id="tUmur${i}">0</span> tahun</small>
+                    </div>`);
+                }
+            </script>
+        </div>
         <button onclick="prosesDaftar()" style="background:#27ae60">HANTAR PENDAFTARAN</button>
     </div>
 
@@ -65,25 +78,15 @@
                     <li>Luar Melaka: <b>Mengikut perbatuan Masjid Al Jonid</b></li>
                 </ul>
             </div>
-            <div class="section-box">
-                <h3>Senarai AJK</h3>
-                <ul style="list-style: none;">
-                    <li><b>Pengerusi:</b> En. Awang Mohd Fauzi (011-333333)</li>
-                    <li><b>Setiausaha:</b> En. Ismail Bin Ishak (017-000000)</li>
-                    <li><b>AJK:</b> En. Mohd Zan Bin Mohd Nor (012-222222)</li>
-                </ul>
-            </div>
             <button onclick="tukarPage('info')">LIHAT MAKLUMAT AHLI</button>
         </div>
 
         <div class="section-box hidden" id="infoPage">
             <h3>Maklumat Peribadi</h3>
             <p><strong>Nama:</strong> <span id="pNama"></span></p>
-            <p><strong>No. Ahli:</strong> <span id="pId"></span></p>
+            <p><strong>Email:</strong> <span id="pEmail"></span></p>
             <p><strong>Alamat:</strong> <span id="pAlamat"></span></p>
-            <p><strong>No. Tel:</strong> <span id="pTel"></span></p>
-            <p><strong>Waris:</strong> <span id="pWaris"></span> (<span id="pHubungan"></span>) - <span id="pWarisTel"></span></p>
-            <p id="pTangBox"><strong>Tanggungan:</strong> <span id="pTang"></span></p>
+            <p><strong>Waris:</strong> <span id="pWaris"></span></p>
             <button onclick="tukarPage('manfaat')">KEMBALI KE MANFAAT</button>
         </div>
         <button onclick="location.reload()" style="background:#e74c3c; margin-top:20px;">LOG KELUAR</button>
@@ -105,16 +108,25 @@
         document.getElementById('infoPage').style.display = p === 'info' ? 'block' : 'none';
     }
 
+    function kiraUmur(i) {
+        let tLahir = new Date(document.getElementById('tLahir'+i).value);
+        let sekarang = new Date();
+        let umur = sekarang.getFullYear() - tLahir.getFullYear();
+        document.getElementById('tUmur'+i).innerText = umur > 0 ? umur : 0;
+    }
+
     function prosesDaftar() {
+        let tanggungan = [];
+        for(let i=1; i<=5; i++){
+            let nama = document.getElementById('tNama'+i).value;
+            if(nama) tanggungan.push({nama: nama, umur: document.getElementById('tUmur'+i).innerText});
+        }
         let data = {
             id: document.getElementById('regId').value,
             nama: document.getElementById('regNama').value,
+            email: document.getElementById('regEmail').value,
             alamat: document.getElementById('regAlamat').value,
-            noTel: document.getElementById('regTel').value,
-            waris: document.getElementById('regWaris').value,
-            warisTel: document.getElementById('regWarisTel').value,
-            hubungan: document.getElementById('regHubungan').value,
-            tanggungan: document.getElementById('regTang').value
+            tanggungan: tanggungan
         };
         firebase.database().ref('ahli').push(data).then(() => {
             alert("Pendaftaran Berjaya!");
@@ -127,22 +139,9 @@
         firebase.database().ref('ahli').orderByChild('id').equalTo(idDicari).once('value', (s) => {
             if(s.exists()) {
                 let data = Object.values(s.val())[0];
-                document.getElementById('pNama').innerText = data.nama || '-';
-                document.getElementById('pId').innerText = data.id || '-';
-                document.getElementById('pAlamat').innerText = data.alamat || '-';
-                document.getElementById('pTel').innerText = data.noTel || '-';
-                document.getElementById('pWaris').innerText = data.waris || '-';
-                document.getElementById('pWarisTel').innerText = data.warisTel || '-';
-                document.getElementById('pHubungan').innerText = data.hubungan || '-';
-                
-                // Papar tanggungan hanya jika ada data
-                if(data.tanggungan) {
-                    document.getElementById('pTang').innerText = data.tanggungan;
-                    document.getElementById('pTangBox').style.display = 'block';
-                } else {
-                    document.getElementById('pTangBox').style.display = 'none';
-                }
-
+                document.getElementById('pNama').innerText = data.nama;
+                document.getElementById('pEmail').innerText = data.email || '-';
+                document.getElementById('pAlamat').innerText = data.alamat;
                 document.getElementById('loginSection').classList.add('hidden');
                 document.getElementById('profileSection').classList.remove('hidden');
             } else { alert("ID tidak ditemui!"); }
