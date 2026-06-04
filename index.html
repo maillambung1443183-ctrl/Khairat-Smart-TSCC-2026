@@ -17,14 +17,16 @@
 </head>
 <body>
 
-<div class="card" id="mainCard">
+<div class="card">
     <h1>SISTEM KHAIRAT SMART SURAU AL FALAH TSCC</h1>
 
+    <!-- MENU AWAL -->
     <div id="navView">
         <button onclick="tukarView('login')">LOG MASUK</button>
         <button onclick="tukarView('daftar')" style="background:#27ae60">DAFTAR AHLI BARU</button>
     </div>
 
+    <!-- LOG MASUK & DAFTAR (SAMA SEPERTI KOD SEBELUMNYA) -->
     <div id="loginSection" class="hidden">
         <h2>Log Masuk</h2>
         <input type="text" id="loginId" placeholder="No. Ahli">
@@ -40,39 +42,32 @@
         <input type="tel" id="regTel" placeholder="No. Telefon">
         <input type="text" id="regWaris" placeholder="Nama Waris Utama">
         <input type="tel" id="regWarisTel" placeholder="No. Tel Waris">
-        <h4>Tanggungan (5 Orang)</h4>
-        <div id="tanggunganInput">
-            <script>
-                for(let i=1; i<=5; i++){
-                    document.write(`<div>
-                        <input type="text" id="tNama${i}" placeholder="Nama Tanggungan ${i}">
-                        <input type="date" id="tLahir${i}" onchange="kiraUmur(${i})">
-                        <small>Umur: <span id="tUmur${i}">0</span></small>
-                    </div>`);
-                }
-            </script>
-        </div>
         <button onclick="prosesDaftar()" style="background:#27ae60">HANTAR PENDAFTARAN</button>
     </div>
 
+    <!-- PROFIL & MANFAAT -->
     <div id="profileSection" class="hidden">
-        <h2>Profil Ahli</h2>
-        <p><strong>Nama:</strong> <span id="pNama"></span></p>
-        <p><strong>No. Ahli:</strong> <span id="pId"></span></p>
-        
-        <div class="section-box">
-            <h3>Manfaat Kematian</h3>
-            <ul>
-                <li>Pengurusan Jenazah (Van & Kafan)</li>
-                <li>Bantuan Kewangan Keluarga</li>
-            </ul>
+        <!-- 1. BAHAGIAN MANFAAT (PAGE DEPAN) -->
+        <div class="section-box" id="manfaatPage">
+            <h3>Manfaat Kematian (Jumlah: RM 1,000)</h3>
+            <p>1. Pengurusan Kubur: RM 300</p>
+            <p>2. Kain Kafan: RM 250</p>
+            <p>3. Papan Lahad: RM 200</p>
+            <p>4. Bantuan Tunai: RM 250</p>
+            <button onclick="tukarPage('info')">LIHAT MAKLUMAT AHLI</button>
         </div>
 
-        <div class="section-box">
-            <h3>Senarai AJK Khairat</h3>
-            <p><strong>Pengerusi:</strong> En. Awang Mohd Fauzi (011-333333)</p>
-            <p><strong>Setiausaha:</strong> En. Ismail Bin Ishak (017-000000)</p>
-            <p><strong>Bendahari:</strong> En. Mohd Zan Bin Mohd Nor (012-222222)</p>
+        <!-- 2. BAHAGIAN MAKLUMAT AHLI (PAGE LAIN) -->
+        <div class="section-box hidden" id="infoPage">
+            <h3>Maklumat Ahli</h3>
+            <p><strong>Nama:</strong> <span id="pNama"></span></p>
+            <p><strong>No. Ahli:</strong> <span id="pId"></span></p>
+            <hr>
+            <h3>Hubungi AJK</h3>
+            <p>Pengerusi: En. Awang (011-333333)</p>
+            <p>Setiausaha: En. Ismail (017-000000)</p>
+            <p>AJK: En. Mohd Zan (012-222222)</p>
+            <button onclick="tukarPage('manfaat')">BALIK KE MANFAAT</button>
         </div>
 
         <button onclick="location.reload()" style="background:#e74c3c; margin-top:20px;">LOG KELUAR</button>
@@ -89,25 +84,17 @@
         else document.getElementById('daftarSection').classList.remove('hidden');
     }
 
-    function kiraUmur(i) {
-        let tLahir = new Date(document.getElementById('tLahir'+i).value);
-        let umur = new Date().getFullYear() - tLahir.getFullYear();
-        document.getElementById('tUmur'+i).innerText = umur >= 0 ? umur : 0;
+    function tukarPage(p) {
+        document.getElementById('manfaatPage').style.display = p === 'manfaat' ? 'block' : 'none';
+        document.getElementById('infoPage').style.display = p === 'info' ? 'block' : 'none';
     }
 
     function prosesDaftar() {
         let data = {
             id: document.getElementById('regId').value,
             nama: document.getElementById('regNama').value,
-            alamat: document.getElementById('regAlamat').value,
-            email: document.getElementById('regEmail').value,
-            noTel: document.getElementById('regTel').value,
-            waris: { nama: document.getElementById('regWaris').value, tel: document.getElementById('regWarisTel').value },
-            tanggungan: {}
+            alamat: document.getElementById('regAlamat').value
         };
-        for(let i=1; i<=5; i++){
-            data.tanggungan['t'+i] = { nama: document.getElementById('tNama'+i).value, umur: document.getElementById('tUmur'+i).innerText };
-        }
         firebase.database().ref('ahli').push(data).then(() => {
             alert("Pendaftaran Berjaya!");
             location.reload();
