@@ -7,13 +7,12 @@
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
     <style>
         body { font-family: sans-serif; background: #f4f4f9; padding: 20px; }
-        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 500px; margin: auto; }
-        h1 { font-size: 1.2rem; color: #2c3e50; text-align: center; }
+        .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 500px; margin: auto; }
+        h1 { font-size: 1.3rem; color: #2c3e50; text-align: center; margin-bottom: 20px; }
         input, button { width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
         button { background: #3498db; color: white; border: none; cursor: pointer; font-weight: bold; }
         .hidden { display: none; }
         .section-box { background: #f9f9f9; padding: 15px; border-left: 5px solid #27ae60; margin-top: 15px; }
-        ul { padding-left: 20px; }
     </style>
 </head>
 <body>
@@ -26,112 +25,84 @@
         <button onclick="tukarView('daftar')" style="background:#27ae60">DAFTAR AHLI BARU</button>
     </div>
 
+    <!-- LOG MASUK -->
     <div id="loginSection" class="hidden">
         <h2>Log Masuk</h2>
         <input type="text" id="loginId" placeholder="No. Ahli">
         <button onclick="prosesLogin()">MASUK</button>
-        <p style="text-align:center; cursor:pointer; color:blue;" onclick="alert('Hubungi En. Ismail: 017-000000')">Lupa No. Ahli?</p>
+        <p style="text-align:center; cursor:pointer; color:blue;" onclick="lupaPassword()">Lupa No. Ahli/Kata Laluan?</p>
     </div>
 
+    <!-- DAFTAR -->
     <div id="daftarSection" class="hidden">
-        <h2>Pendaftaran</h2>
+        <h2>Pendaftaran Ahli</h2>
         <input type="text" id="regId" placeholder="No. Ahli">
         <input type="text" id="regNama" placeholder="Nama Penuh">
-        <input type="text" id="regAlamat" placeholder="Alamat">
-        <input type="email" id="regEmail" placeholder="Email">
         <input type="tel" id="regTel" placeholder="No. Telefon">
-        <input type="text" id="regWaris" placeholder="Nama Waris">
-        <input type="tel" id="regWarisTel" placeholder="No. Tel Waris">
-        <input type="text" id="regHubungan" placeholder="Hubungan">
-        <h4>Tanggungan </h4>
-        <div id="tanggunganFields">
-            <script>
-                for(let i=1; i<=5; i++){
-                    document.write(`<div>
-                        <input type="text" id="tNama${i}" placeholder="Nama ${i}">
-                        <input type="date" id="tLahir${i}" onchange="kiraUmur(${i})">
-                        <small>Umur: <span id="tUmur${i}">0</span></small>
-                    </div>`);
-                }
-            </script>
-        </div>
-        <button onclick="cekDaftar()" style="background:#27ae60">HANTAR PENDAFTARAN</button>
+        <button onclick="prosesDaftar()" style="background:#27ae60">HANTAR PENDAFTARAN</button>
     </div>
 
+    <!-- PROFIL -->
     <div id="profileSection" class="hidden">
         <div id="manfaatPage">
             <div class="section-box">
-                <h3>Manfaat (RM 1,000)</h3>
-                <ul><li>Kubur (300), Kafan (250), Papan (200), Tunai (250)</li></ul>
+                <h3>Manfaat Kematian (Jumlah: RM 1,000)</h3>
+                <p>1. Pengurusan Kubur: RM 300 | 2. Kain Kafan: RM 250 | 3. Papan Lahad: RM 200 | 4. Bantuan Tunai: RM 250</p>
             </div>
-            <div class="section-box">
-                <h3>Van Jenazah</h3>
-                <ul><li>Dalam Kariah: Percuma</li><li>Luar Kariah: RM 80</li><li>Luar Melaka: Ikut perbatuan</li></ul>
-            </div>
-            <div class="section-box">
-                <h3>AJK</h3>
-                <ul><li>Pengerusi: En. Awang (011-333333)</li><li>Setiausaha: En. Ismail (017-000000)</li><li>AJK: En. Mohd Zan (012-222222)</li></ul>
-            </div>
-            <button onclick="tukarPage('info')">LIHAT DATA PERIBADI</button>
+            <button onclick="tukarPage('info')">LIHAT MAKLUMAT AHLI</button>
         </div>
 
         <div class="section-box hidden" id="infoPage">
-            <h3>Data Peribadi</h3>
+            <h3>Maklumat Peribadi</h3>
             <p><strong>Nama:</strong> <span id="pNama"></span></p>
-            <p><strong>Alamat:</strong> <span id="pAlamat"></span></p>
-            <p><strong>Waris:</strong> <span id="pWaris"></span></p>
-            <ul id="pTangList"></ul>
-            <button onclick="tukarPage('manfaat')">KEMBALI KE MANFAAT</button>
+            <p><strong>No. Tel:</strong> <span id="pTel"></span></p>
+            <button onclick="tukarPage('manfaat')">KEMBALI</button>
         </div>
-        <button onclick="location.reload()" style="background:#e74c3c; margin-top:10px;">LOG KELUAR</button>
+        <button onclick="location.reload()" style="background:#e74c3c; margin-top:20px;">LOG KELUAR</button>
     </div>
 </div>
 
 <script>
-    const db = firebase.initializeApp({ databaseURL: "https://khairatsmarttempat-default-rtdb.firebaseio.com" }).database();
+    const firebaseConfig = { databaseURL: "https://khairatsmarttempat-default-rtdb.firebaseio.com" };
+    firebase.initializeApp(firebaseConfig);
 
-    function tukarView(v) { document.getElementById('navView').classList.add('hidden'); document.getElementById(v+'Section').classList.remove('hidden'); }
-    function tukarPage(p) { document.getElementById('manfaatPage').style.display = p === 'manfaat' ? 'block' : 'none'; document.getElementById('infoPage').style.display = p === 'info' ? 'block' : 'none'; }
-    
-    function kiraUmur(i) {
-        let umur = new Date().getFullYear() - new Date(document.getElementById('tLahir'+i).value).getFullYear();
-        document.getElementById('tUmur'+i).innerText = umur > 0 ? umur : 0;
+    function tukarView(v) {
+        document.getElementById('navView').classList.add('hidden');
+        if(v === 'login') document.getElementById('loginSection').classList.remove('hidden');
+        else document.getElementById('daftarSection').classList.remove('hidden');
     }
 
-    function cekDaftar() {
-        let idBaru = document.getElementById('regId').value;
-        db.ref('ahli').orderByChild('id').equalTo(idBaru).once('value', (s) => {
-            if(s.exists()) { alert("ID sudah wujud!"); } else { prosesDaftar(); }
-        });
+    function tukarPage(p) {
+        document.getElementById('manfaatPage').style.display = p === 'manfaat' ? 'block' : 'none';
+        document.getElementById('infoPage').style.display = p === 'info' ? 'block' : 'none';
+    }
+
+    function lupaPassword() {
+        alert("Sila hubungi Setiausaha, En. Ismail Bin Ishak (017-000000) untuk bantuan lanjut.");
     }
 
     function prosesDaftar() {
-        let tanggungan = [];
-        for(let i=1; i<=5; i++){
-            let n = document.getElementById('tNama'+i).value;
-            if(n) tanggungan.push({nama: n, umur: document.getElementById('tUmur'+i).innerText});
-        }
-        db.ref('ahli').push({
-            id: document.getElementById('regId').value, nama: document.getElementById('regNama').value,
-            alamat: document.getElementById('regAlamat').value, email: document.getElementById('regEmail').value,
-            noTel: document.getElementById('regTel').value, waris: document.getElementById('regWaris').value,
-            warisTel: document.getElementById('regWarisTel').value, hubungan: document.getElementById('regHubungan').value,
-            tanggungan: tanggungan
-        }).then(() => { alert("Berjaya!"); location.reload(); });
+        let data = {
+            id: document.getElementById('regId').value,
+            nama: document.getElementById('regNama').value,
+            noTel: document.getElementById('regTel').value
+        };
+        firebase.database().ref('ahli').push(data).then(() => {
+            alert("Pendaftaran Berjaya!");
+            location.reload();
+        });
     }
 
     function prosesLogin() {
-        db.ref('ahli').orderByChild('id').equalTo(document.getElementById('loginId').value).once('value', (s) => {
+        let idDicari = document.getElementById('loginId').value;
+        firebase.database().ref('ahli').orderByChild('id').equalTo(idDicari).once('value', (s) => {
             if(s.exists()) {
                 let data = Object.values(s.val())[0];
                 document.getElementById('pNama').innerText = data.nama;
-                document.getElementById('pAlamat').innerText = data.alamat;
-                document.getElementById('pWaris').innerText = data.waris;
-                let list = document.getElementById('pTangList'); list.innerHTML = '';
-                if(data.tanggungan) data.tanggungan.forEach(t => list.innerHTML += `<li>${t.nama} (${t.umur} thn)</li>`);
+                document.getElementById('pTel').innerText = data.noTel || 'Tiada data';
                 document.getElementById('loginSection').classList.add('hidden');
                 document.getElementById('profileSection').classList.remove('hidden');
-            } else { alert("ID salah!"); }
+            } else { alert("ID tidak ditemui!"); }
         });
     }
 </script>
