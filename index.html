@@ -148,9 +148,13 @@
     }
 
     function updateTanggungan(index) {
-        let newName = prompt("Kemaskini nama tanggungan:");
-        if (newName) {
-            db.ref('ahli/' + userFirebaseKey + '/tanggungan/' + index).update({ nama: newName }).then(() => {
+        let newName = prompt("Kemaskini Nama Tanggungan:");
+        let newUmur = prompt("Kemaskini Umur Tanggungan:");
+        if (newName !== null && newUmur !== null) {
+            db.ref('ahli/' + userFirebaseKey + '/tanggungan/' + index).update({ 
+                nama: newName, 
+                umur: newUmur 
+            }).then(() => {
                 alert("Berjaya dikemaskini!");
                 location.reload();
             });
