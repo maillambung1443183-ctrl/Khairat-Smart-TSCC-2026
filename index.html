@@ -42,11 +42,11 @@
         <input type="text" id="regWaris" placeholder="Nama Waris">
         <input type="tel" id="regWarisTel" placeholder="No. Tel Waris">
         <input type="text" id="regHubungan" placeholder="Hubungan Waris">
+        <input type="text" id="regTang" placeholder="Nama Tanggungan (Jika ada)">
         <button onclick="prosesDaftar()" style="background:#27ae60">HANTAR PENDAFTARAN</button>
     </div>
 
     <div id="profileSection" class="hidden">
-        
         <div id="manfaatPage">
             <div class="section-box">
                 <h3>Manfaat Kematian (Jumlah: RM 1,000)</h3>
@@ -57,7 +57,6 @@
                     <li>Bantuan Tunai: RM 250</li>
                 </ul>
             </div>
-
             <div class="section-box">
                 <h3>Perkhidmatan Van Jenazah</h3>
                 <ul>
@@ -66,7 +65,6 @@
                     <li>Luar Melaka: <b>Mengikut perbatuan Masjid Al Jonid</b></li>
                 </ul>
             </div>
-
             <div class="section-box">
                 <h3>Senarai AJK</h3>
                 <ul style="list-style: none;">
@@ -75,7 +73,6 @@
                     <li><b>AJK:</b> En. Mohd Zan Bin Mohd Nor (012-222222)</li>
                 </ul>
             </div>
-            
             <button onclick="tukarPage('info')">LIHAT MAKLUMAT AHLI</button>
         </div>
 
@@ -86,9 +83,9 @@
             <p><strong>Alamat:</strong> <span id="pAlamat"></span></p>
             <p><strong>No. Tel:</strong> <span id="pTel"></span></p>
             <p><strong>Waris:</strong> <span id="pWaris"></span> (<span id="pHubungan"></span>) - <span id="pWarisTel"></span></p>
+            <p id="pTangBox"><strong>Tanggungan:</strong> <span id="pTang"></span></p>
             <button onclick="tukarPage('manfaat')">KEMBALI KE MANFAAT</button>
         </div>
-
         <button onclick="location.reload()" style="background:#e74c3c; margin-top:20px;">LOG KELUAR</button>
     </div>
 </div>
@@ -116,7 +113,8 @@
             noTel: document.getElementById('regTel').value,
             waris: document.getElementById('regWaris').value,
             warisTel: document.getElementById('regWarisTel').value,
-            hubungan: document.getElementById('regHubungan').value
+            hubungan: document.getElementById('regHubungan').value,
+            tanggungan: document.getElementById('regTang').value
         };
         firebase.database().ref('ahli').push(data).then(() => {
             alert("Pendaftaran Berjaya!");
@@ -129,13 +127,22 @@
         firebase.database().ref('ahli').orderByChild('id').equalTo(idDicari).once('value', (s) => {
             if(s.exists()) {
                 let data = Object.values(s.val())[0];
-                document.getElementById('pNama').innerText = data.nama;
-                document.getElementById('pId').innerText = data.id;
-                document.getElementById('pAlamat').innerText = data.alamat;
-                document.getElementById('pTel').innerText = data.noTel;
-                document.getElementById('pWaris').innerText = data.waris;
-                document.getElementById('pWarisTel').innerText = data.warisTel;
-                document.getElementById('pHubungan').innerText = data.hubungan;
+                document.getElementById('pNama').innerText = data.nama || '-';
+                document.getElementById('pId').innerText = data.id || '-';
+                document.getElementById('pAlamat').innerText = data.alamat || '-';
+                document.getElementById('pTel').innerText = data.noTel || '-';
+                document.getElementById('pWaris').innerText = data.waris || '-';
+                document.getElementById('pWarisTel').innerText = data.warisTel || '-';
+                document.getElementById('pHubungan').innerText = data.hubungan || '-';
+                
+                // Papar tanggungan hanya jika ada data
+                if(data.tanggungan) {
+                    document.getElementById('pTang').innerText = data.tanggungan;
+                    document.getElementById('pTangBox').style.display = 'block';
+                } else {
+                    document.getElementById('pTangBox').style.display = 'none';
+                }
+
                 document.getElementById('loginSection').classList.add('hidden');
                 document.getElementById('profileSection').classList.remove('hidden');
             } else { alert("ID tidak ditemui!"); }
