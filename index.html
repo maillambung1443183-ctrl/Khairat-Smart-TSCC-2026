@@ -35,44 +35,43 @@
         <h2>Pendaftaran Ahli</h2>
         <input type="text" id="regId" placeholder="No. Ahli">
         <input type="text" id="regNama" placeholder="Nama Penuh">
+        <input type="text" id="regAlamat" placeholder="Alamat">
+        <input type="tel" id="regTel" placeholder="No. Telefon">
+        <input type="text" id="regWaris" placeholder="Nama Waris">
+        <input type="tel" id="regWarisTel" placeholder="No. Tel Waris">
+        <input type="text" id="regHubungan" placeholder="Hubungan Waris">
         <button onclick="prosesDaftar()" style="background:#27ae60">HANTAR PENDAFTARAN</button>
     </div>
 
     <div id="profileSection" class="hidden">
-        
         <div id="manfaatPage">
             <div class="section-box">
                 <h3>Manfaat Kematian (Jumlah: RM 1,000)</h3>
-                <p>1. Pengurusan Kubur: RM 300</p>
-                <p>2. Kain Kafan: RM 250</p>
-                <p>3. Papan Lahad: RM 200</p>
-                <p>4. Bantuan Tunai: RM 250</p>
+                <p>1. Pengurusan Kubur: RM 300 | 2. Kain Kafan: RM 250 | 3. Papan Lahad: RM 200 | 4. Bantuan Tunai: RM 250</p>
             </div>
-
             <div class="section-box">
                 <h3>Perkhidmatan Van Jenazah</h3>
-                <p>• Dalam Kariah: <b>Percuma</b></p>
-                <p>• Luar Kariah (Dalam Melaka): <b>RM 80</b></p>
-                <p>• Luar Melaka: <b>Mengikut perbatuan pihak Masjid Al Jonid</b></p>
+                <p>Dalam Kariah: Percuma | Luar Kariah: RM 80 | Luar Melaka: Mengikut perbatuan Masjid Al Jonid</p>
             </div>
-
             <div class="section-box">
-                <h3>Senarai AJK Khairat</h3>
-                <p><strong>Pengerusi:</strong> En. Awang Mohd Fauzi (011-333333)</p>
-                <p><strong>Setiausaha:</strong> En. Ismail Bin Ishak (017-000000)</p>
-                <p><strong>AJK:</strong> En. Mohd Zan Bin Mohd Nor (012-222222)</p>
+                <h3>Senarai AJK</h3>
+                <p>Pengerusi: En. Awang (011-333333) | Setiausaha: En. Ismail (017-000000) | AJK: En. Mohd Zan (012-222222)</p>
             </div>
-            
             <button onclick="tukarPage('info')">LIHAT MAKLUMAT AHLI</button>
         </div>
 
         <div class="section-box hidden" id="infoPage">
-            <h3>Maklumat Ahli</h3>
+            <h3>Maklumat Peribadi</h3>
             <p><strong>Nama:</strong> <span id="pNama"></span></p>
             <p><strong>No. Ahli:</strong> <span id="pId"></span></p>
+            <p><strong>Alamat:</strong> <span id="pAlamat"></span></p>
+            <p><strong>No. Tel:</strong> <span id="pTel"></span></p>
+            <p><strong>Waris:</strong> <span id="pWaris"></span> (<span id="pHubungan"></span>) - <span id="pWarisTel"></span></p>
+            <hr>
+            <h3>Tanggungan (5 Orang)</h3>
+            <p id="pTanggungan"></p>
             <button onclick="tukarPage('manfaat')">KEMBALI KE MANFAAT</button>
         </div>
-
         <button onclick="location.reload()" style="background:#e74c3c; margin-top:20px;">LOG KELUAR</button>
     </div>
 </div>
@@ -95,7 +94,12 @@
     function prosesDaftar() {
         let data = {
             id: document.getElementById('regId').value,
-            nama: document.getElementById('regNama').value
+            nama: document.getElementById('regNama').value,
+            alamat: document.getElementById('regAlamat').value,
+            noTel: document.getElementById('regTel').value,
+            waris: document.getElementById('regWaris').value,
+            warisTel: document.getElementById('regWarisTel').value,
+            hubungan: document.getElementById('regHubungan').value
         };
         firebase.database().ref('ahli').push(data).then(() => {
             alert("Pendaftaran Berjaya!");
@@ -110,6 +114,11 @@
                 let data = Object.values(s.val())[0];
                 document.getElementById('pNama').innerText = data.nama;
                 document.getElementById('pId').innerText = data.id;
+                document.getElementById('pAlamat').innerText = data.alamat;
+                document.getElementById('pTel').innerText = data.noTel;
+                document.getElementById('pWaris').innerText = data.waris;
+                document.getElementById('pWarisTel').innerText = data.warisTel;
+                document.getElementById('pHubungan').innerText = data.hubungan;
                 document.getElementById('loginSection').classList.add('hidden');
                 document.getElementById('profileSection').classList.remove('hidden');
             } else { alert("ID tidak ditemui!"); }
