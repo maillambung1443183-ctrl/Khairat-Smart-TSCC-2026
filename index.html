@@ -2,79 +2,43 @@
 <html lang="ms">
 <head>
     <meta charset="UTF-8">
-    <title>Sistem Pendaftaran Khairat</title>
+    <title>Log Masuk Ahli</title>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
     <style>
-        body { font-family: sans-serif; background: #f4f4f9; padding: 20px; }
-        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); max-width: 500px; margin: auto; }
-        input { width: 100%; padding: 8px; margin: 5px 0; border: 1px solid #ccc; box-sizing: border-box; }
-        button { width: 100%; padding: 10px; background: #27ae60; color: white; border: none; cursor: pointer; margin-top: 10px; }
+        body { font-family: sans-serif; background: #f4f4f9; padding: 20px; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 100%; max-width: 350px; text-align: center; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #3498db; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; }
+        h2 { color: #2c3e50; }
+        a { color: #3498db; text-decoration: none; font-size: 14px; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h3>Pendaftaran Ahli</h3>
-    <input type="text" id="noAhli" placeholder="No. Ahli">
-    <input type="text" id="nama" placeholder="Nama Penuh">
-    <input type="text" id="alamat" placeholder="Alamat">
-    <input type="email" id="email" placeholder="Email">
-    <input type="tel" id="noTel" placeholder="No. Telefon">
-    <hr>
-    <input type="text" id="waris" placeholder="Nama Waris Utama">
-    <input type="tel" id="noWaris" placeholder="No. Tel Waris">
-    
-    <h4>Tanggungan (Nama & Tarikh Lahir)</h4>
-    <div id="tanggunganList">
-        <!-- 5 Slot Tanggungan -->
-        <script>
-            for(let i=1; i<=5; i++){
-                document.write(`
-                    <input type="text" id="tNama${i}" placeholder="Nama Tanggungan ${i}">
-                    <input type="date" id="tLahir${i}" onchange="kiraUmur(${i})" placeholder="Tarikh Lahir">
-                    <p>Umur: <span id="tUmur${i}">0</span> tahun</p>
-                `);
-            }
-        </script>
-    </div>
-    
-    <button onclick="daftar()">DAFTAR SEKARANG</button>
+    <h2>Log Masuk Ahli</h2>
+    <p>Sila masukkan No. Ahli anda</p>
+    <input type="text" id="loginId" placeholder="No. Ahli (cth: KAF045)">
+    <button onclick="prosesLogin()">LOG MASUK</button>
+    <br><br>
+    <a href="daftar.html">Belum daftar? Klik di sini</a>
 </div>
 
 <script>
     const firebaseConfig = { databaseURL: "https://khairatsmarttempat-default-rtdb.firebaseio.com" };
     firebase.initializeApp(firebaseConfig);
 
-    function kiraUmur(i) {
-        let tLahir = new Date(document.getElementById('tLahir'+i).value);
-        let hariIni = new Date();
-        let umur = hariIni.getFullYear() - tLahir.getFullYear();
-        document.getElementById('tUmur'+i).innerText = umur >= 0 ? umur : 0;
-    }
-
-    function daftar() {
-        let data = {
-            id: document.getElementById('noAhli').value,
-            nama: document.getElementById('nama').value,
-            alamat: document.getElementById('alamat').value,
-            email: document.getElementById('email').value,
-            noTel: document.getElementById('noTel').value,
-            waris: { nama: document.getElementById('waris').value, noTel: document.getElementById('noWaris').value },
-            tanggungan: {}
-        };
-
-        for(let i=1; i<=5; i++){
-            data.tanggungan['t'+i] = {
-                nama: document.getElementById('tNama'+i).value,
-                lahir: document.getElementById('tLahir'+i).value,
-                umur: document.getElementById('tUmur'+i).innerText
-            };
-        }
-
-        firebase.database().ref('ahli').push(data).then(() => {
-            alert("Berjaya Daftar!");
-            location.reload();
+    function prosesLogin() {
+        let idDicari = document.getElementById('loginId').value;
+        
+        firebase.database().ref('ahli').orderByChild('id').equalTo(idDicari).once('value', (s) => {
+            if(s.exists()) {
+                alert("Log Masuk Berjaya! Selamat datang.");
+                // Boleh tambah kod untuk terus ke halaman profil di sini
+            } else {
+                alert("ID tidak ditemui! Sila semak semula.");
+            }
         });
     }
 </script>
