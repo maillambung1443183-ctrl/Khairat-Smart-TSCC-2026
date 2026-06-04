@@ -6,54 +6,77 @@
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
     <style>
-        body { font-family: sans-serif; background: #f4f4f9; padding: 20px; display: flex; justify-content: center; }
-        .card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
-        input, button { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
+        body { font-family: sans-serif; background: #f4f4f9; padding: 20px; }
+        .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 450px; margin: auto; }
+        input, button { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
         button { background: #3498db; color: white; border: none; cursor: pointer; font-weight: bold; }
+        .tab-btn { background: #95a5a6; }
         .hidden { display: none; }
-        h2 { text-align: center; color: #2c3e50; }
     </style>
 </head>
 <body>
 
-<div id="loginSection" class="card">
-    <h2>Log Masuk Ahli</h2>
-    <input type="text" id="loginId" placeholder="No. Ahli (cth: KAF045)">
-    <button onclick="prosesLogin()">LOG MASUK</button>
-</div>
+<div class="card">
+    <div style="display:flex; gap:10px;">
+        <button class="tab-btn" onclick="tukarView('login')">LOG MASUK</button>
+        <button class="tab-btn" onclick="tukarView('daftar')">DAFTAR</button>
+    </div>
 
-<div id="profileSection" class="card hidden">
-    <h2>Profil & Manfaat</h2>
-    <p><strong>Nama:</strong> <span id="pNama"></span></p>
-    <p><strong>No. Ahli:</strong> <span id="pId"></span></p>
-    <p><strong>Alamat:</strong> <span id="pAlamat"></span></p>
-    <hr>
-    <h3>Manfaat Khairat</h3>
-    <ul>
-        <li>Pengurusan Jenazah (Van & Kafan)</li>
-        <li>Bantuan Kewangan Waris</li>
-        <li>Khidmat Nasihat Pengurusan</li>
-    </ul>
-    <button onclick="location.reload()" style="background:#e74c3c">LOG KELUAR</button>
+    <div id="loginSection">
+        <h2>Log Masuk</h2>
+        <input type="text" id="loginId" placeholder="No. Ahli">
+        <button onclick="prosesLogin()">MASUK</button>
+    </div>
+
+    <div id="daftarSection" class="hidden">
+        <h2>Daftar Ahli</h2>
+        <input type="text" id="regId" placeholder="No. Ahli">
+        <input type="text" id="regNama" placeholder="Nama Penuh">
+        <input type="text" id="regAlamat" placeholder="Alamat">
+        <button onclick="prosesDaftar()" style="background:#27ae60">DAFTAR SEKARANG</button>
+    </div>
+
+    <div id="profileSection" class="hidden">
+        <h2>Profil Ahli</h2>
+        <p><strong>Nama:</strong> <span id="pNama"></span></p>
+        <p><strong>No. Ahli:</strong> <span id="pId"></span></p>
+        <p><strong>Alamat:</strong> <span id="pAlamat"></span></p>
+        <button onclick="location.reload()" style="background:#e74c3c">LOG KELUAR</button>
+    </div>
 </div>
 
 <script>
     const firebaseConfig = { databaseURL: "https://khairatsmarttempat-default-rtdb.firebaseio.com" };
     firebase.initializeApp(firebaseConfig);
 
+    function tukarView(v) {
+        document.getElementById('loginSection').style.display = v === 'login' ? 'block' : 'none';
+        document.getElementById('daftarSection').style.display = v === 'daftar' ? 'block' : 'none';
+    }
+
+    function prosesDaftar() {
+        let data = {
+            id: document.getElementById('regId').value,
+            nama: document.getElementById('regNama').value,
+            alamat: document.getElementById('regAlamat').value
+        };
+        firebase.database().ref('ahli').push(data).then(() => {
+            alert("Pendaftaran berjaya!");
+            location.reload();
+        });
+    }
+
     function prosesLogin() {
         let idDicari = document.getElementById('loginId').value;
-        
         firebase.database().ref('ahli').orderByChild('id').equalTo(idDicari).once('value', (s) => {
             if(s.exists()) {
                 let data = Object.values(s.val())[0];
-                
-                document.getElementById('pNama').innerText = data.nama || '-';
-                document.getElementById('pId').innerText = data.id || '-';
-                document.getElementById('pAlamat').innerText = data.alamat || '-';
-                
-                document.getElementById('loginSection').classList.add('hidden');
-                document.getElementById('profileSection').classList.remove('hidden');
+                document.getElementById('pNama').innerText = data.nama;
+                document.getElementById('pId').innerText = data.id;
+                document.getElementById('pAlamat').innerText = data.alamat;
+                document.getElementById('loginSection').style.display = 'none';
+                document.getElementById('daftarSection').style.display = 'none';
+                document.getElementById('profileSection').style.display = 'block';
             } else {
                 alert("ID tidak ditemui!");
             }
