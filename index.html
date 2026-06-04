@@ -1,26 +1,76 @@
 <!DOCTYPE html>
-<html>
+<html lang="ms">
 <head>
-    <title>Penyiasat Database</title>
+    <meta charset="UTF-8">
+    <title>Sistem Khairat Smart TSCC</title>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
+    <style>
+        body { font-family: sans-serif; background: #f4f4f9; padding: 20px; }
+        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); max-width: 400px; margin: auto; }
+        input, button { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; font-weight: bold; }
+        button { background: #3498db; color: white; border: none; cursor: pointer; }
+    </style>
 </head>
 <body>
-    <h3>Mencari Struktur Data... Sila tunggu sebentar.</h3>
-    <pre id="output"></pre>
+
+    <div id="loginPage" class="card">
+        <h2>Log Masuk Ahli</h2>
+        <input type="text" id="inputId" placeholder="ID Ahli (cth: KAF045)">
+        <button onclick="logMasuk()">MASUK</button>
+    </div>
+
+    <div id="mainPage" class="card" style="display:none;">
+        <h2>Profil Ahli</h2>
+        <p>Nama: <span id="vNama">-</span></p>
+        <p>Alamat: <span id="vAlamat">-</span></p>
+        <p>Tanggungan: <span id="vTanggungan">-</span></p>
+        <hr>
+        <input type="text" id="eAlamat" placeholder="Alamat Baru">
+        <input type="text" id="eTanggungan" placeholder="Bilangan Tanggungan">
+        <button onclick="simpanData()" style="background:#27ae60">SIMPAN</button>
+        <button onclick="location.reload()" style="background:#e74c3c">KELUAR</button>
+    </div>
 
     <script>
+        // Konfigurasi ini adalah untuk projek "khairatsmarttempat"
         const firebaseConfig = {
             databaseURL: "https://khairatsmarttempat-default-rtdb.firebaseio.com"
         };
         firebase.initializeApp(firebaseConfig);
 
-        // Membaca punca (root) database
-        firebase.database().ref('/').once('value', (s) => {
-            document.getElementById('output').innerText = JSON.stringify(s.val(), null, 2);
-        }).catch((e) => {
-            document.getElementById('output').innerText = "Ralat: " + e.message;
-        });
+        let currentId = "";
+
+        function logMasuk() {
+            currentId = document.getElementById('inputId').value;
+            // Akses 'ahli/' + ID yang dimasukkan
+            firebase.database().ref('ahli/' + currentId).once('value', (s) => {
+                if(s.exists()) {
+                    let d = s.val();
+                    document.getElementById('vNama').innerText = d.nama || '-';
+                    document.getElementById('vAlamat').innerText = d.alamat || '-';
+                    document.getElementById('vTanggungan').innerText = d.tanggungan || '-';
+                    document.getElementById('eAlamat').value = d.alamat || '';
+                    document.getElementById('eTanggungan').value = d.tanggungan || '';
+                    
+                    document.getElementById('loginPage').style.display = 'none';
+                    document.getElementById('mainPage').style.display = 'block';
+                } else {
+                    alert("ID tidak dijumpai di bawah folder 'ahli'.");
+                }
+            });
+        }
+
+        function simpanData() {
+            // Update data ke dalam folder 'ahli/'
+            firebase.database().ref('ahli/' + currentId).update({
+                alamat: document.getElementById('eAlamat').value,
+                tanggungan: document.getElementById('eTanggungan').value
+            }).then(() => {
+                alert("Berjaya disimpan!");
+                location.reload();
+            });
+        }
     </script>
 </body>
 </html>
