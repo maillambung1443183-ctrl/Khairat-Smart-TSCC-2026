@@ -2,80 +2,79 @@
 <html lang="ms">
 <head>
     <meta charset="UTF-8">
-    <title>Sistem Khairat Smart</title>
+    <title>Sistem Pendaftaran Khairat</title>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
     <style>
         body { font-family: sans-serif; background: #f4f4f9; padding: 20px; }
-        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); max-width: 400px; margin: auto; }
-        input, button { width: 100%; padding: 10px; margin: 5px 0; border-radius: 5px; border: 1px solid #ccc; box-sizing: border-box; }
-        button { background: #3498db; color: white; border: none; cursor: pointer; }
-        .tab { display: flex; gap: 10px; margin-bottom: 20px; }
+        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); max-width: 500px; margin: auto; }
+        input { width: 100%; padding: 8px; margin: 5px 0; border: 1px solid #ccc; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; background: #27ae60; color: white; border: none; cursor: pointer; margin-top: 10px; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <div class="tab">
-        <button onclick="tukarView('login')">Log Masuk</button>
-        <button onclick="tukarView('daftar')">Daftar</button>
+    <h3>Pendaftaran Ahli</h3>
+    <input type="text" id="noAhli" placeholder="No. Ahli">
+    <input type="text" id="nama" placeholder="Nama Penuh">
+    <input type="text" id="alamat" placeholder="Alamat">
+    <input type="email" id="email" placeholder="Email">
+    <input type="tel" id="noTel" placeholder="No. Telefon">
+    <hr>
+    <input type="text" id="waris" placeholder="Nama Waris Utama">
+    <input type="tel" id="noWaris" placeholder="No. Tel Waris">
+    
+    <h4>Tanggungan (Nama & Tarikh Lahir)</h4>
+    <div id="tanggunganList">
+        <!-- 5 Slot Tanggungan -->
+        <script>
+            for(let i=1; i<=5; i++){
+                document.write(`
+                    <input type="text" id="tNama${i}" placeholder="Nama Tanggungan ${i}">
+                    <input type="date" id="tLahir${i}" onchange="kiraUmur(${i})" placeholder="Tarikh Lahir">
+                    <p>Umur: <span id="tUmur${i}">0</span> tahun</p>
+                `);
+            }
+        </script>
     </div>
-
-    <div id="loginView">
-        <h3>Log Masuk</h3>
-        <input type="text" id="inId" placeholder="Masukkan ID Ahli">
-        <button onclick="logMasuk()">MASUK</button>
-    </div>
-
-    <div id="daftarView" style="display:none;">
-        <h3>Daftar Ahli</h3>
-        <input type="text" id="newId" placeholder="ID Ahli (cth: KAF000)">
-        <input type="text" id="newName" placeholder="Nama Penuh">
-        <input type="text" id="newAlamat" placeholder="Alamat">
-        <button onclick="daftarAhli()" style="background:#27ae60">DAFTAR SEKARANG</button>
-    </div>
+    
+    <button onclick="daftar()">DAFTAR SEKARANG</button>
 </div>
 
 <script>
     const firebaseConfig = { databaseURL: "https://khairatsmarttempat-default-rtdb.firebaseio.com" };
     firebase.initializeApp(firebaseConfig);
 
-    function tukarView(view) {
-        document.getElementById('loginView').style.display = view === 'login' ? 'block' : 'none';
-        document.getElementById('daftarView').style.display = view === 'daftar' ? 'block' : 'none';
+    function kiraUmur(i) {
+        let tLahir = new Date(document.getElementById('tLahir'+i).value);
+        let hariIni = new Date();
+        let umur = hariIni.getFullYear() - tLahir.getFullYear();
+        document.getElementById('tUmur'+i).innerText = umur >= 0 ? umur : 0;
     }
 
-    // FUNGSI DAFTAR (Simpan data baru ke Firebase)
-    function daftarAhli() {
-        let id = document.getElementById('newId').value;
-        let nama = document.getElementById('newName').value;
-        let alamat = document.getElementById('newAlamat').value;
+    function daftar() {
+        let data = {
+            id: document.getElementById('noAhli').value,
+            nama: document.getElementById('nama').value,
+            alamat: document.getElementById('alamat').value,
+            email: document.getElementById('email').value,
+            noTel: document.getElementById('noTel').value,
+            waris: { nama: document.getElementById('waris').value, noTel: document.getElementById('noWaris').value },
+            tanggungan: {}
+        };
 
-        if(id && nama) {
-            // Kita guna .push() untuk cipta 'Key Unik' automatik dalam folder 'ahli'
-            firebase.database().ref('ahli').push({
-                id: id,
-                nama: nama,
-                alamat: alamat
-            }).then(() => {
-                alert("Pendaftaran Berjaya!");
-                location.reload();
-            });
-        } else {
-            alert("Sila isi ID dan Nama!");
+        for(let i=1; i<=5; i++){
+            data.tanggungan['t'+i] = {
+                nama: document.getElementById('tNama'+i).value,
+                lahir: document.getElementById('tLahir'+i).value,
+                umur: document.getElementById('tUmur'+i).innerText
+            };
         }
-    }
 
-    // FUNGSI LOG MASUK (Seperti kod sebelum ini)
-    function logMasuk() {
-        let idDicari = document.getElementById('inId').value;
-        firebase.database().ref('ahli').orderByChild('id').equalTo(idDicari).once('value', (s) => {
-            if(s.exists()) {
-                alert("Log Masuk Berjaya!");
-                // Boleh sambung ke paparan profil di sini
-            } else {
-                alert("ID tidak ditemui!");
-            }
+        firebase.database().ref('ahli').push(data).then(() => {
+            alert("Berjaya Daftar!");
+            location.reload();
         });
     }
 </script>
