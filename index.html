@@ -2,12 +2,13 @@
 <html lang="ms">
 <head>
     <meta charset="UTF-8">
-    <title>Sistem Khairat Smart TSCC</title>
+    <title>Sistem Khairat Smart Surau Al Falah TSCC</title>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
     <style>
         body { font-family: sans-serif; background: #f4f4f9; padding: 20px; }
         .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 500px; margin: auto; }
+        h1 { font-size: 1.5rem; color: #2c3e50; text-align: center; margin-bottom: 20px; }
         input, button { width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
         button { background: #3498db; color: white; border: none; cursor: pointer; font-weight: bold; }
         .hidden { display: none; }
@@ -16,20 +17,19 @@
 <body>
 
 <div class="card" id="mainCard">
-    <!-- MENU AWAL -->
+    <h1>SISTEM KHAIRAT SMART SURAU AL FALAH TSCC</h1>
+
     <div id="navView">
         <button onclick="tukarView('login')">LOG MASUK</button>
         <button onclick="tukarView('daftar')" style="background:#27ae60">DAFTAR AHLI BARU</button>
     </div>
 
-    <!-- LOG MASUK -->
     <div id="loginSection" class="hidden">
         <h2>Log Masuk</h2>
         <input type="text" id="loginId" placeholder="No. Ahli">
         <button onclick="prosesLogin()">MASUK</button>
     </div>
 
-    <!-- DAFTAR -->
     <div id="daftarSection" class="hidden">
         <h2>Pendaftaran Ahli</h2>
         <input type="text" id="regId" placeholder="No. Ahli">
@@ -55,7 +55,6 @@
         <button onclick="prosesDaftar()" style="background:#27ae60">HANTAR PENDAFTARAN</button>
     </div>
 
-    <!-- PROFIL -->
     <div id="profileSection" class="hidden">
         <h2>Profil Ahli</h2>
         <p><strong>Nama:</strong> <span id="pNama"></span></p>
@@ -100,7 +99,7 @@
             data.tanggungan['t'+i] = { nama: document.getElementById('tNama'+i).value, umur: document.getElementById('tUmur'+i).innerText };
         }
         firebase.database().ref('ahli').push(data).then(() => {
-            alert("Berjaya Daftar!");
+            alert("Pendaftaran Berjaya! Sila log masuk.");
             location.reload();
         });
     }
