@@ -1,34 +1,77 @@
 <!DOCTYPE html>
-<html>
+<html lang="ms">
 <head>
+    <meta charset="UTF-8">
+    <title>Sistem Khairat Smart TSCC</title>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
+    <style>
+        body { font-family: sans-serif; background: #f4f4f9; padding: 20px; }
+        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); max-width: 400px; margin: auto; }
+        input, button { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; }
+        button { background: #3498db; color: white; border: none; cursor: pointer; }
+    </style>
 </head>
 <body>
-    <h2>Uji Sambungan Database</h2>
-    <input type="text" id="idTest" placeholder="Masukkan ID (cth: KAF045)">
-    <button onclick="testMasuk()">MASUK</button>
-    <p id="hasil"></p>
+
+    <div id="loginPage" class="card">
+        <h2>Log Masuk Ahli</h2>
+        <input type="text" id="inputId" placeholder="Masukkan ID (cth: KAF045)">
+        <button onclick="logMasuk()">MASUK</button>
+    </div>
+
+    <div id="mainPage" class="card" style="display:none;">
+        <h2>Profil Ahli</h2>
+        <p>Nama: <span id="vNama">-</span></p>
+        <p>Alamat: <span id="vAlamat">-</span></p>
+        <p>Tanggungan: <span id="vTanggungan">-</span></p>
+        <hr>
+        <input type="text" id="eAlamat" placeholder="Alamat Baru">
+        <input type="number" id="eTanggungan" placeholder="Bilangan Tanggungan">
+        <button onclick="simpanData()" style="background:#27ae60">SIMPAN</button>
+        <button onclick="location.reload()" style="background:#e74c3c">LOG KELUAR</button>
+    </div>
 
     <script>
-        // Gunakan konfigurasi yang anda baru beri
+        // Gunakan Firebase Config yang tepat
         const firebaseConfig = {
             databaseURL: "https://khairat-smart-al-falah-tscc-default-rtdb.firebaseio.com",
             projectId: "khairat-smart-al-falah-tscc"
         };
         firebase.initializeApp(firebaseConfig);
 
-        function testMasuk() {
-            let id = document.getElementById('idTest').value;
-            // Terus rujuk ID tanpa folder 'ahli/'
-            firebase.database().ref(id).once('value', (s) => {
+        let currentId = "";
+
+        function logMasuk() {
+            currentId = document.getElementById('inputId').value;
+            // Terus rujuk ID dalam database tanpa folder 'ahli/'
+            firebase.database().ref(currentId).once('value', (s) => {
                 if(s.exists()) {
-                    document.getElementById('hasil').innerHTML = "<b>BERJAYA!</b> Data dijumpai:<br>" + JSON.stringify(s.val());
+                    let d = s.val();
+                    document.getElementById('vNama').innerText = d.nama || '-';
+                    document.getElementById('vAlamat').innerText = d.alamat || '-';
+                    document.getElementById('vTanggungan').innerText = d.tanggungan || '-';
+                    
+                    document.getElementById('eAlamat').value = d.alamat || '';
+                    document.getElementById('eTanggungan').value = d.tanggungan || '';
+                    
+                    document.getElementById('loginPage').style.display = 'none';
+                    document.getElementById('mainPage').style.display = 'block';
                 } else {
-                    document.getElementById('hasil').innerText = "Gagal: ID " + id + " tidak dijumpai dalam database ini.";
+                    alert("ID tidak dijumpai dalam sistem!");
                 }
-            }).catch(e => {
-                document.getElementById('hasil').innerText = "Ralat: " + e.message;
+            });
+        }
+
+        function simpanData() {
+            // .update() hanya akan mengubah medan yang dinyatakan
+            // Medan lain seperti 'nama' atau 'email' TIDAK AKAN DISENTUH
+            firebase.database().ref(currentId).update({
+                alamat: document.getElementById('eAlamat').value,
+                tanggungan: document.getElementById('eTanggungan').value
+            }).then(() => {
+                alert("Berjaya disimpan!");
+                location.reload(); 
             });
         }
     </script>
