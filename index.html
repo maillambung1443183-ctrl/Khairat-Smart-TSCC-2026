@@ -34,6 +34,7 @@
         <input type="password" id="loginPass" placeholder="Kata Laluan">
         <button onclick="prosesLogin()">MASUK</button>
         <button onclick="location.reload()" style="background:#95a5a6">KEMBALI</button>
+        <p style="text-align:center; cursor:pointer; color:blue;" onclick="lupaPassword()">Lupa Kata Laluan?</p>
     </div>
 
     <!-- DAFTAR -->
@@ -61,7 +62,7 @@
             </script>
         </div>
         <button onclick="cekDaftar()" style="background:#27ae60">HANTAR PENDAFTARAN</button>
-        <button onclick="location.reload()" style="background:#95a5a6">KEMBALI</button>
+        <button onclick="location.reload()" style="background:#95a5a6">KEMBALI KE LOG MASUK</button>
     </div>
 
     <!-- PROFIL -->
@@ -74,9 +75,20 @@
                     <li>Kain Kafan: RM 250</li>
                     <li>Papan Lahad: RM 200</li>
                     <li>Bantuan Tunai: RM 250</li>
+                    <li>Mandi Jenazah (L/P): Seikhlas Hati</li>
+                    <li>Bacaan Talkin: Seikhlas Hati</li>
                 </ul>
             </div>
+            <div class="section-box">
+                <h3>Van Jenazah</h3>
+                <ul><li>Dalam Kariah: Percuma</li><li>Luar Kariah: RM 80</li><li>Luar Melaka: Ikut perbatuan</li></ul>
+            </div>
+            <div class="section-box">
+                <h3>Bayaran Online</h3>
+                <p>E-Wallet Surau Al Falah TSCC:<br>9988000930222</p>
+            </div>
             <button onclick="tukarPage('info')">LIHAT DATA PERIBADI</button>
+            <button onclick="tukarPage('ajk')" style="background:#f39c12; margin-top:5px;">SENARAI AJK</button>
         </div>
 
         <div class="section-box hidden" id="infoPage">
@@ -89,7 +101,24 @@
             <h3>Tanggungan</h3>
             <ul id="pTangList"></ul>
             
-            <button onclick="bukaKemaskiniAll()" style="background:#e67e22;">KEMASKINI DATA</button>
+            <!-- Butang dipindah ke bawah tanggungan -->
+            <button onclick="bukaKemaskiniAll()" style="background:#e67e22; margin-bottom:10px;">KEMASKINI DATA</button>
+            <br>
+            <button onclick="tukarPage('manfaat')">KEMBALI KE MANFAAT</button>
+        </div>
+
+        <div class="section-box hidden" id="ajkPage">
+            <h3>Senarai AJK Khairat</h3>
+            <p>1. EN AWANG MOHD FAUZI (013333333) - PENGERUSI</p>
+            <p>2. EN FADZIL BIN SULAIMAN - TIMB PENGERUSI</p>
+            <p>3. EN ISMAIL BIN ISHAK (017700000) - SETIAUSAHA</p>
+            <p>4. EN MOHD ZAN BIN MOHD NOR (0111111111) - BENDAHARI</p>
+            <h3>AJK KUTIPAN</h3>
+            <p>1. EN HJ NAZRI BIN ABU BAKAR (019999999)</p>
+            <p>2. EN NORMAN BIN NORMAN (011111111)</p>
+            <p>3. PN ROSNI BIN MOKHTAR (01333333)</p>
+            <p>4. EN AMIRUDDIN BIN OTHMAN (013333333)</p>
+            <p>5. PN SURAYA BINTI UNAN (013333333)</p>
             <button onclick="tukarPage('manfaat')">KEMBALI KE MANFAAT</button>
         </div>
         <button onclick="location.reload()" style="background:#e74c3c; margin-top:10px;">LOG KELUAR</button>
@@ -105,7 +134,10 @@
     function tukarPage(p) { 
         document.getElementById('manfaatPage').style.display = p === 'manfaat' ? 'block' : 'none'; 
         document.getElementById('infoPage').style.display = p === 'info' ? 'block' : 'none'; 
+        document.getElementById('ajkPage').style.display = p === 'ajk' ? 'block' : 'none'; 
     }
+    function lupaPassword() { alert("Sila hubungi Setiausaha, En. Ismail Bin Ishak (017-000000) untuk bantuan kata laluan."); }
+    
     function kiraUmur(i) {
         let umur = new Date().getFullYear() - new Date(document.getElementById('tLahir'+i).value).getFullYear();
         document.getElementById('tUmur'+i).innerText = umur > 0 ? umur : 0;
@@ -119,38 +151,26 @@
         let wt = prompt("No. Tel Waris:", cachedData.warisTel || "");
 
         if(n !== null && a !== null && t !== null && w !== null && wt !== null) {
-            let updateData = { nama: n, alamat: a, noTel: t, waris: w, warisTel: wt };
-            if(cachedData.tanggungan) {
-                cachedData.tanggungan.forEach((tanggungan, index) => {
-                    let namaT = prompt("Nama Tanggungan " + (index+1) + ":", tanggungan.nama);
-                    let umurT = prompt("Umur Tanggungan " + (index+1) + ":", tanggungan.umur);
-                    updateData['tanggungan/' + index] = { nama: namaT, umur: umurT };
-                });
-            }
-            db.ref('ahli/' + userFirebaseKey).update(updateData).then(() => { location.reload(); });
+            db.ref('ahli/' + userFirebaseKey).update({ nama: n, alamat: a, noTel: t, waris: w, warisTel: wt }).then(() => { location.reload(); });
         }
     }
 
     function prosesLogin() {
         let id = document.getElementById('loginId').value.trim();
         let pass = document.getElementById('loginPass').value.trim();
-        
         db.ref('ahli').orderByChild('id').equalTo(id).once('value', (s) => {
             if(s.exists()) {
-                let userKey = Object.keys(s.val())[0];
-                let data = s.val()[userKey];
-                
-                if(String(data.pass) === String(pass)) {
-                    userFirebaseKey = userKey;
-                    cachedData = data;
-                    document.getElementById('pNama').innerText = data.nama;
-                    document.getElementById('pAlamat').innerText = data.alamat;
-                    document.getElementById('pTel').innerText = data.noTel || '-';
-                    document.getElementById('pWaris').innerText = data.waris || '-';
-                    document.getElementById('pWarisTel').innerText = data.warisTel || '-';
+                userFirebaseKey = Object.keys(s.val())[0];
+                cachedData = s.val()[userFirebaseKey];
+                if(String(cachedData.pass) === String(pass)) {
+                    document.getElementById('pNama').innerText = cachedData.nama;
+                    document.getElementById('pAlamat').innerText = cachedData.alamat;
+                    document.getElementById('pTel').innerText = cachedData.noTel || '-';
+                    document.getElementById('pWaris').innerText = cachedData.waris || '-';
+                    document.getElementById('pWarisTel').innerText = cachedData.warisTel || '-';
                     let list = document.getElementById('pTangList'); list.innerHTML = '';
-                    if(data.tanggungan) {
-                        data.tanggungan.forEach((t) => {
+                    if(cachedData.tanggungan) {
+                        cachedData.tanggungan.forEach((t) => {
                             list.innerHTML += `<li>${t.nama} (${t.umur} thn)</li>`;
                         });
                     }
@@ -176,8 +196,9 @@
         }
         db.ref('ahli').push({
             id: document.getElementById('regId').value, nama: document.getElementById('regNama').value,
-            alamat: document.getElementById('regAlamat').value, noTel: document.getElementById('regTel').value,
-            waris: document.getElementById('regWaris').value, warisTel: document.getElementById('regWarisTel').value,
+            alamat: document.getElementById('regAlamat').value, email: document.getElementById('regEmail').value,
+            noTel: document.getElementById('regTel').value, waris: document.getElementById('regWaris').value,
+            warisTel: document.getElementById('regWarisTel').value, hubungan: document.getElementById('regHubungan').value,
             pass: document.getElementById('regPass').value, tanggungan: tanggungan
         }).then(() => { alert("Pendaftaran Berjaya!"); location.reload(); });
     }
