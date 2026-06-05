@@ -15,7 +15,6 @@
         .hidden { display: none; }
         .section-box { background: #f9f9f9; padding: 15px; border-left: 5px solid #27ae60; margin-top: 15px; }
         ul { padding-left: 20px; }
-        .edit-btn { cursor: pointer; color: #3498db; margin-left: 10px; text-decoration: none; font-size: 0.9em; }
     </style>
 </head>
 <body>
@@ -25,7 +24,7 @@
 
     <div id="navView">
         <button onclick="tukarView('login')">LOG MASUK</button>
-        <button onclick="tukarView('daftar')" style="background:#27ae60">DAFTAR AHLI</button>
+        <button onclick="tukarView('daftar')" style="background:#27ae60">DAFTAR AHLI BARU</button>
     </div>
 
     <!-- LOG MASUK -->
@@ -94,11 +93,12 @@
 
         <div class="section-box hidden" id="infoPage">
             <h3>Data Peribadi</h3>
-            <p><strong>Nama:</strong> <span id="pNama"></span> <span class="edit-btn" onclick="updateField('nama', 'pNama')">✎</span></p>
-            <p><strong>Alamat:</strong> <span id="pAlamat"></span> <span class="edit-btn" onclick="updateField('alamat', 'pAlamat')">✎</span></p>
-            <p><strong>No. Tel:</strong> <span id="pTel"></span> <span class="edit-btn" onclick="updateField('noTel', 'pTel')">✎</span></p>
-            <p><strong>Waris:</strong> <span id="pWaris"></span> <span class="edit-btn" onclick="updateField('waris', 'pWaris')">✎</span></p>
-            <p><strong>No. Tel Waris:</strong> <span id="pWarisTel"></span> <span class="edit-btn" onclick="updateField('warisTel', 'pWarisTel')">✎</span></p>
+            <p><strong>Nama:</strong> <span id="pNama"></span></p>
+            <p><strong>Alamat:</strong> <span id="pAlamat"></span></p>
+            <p><strong>No. Tel:</strong> <span id="pTel"></span></p>
+            <p><strong>Waris:</strong> <span id="pWaris"></span></p>
+            <p><strong>No. Tel Waris:</strong> <span id="pWarisTel"></span></p>
+            <button onclick="bukaKemaskini()">KEMASKINI DATA</button>
             <h3>Tanggungan</h3>
             <ul id="pTangList"></ul>
             <button onclick="tukarPage('manfaat')">KEMBALI KE MANFAAT</button>
@@ -139,12 +139,16 @@
         document.getElementById('tUmur'+i).innerText = umur > 0 ? umur : 0;
     }
 
-    function updateField(field, elementId) {
-        let newValue = prompt("Masukkan nilai baru untuk " + field + ":");
-        if (newValue !== null) {
-            db.ref('ahli/' + userFirebaseKey).update({ [field]: newValue }).then(() => {
-                document.getElementById(elementId).innerText = newValue;
-                alert("Berjaya dikemaskini!");
+    function bukaKemaskini() {
+        let n = prompt("Nama Baru:", document.getElementById('pNama').innerText);
+        let a = prompt("Alamat Baru:", document.getElementById('pAlamat').innerText);
+        let t = prompt("No Tel Baru:", document.getElementById('pTel').innerText);
+        let w = prompt("Nama Waris Baru:", document.getElementById('pWaris').innerText);
+        let wt = prompt("No Tel Waris Baru:", document.getElementById('pWarisTel').innerText);
+
+        if(n && a && t && w && wt) {
+            db.ref('ahli/' + userFirebaseKey).update({ nama:n, alamat:a, noTel:t, waris:w, warisTel:wt }).then(() => {
+                location.reload();
             });
         }
     }
@@ -153,11 +157,7 @@
         let newName = prompt("Kemaskini Nama Tanggungan:");
         let newUmur = prompt("Kemaskini Umur Tanggungan:");
         if (newName !== null && newUmur !== null) {
-            db.ref('ahli/' + userFirebaseKey + '/tanggungan/' + index).update({ 
-                nama: newName, 
-                umur: newUmur 
-            }).then(() => {
-                alert("Berjaya dikemaskini!");
+            db.ref('ahli/' + userFirebaseKey + '/tanggungan/' + index).update({ nama: newName, umur: newUmur }).then(() => {
                 location.reload();
             });
         }
@@ -201,7 +201,7 @@
                     let list = document.getElementById('pTangList'); list.innerHTML = '';
                     if(data.tanggungan) {
                         data.tanggungan.forEach((t, index) => {
-                            list.innerHTML += `<li>${t.nama} (${t.umur} thn) <span class="edit-btn" onclick="updateTanggungan(${index})">✎</span></li>`;
+                            list.innerHTML += `<li>${t.nama} (${t.umur} thn) <button style="padding:2px 5px; background:orange;" onclick="updateTanggungan(${index})">Edit</button></li>`;
                         });
                     }
                     document.getElementById('loginSection').classList.add('hidden');
