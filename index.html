@@ -98,7 +98,7 @@
             <p><strong>No. Tel:</strong> <span id="pTel"></span></p>
             <p><strong>Waris:</strong> <span id="pWaris"></span></p>
             <p><strong>No. Tel Waris:</strong> <span id="pWarisTel"></span></p>
-            <button onclick="bukaKemaskini()">KEMASKINI DATA</button>
+            <button onclick="bukaKemaskiniAll()">KEMASKINI DATA</button>
             <h3>Tanggungan</h3>
             <ul id="pTangList"></ul>
             <button onclick="tukarPage('manfaat')">KEMBALI KE MANFAAT</button>
@@ -125,6 +125,7 @@
 <script>
     const db = firebase.initializeApp({ databaseURL: "https://khairatsmarttempat-default-rtdb.firebaseio.com" }).database();
     let userFirebaseKey = "";
+    let cachedData = {};
 
     function tukarView(v) { document.getElementById('navView').classList.add('hidden'); document.getElementById(v+'Section').classList.remove('hidden'); }
     function tukarPage(p) { 
@@ -139,23 +140,24 @@
         document.getElementById('tUmur'+i).innerText = umur > 0 ? umur : 0;
     }
 
-    function bukaKemaskini() {
-        let n = prompt("Nama Baru:", document.getElementById('pNama').innerText);
-        let a = prompt("Alamat Baru:", document.getElementById('pAlamat').innerText);
-        let t = prompt("No Tel Baru:", document.getElementById('pTel').innerText);
-        let w = prompt("Nama Waris Baru:", document.getElementById('pWaris').innerText);
-        let wt = prompt("No Tel Waris Baru:", document.getElementById('pWarisTel').innerText);
+    // Fungsi kemaskini semua data peribadi dalam satu sesi
+    function bukaKemaskiniAll() {
+        let n = prompt("Nama Penuh:", cachedData.nama || "");
+        let a = prompt("Alamat:", cachedData.alamat || "");
+        let t = prompt("No. Telefon:", cachedData.noTel || "");
+        let w = prompt("Nama Waris:", cachedData.waris || "");
+        let wt = prompt("No. Tel Waris:", cachedData.warisTel || "");
 
-        if(n && a && t && w && wt) {
-            db.ref('ahli/' + userFirebaseKey).update({ nama:n, alamat:a, noTel:t, waris:w, warisTel:wt }).then(() => {
-                location.reload();
-            });
+        if(n !== null && a !== null && t !== null && w !== null && wt !== null) {
+            db.ref('ahli/' + userFirebaseKey).update({ 
+                nama: n, alamat: a, noTel: t, waris: w, warisTel: wt 
+            }).then(() => { location.reload(); });
         }
     }
 
     function updateTanggungan(index) {
-        let newName = prompt("Kemaskini Nama Tanggungan:");
-        let newUmur = prompt("Kemaskini Umur Tanggungan:");
+        let newName = prompt("Kemaskini Nama Tanggungan:", cachedData.tanggungan[index].nama);
+        let newUmur = prompt("Kemaskini Umur Tanggungan:", cachedData.tanggungan[index].umur);
         if (newName !== null && newUmur !== null) {
             db.ref('ahli/' + userFirebaseKey + '/tanggungan/' + index).update({ nama: newName, umur: newUmur }).then(() => {
                 location.reload();
@@ -191,16 +193,16 @@
         db.ref('ahli').orderByChild('id').equalTo(id).once('value', (s) => {
             if(s.exists()) {
                 userFirebaseKey = Object.keys(s.val())[0];
-                let data = s.val()[userFirebaseKey];
-                if(data.pass === pass) {
-                    document.getElementById('pNama').innerText = data.nama;
-                    document.getElementById('pAlamat').innerText = data.alamat;
-                    document.getElementById('pTel').innerText = data.noTel || '-';
-                    document.getElementById('pWaris').innerText = data.waris || '-';
-                    document.getElementById('pWarisTel').innerText = data.warisTel || '-';
+                cachedData = s.val()[userFirebaseKey];
+                if(cachedData.pass === pass) {
+                    document.getElementById('pNama').innerText = cachedData.nama;
+                    document.getElementById('pAlamat').innerText = cachedData.alamat;
+                    document.getElementById('pTel').innerText = cachedData.noTel || '-';
+                    document.getElementById('pWaris').innerText = cachedData.waris || '-';
+                    document.getElementById('pWarisTel').innerText = cachedData.warisTel || '-';
                     let list = document.getElementById('pTangList'); list.innerHTML = '';
-                    if(data.tanggungan) {
-                        data.tanggungan.forEach((t, index) => {
+                    if(cachedData.tanggungan) {
+                        cachedData.tanggungan.forEach((t, index) => {
                             list.innerHTML += `<li>${t.nama} (${t.umur} thn) <button style="padding:2px 5px; background:orange;" onclick="updateTanggungan(${index})">Edit</button></li>`;
                         });
                     }
