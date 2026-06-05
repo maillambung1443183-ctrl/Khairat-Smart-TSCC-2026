@@ -140,7 +140,7 @@
         document.getElementById('tUmur'+i).innerText = umur > 0 ? umur : 0;
     }
 
-    // Fungsi kemaskini semua data peribadi dalam satu sesi
+    // Fungsi kemaskini semua data peribadi dan tanggungan
     function bukaKemaskiniAll() {
         let n = prompt("Nama Penuh:", cachedData.nama || "");
         let a = prompt("Alamat:", cachedData.alamat || "");
@@ -149,19 +149,18 @@
         let wt = prompt("No. Tel Waris:", cachedData.warisTel || "");
 
         if(n !== null && a !== null && t !== null && w !== null && wt !== null) {
-            db.ref('ahli/' + userFirebaseKey).update({ 
-                nama: n, alamat: a, noTel: t, waris: w, warisTel: wt 
-            }).then(() => { location.reload(); });
-        }
-    }
+            let updateData = { nama: n, alamat: a, noTel: t, waris: w, warisTel: wt };
+            
+            // Kemaskini tanggungan satu persatu
+            if(cachedData.tanggungan) {
+                cachedData.tanggungan.forEach((tanggungan, index) => {
+                    let namaT = prompt("Nama Tanggungan " + (index+1) + ":", tanggungan.nama);
+                    let umurT = prompt("Umur Tanggungan " + (index+1) + ":", tanggungan.umur);
+                    updateData['tanggungan/' + index] = { nama: namaT, umur: umurT };
+                });
+            }
 
-    function updateTanggungan(index) {
-        let newName = prompt("Kemaskini Nama Tanggungan:", cachedData.tanggungan[index].nama);
-        let newUmur = prompt("Kemaskini Umur Tanggungan:", cachedData.tanggungan[index].umur);
-        if (newName !== null && newUmur !== null) {
-            db.ref('ahli/' + userFirebaseKey + '/tanggungan/' + index).update({ nama: newName, umur: newUmur }).then(() => {
-                location.reload();
-            });
+            db.ref('ahli/' + userFirebaseKey).update(updateData).then(() => { location.reload(); });
         }
     }
 
@@ -202,8 +201,8 @@
                     document.getElementById('pWarisTel').innerText = cachedData.warisTel || '-';
                     let list = document.getElementById('pTangList'); list.innerHTML = '';
                     if(cachedData.tanggungan) {
-                        cachedData.tanggungan.forEach((t, index) => {
-                            list.innerHTML += `<li>${t.nama} (${t.umur} thn) <button style="padding:2px 5px; background:orange;" onclick="updateTanggungan(${index})">Edit</button></li>`;
+                        cachedData.tanggungan.forEach((t) => {
+                            list.innerHTML += `<li>${t.nama} (${t.umur} thn)</li>`;
                         });
                     }
                     document.getElementById('loginSection').classList.add('hidden');
