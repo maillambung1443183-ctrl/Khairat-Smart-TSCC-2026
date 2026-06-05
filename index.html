@@ -24,7 +24,7 @@
 
     <div id="navView">
         <button onclick="tukarView('login')">LOG MASUK</button>
-        <button onclick="tukarView('daftar')" style="background:#27ae60">DAFTAR AHLI</button>
+        <button onclick="tukarView('daftar')" style="background:#27ae60">DAFTAR AHLI BARU</button>
     </div>
 
     <!-- LOG MASUK -->
@@ -98,9 +98,10 @@
             <p><strong>No. Tel:</strong> <span id="pTel"></span></p>
             <p><strong>Waris:</strong> <span id="pWaris"></span></p>
             <p><strong>No. Tel Waris:</strong> <span id="pWarisTel"></span></p>
-            <button onclick="bukaKemaskiniAll()">KEMASKINI DATA</button>
             <h3>Tanggungan</h3>
             <ul id="pTangList"></ul>
+            
+            <button onclick="bukaKemaskiniAll()" style="background:#e67e22;">KEMASKINI DATA</button>
             <button onclick="tukarPage('manfaat')">KEMBALI KE MANFAAT</button>
         </div>
 
@@ -140,7 +141,6 @@
         document.getElementById('tUmur'+i).innerText = umur > 0 ? umur : 0;
     }
 
-    // Fungsi kemaskini semua data peribadi dan tanggungan
     function bukaKemaskiniAll() {
         let n = prompt("Nama Penuh:", cachedData.nama || "");
         let a = prompt("Alamat:", cachedData.alamat || "");
@@ -150,8 +150,6 @@
 
         if(n !== null && a !== null && t !== null && w !== null && wt !== null) {
             let updateData = { nama: n, alamat: a, noTel: t, waris: w, warisTel: wt };
-            
-            // Kemaskini tanggungan satu persatu
             if(cachedData.tanggungan) {
                 cachedData.tanggungan.forEach((tanggungan, index) => {
                     let namaT = prompt("Nama Tanggungan " + (index+1) + ":", tanggungan.nama);
@@ -159,7 +157,6 @@
                     updateData['tanggungan/' + index] = { nama: namaT, umur: umurT };
                 });
             }
-
             db.ref('ahli/' + userFirebaseKey).update(updateData).then(() => { location.reload(); });
         }
     }
