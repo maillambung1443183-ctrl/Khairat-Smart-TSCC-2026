@@ -24,10 +24,9 @@
 
     <div id="navView">
         <button onclick="tukarView('login')">LOG MASUK</button>
-        <button onclick="tukarView('daftar')" style="background:#27ae60">DAFTAR AHLI BARU</button>
+        <button onclick="tukarView('daftar')" style="background:#27ae60">DAFTAR AHLI</button>
     </div>
 
-    <!-- LOG MASUK -->
     <div id="loginSection" class="hidden">
         <h2>Log Masuk</h2>
         <input type="text" id="loginId" placeholder="No. Ahli">
@@ -37,7 +36,6 @@
         <p style="text-align:center; cursor:pointer; color:blue;" onclick="lupaPassword()">Lupa Kata Laluan?</p>
     </div>
 
-    <!-- DAFTAR -->
     <div id="daftarSection" class="hidden">
         <h2>Pendaftaran</h2>
         <input type="text" id="regId" placeholder="No. Ahli">
@@ -65,7 +63,6 @@
         <button onclick="location.reload()" style="background:#95a5a6">KEMBALI KE LOG MASUK</button>
     </div>
 
-    <!-- PROFIL -->
     <div id="profileSection" class="hidden">
         <div id="manfaatPage">
             <div class="section-box">
@@ -81,7 +78,7 @@
             </div>
             <div class="section-box">
                 <h3>Van Jenazah</h3>
-                <ul><li>Dalam Kariah: Percuma</li><li>Luar Kariah: RM 80</li><li>Luar Melaka: Ikut perbatuan</li></ul>
+                <ul><li>Dalam Kariah: Percuma</li><li>Luar Kariah Dalam Melaka: RM 80</li><li>Luar Melaka: Ikut perbatuan</li></ul>
             </div>
             <div class="section-box">
                 <h3>Bayaran Online</h3>
@@ -93,6 +90,7 @@
 
         <div class="section-box hidden" id="infoPage">
             <h3>Data Peribadi</h3>
+            <p><strong>No. Ahli:</strong> <span id="pId"></span></p>
             <p><strong>Nama:</strong> <span id="pNama"></span></p>
             <p><strong>Alamat:</strong> <span id="pAlamat"></span></p>
             <p><strong>No. Tel:</strong> <span id="pTel"></span></p>
@@ -101,7 +99,6 @@
             <h3>Tanggungan</h3>
             <ul id="pTangList"></ul>
             
-            <!-- Butang dipindah ke bawah tanggungan -->
             <button onclick="bukaKemaskiniAll()" style="background:#e67e22; margin-bottom:10px;">KEMASKINI DATA</button>
             <br>
             <button onclick="tukarPage('manfaat')">KEMBALI KE MANFAAT</button>
@@ -163,6 +160,7 @@
                 userFirebaseKey = Object.keys(s.val())[0];
                 cachedData = s.val()[userFirebaseKey];
                 if(String(cachedData.pass) === String(pass)) {
+                    document.getElementById('pId').innerText = cachedData.id;
                     document.getElementById('pNama').innerText = cachedData.nama;
                     document.getElementById('pAlamat').innerText = cachedData.alamat;
                     document.getElementById('pTel').innerText = cachedData.noTel || '-';
